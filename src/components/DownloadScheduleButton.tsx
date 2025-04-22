@@ -2,7 +2,7 @@
 import { Class } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { cn } from "@/lib/utils";
-import { useToJpeg, useToPng } from "@hugocxl/react-to-image";
+import { useToPng } from "@hugocxl/react-to-image";
 import {
   Download,
   Eye,
@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Switch } from "./ui/switch";
 
 interface DownloadScheduleButtonProps extends ButtonProps {
   classes: Class[];
@@ -98,13 +99,14 @@ function DownloadDialog({
   const [aspectRatio, setAspectRatio] = useState<[number, number]>([
     2560, 1440,
   ]);
+  const [isTransparent, setIsTransparent] = useState(false);
   const [imgName, setImgName] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const isMobile = aspectRatio[0] <= aspectRatio[1];
   const [showPreview, setShowPreview] = useState(false);
+  const isMobile = aspectRatio[0] <= aspectRatio[1];
 
   const [{ isLoading: isPreviewLoading, data }, convertPreview] =
-    useToJpeg<HTMLDivElement>({
+    useToPng<HTMLDivElement>({
       selector: "#wallpaper",
       quality: 0.3,
       pixelRatio: 0.5,
@@ -181,10 +183,10 @@ function DownloadDialog({
     if (showPreview) {
       convertPreview();
     }
-    // Disabled because the function re-renders everytime it's run
+    // Disabled because the function changes everytime it's run
     // useCallback did not work here, so this is the next best thing
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPreview, aspectRatio, imageUrl]);
+  }, [showPreview, aspectRatio, imageUrl, isTransparent]);
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
@@ -206,7 +208,7 @@ function DownloadDialog({
             image to use as a background.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-[fit-content(30%)_auto] gap-2 items-center min-w-0">
+        <div className="grid grid-cols-[fit-content(30%)_auto] items-center gap-x-4 gap-y-2">
           <Label htmlFor="aspectRatio" className="text-nowrap">
             Aspect Ratio
           </Label>
@@ -268,7 +270,8 @@ function DownloadDialog({
           <Button
             onClick={() => document.getElementById("fileUpload")?.click()}
             variant="outline"
-            className="justify-start"
+            className="justify-start w-full min-w-0"
+            disabled={isTransparent}
           >
             <Upload className="size-4 mr-2" />
             <span
@@ -286,6 +289,14 @@ function DownloadDialog({
             onChange={handleImageUpload}
             accept="image/*"
             hidden
+          />
+          <Label htmlFor="transparent" className="text-nowrap">
+            Is transparent?
+          </Label>
+          <Switch
+            id="transparent"
+            checked={isTransparent}
+            onCheckedChange={setIsTransparent}
           />
         </div>
         <div className="flex items-center justify-center max-h-[300px]">
@@ -326,6 +337,7 @@ function DownloadDialog({
           classes={classes}
           colors={colors}
           aspectRatio={aspectRatio}
+          isTransparent={isTransparent}
         />
       </div>
     </Dialog>
@@ -338,6 +350,7 @@ interface WallpaperProps {
   colors: Record<string, ColorsEnum>;
   aspectRatio: [width: number, height: number];
   ref: (node: HTMLDivElement) => void;
+  isTransparent: boolean;
 }
 
 function Wallpaper({
@@ -346,10 +359,24 @@ function Wallpaper({
   colors,
   aspectRatio,
   ref,
+  isTransparent,
 }: WallpaperProps) {
   const isMobile = aspectRatio[0] <= aspectRatio[1];
   const [width, height] = aspectRatio;
   const cellSize = Math.min(height / (17.5 + (isMobile ? 4 : 0)), 0.7 * height);
+
+  const background = isTransparent
+    ? {
+        backgroundColor: "transparent",
+        backgroundImage: "none",
+      }
+    : {
+        backgroundImage: imageUrl
+          ? `url(${imageUrl})`
+          : isMobile
+            ? `url(/SchedaddleBG.Mobile.png)`
+            : `url(/SchedaddleBG.Desktop.png)`,
+      };
 
   return (
     <div
@@ -361,13 +388,7 @@ function Wallpaper({
           "flex flex-row gap-8 min-h-0 h-full w-full p-8 bg-cover bg-center overflow-hidden items-center justify-center",
           isMobile && "p-20 py-[12.5%]"
         )}
-        style={{
-          backgroundImage: imageUrl
-            ? `url(${imageUrl})`
-            : isMobile
-              ? `url(/SchedaddleBG.Mobile.png)`
-              : `url(/SchedaddleBG.Desktop.png)`,
-        }}
+        style={background}
         id="wallpaper"
         ref={ref}
       >
