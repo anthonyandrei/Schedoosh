@@ -1,29 +1,60 @@
+
 # Schedaddle
 
-**Schedaddle** is a web application designed to help students create their perfect class schedule. With a focus on flexibility and ease of use, Schedaddle allows you to customize your schedule based on your class preferences and time availability. Whether you're a morning person or prefer afternoon classes, Schedaddle has got you covered.
+**Schedaddle** is a powerful schedule-making tool designed to help students build their ideal class schedules with ease and flexibility. Import courses, group them, filter by time and day, and generate all possible combinations that fit your preferences.
 
-## Features
 
-- **Class Preference Selection**: Choose from a list of available courses and create a schedule that fits your academic needs.
-  
-- **Time Availability Filtering**: Specify your preferred time range for classes, and Schedaddle will generate a schedule that fits within those hours.
+## 🔗 Links
 
-- **Consecutive Classes Filter**: Control the number of consecutive classes you'd like to have in a day, ensuring you have the right balance between classes and breaks.
+- 🔗 [Live Site](https://schedaddle.vercel.app/)
 
-- **Day and Time-Based Filters**: Fine-tune your schedule by selecting specific days and times when you're available or unavailable for classes.
 
-## Getting Started
+## 🚀 Features
 
-Schedaddle is currently not set up for public use or self-hosting, as it requires a specific API key for full functionality. If you are interested in learning more or seeing a demo, please contact me directly.
+- **📥 Easy Course Import**  
+  Add classes directly from **MLS** using your ID number, or manually enter your own custom courses.
 
-## Technologies Used
+- **🧩 Course Grouping**  
+  Want only 2 GEs but have many options (e.g., GESPORT, GETEAMS, GEETHIC)? Group them and set how many you want to pick!
 
-- **Next.js**: React framework for building fast and scalable web applications.
-- **TypeScript**: Strongly typed programming language that builds on JavaScript.
-- **TanStack Table**: A powerful table component for displaying data.
-- **Zod**: TypeScript-first schema declaration and validation library.
-- **shadcn/ui** - Collection of re-usable components.
+- **📅 Smart Schedule Generator**  
+  Create all possible schedules based on your selected classes.
 
-## License
+- **⚙️ Advanced Filters**  
+  Fine-tune schedule generation with filters for:
+  - Earliest and latest class times
+  - Max consecutive classes
+  - Max courses per day
+  - Unavailable times/days
 
-This project is licensed under the GNU General Public License (GPL). See the [LICENSE](LICENSE) file for more details.
+- **💾 Save & Download**  
+  Save your schedule for future use, then download it as an image with support for many device sizes! You can even set your own custom BG image or have it be transparent!  
+
+- **📅 Export to your Calendar**  
+  Export your Calendar directly to **Google Calendar** or download it as an .ics file and import it manually!
+
+## 🧠 Technologies Used
+
+- **Next.js** – Framework for building web applications
+- **TypeScript** – For static typing
+- **Zustand** – Simple, fast state management
+- **TanStack Table** – For table rendering
+- **Zod** – Schema validation
+- **shadcn/ui** – Accessible, reusable UI components
+
+## 🔐 ID Number Privacy
+
+Your **ID number** is used *only* to fetch data from MLS. It is never uploaded and is stored locally on your device for convenience.
+
+## ❗ Bugs & Feedback
+
+Found a bug or have a suggestion? [Open an Issue](https://github.com/CyberEzpertz/Schedaddle/issues) or message me directly.
+
+## 🙏 Acknowledgments
+
+Inspired by [**AralTools**](https://github.com/tudlang/araltools) by u/YivanGamer — huge thanks for the inspiration. Also, special thanks to early testers for their feedback!
+
+## 📄 License
+
+Licensed under the **GNU General Public License (GPL)**.  
+See the [LICENSE](LICENSE) file for more info.
