@@ -12,7 +12,7 @@ import {
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { SearchSlash, UsersRound, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { CELL_SIZE_PX, TOP_OFFSET } from "./Calendar";
+import { TOP_OFFSET } from "./Calendar";
 import TooltipWrapper from "./common/TooltipWrapper";
 import OverviewCard from "./OverviewCard";
 import { Badge } from "./ui/badge";
@@ -25,9 +25,11 @@ import { Switch } from "./ui/switch";
 
 interface ManualScheduleCardProps {
   manualProps: ReturnType<typeof useManualSchedule>;
+  cellSize: number;
 }
 export default function ManualScheduleCard({
   manualProps,
+  cellSize,
 }: ManualScheduleCardProps) {
   const [showOngoing, setShowOngoing] = useState(false);
   const setManualSchedule = useGlobalStore((state) => state.setManualSchedule);
@@ -36,7 +38,6 @@ export default function ManualScheduleCard({
     (state) => state.getSelectedData
   )();
   const { dragging, selection, setSelection, popoverRef } = manualProps;
-  const cellSizePx = CELL_SIZE_PX;
   const startTime = selection ? minutesToMilitaryTime(selection.start) : null;
   const endTime = selection ? minutesToMilitaryTime(selection.end) : null;
   const day = selection ? selection.day : null;
@@ -127,7 +128,7 @@ export default function ManualScheduleCard({
             height: calculateHeight({
               start: selection.start,
               end: selection.end,
-              cellSizePx,
+              cellSizePx: cellSize,
               type: "minutes",
             }),
             top:
@@ -135,7 +136,7 @@ export default function ManualScheduleCard({
                 start: 420,
                 end: selection.start,
                 type: "minutes",
-                cellSizePx,
+                cellSizePx: cellSize,
               }) + TOP_OFFSET,
           }}
           className={cn(

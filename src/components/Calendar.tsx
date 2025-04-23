@@ -33,9 +33,11 @@ const Calendar = ({
   className,
   noAnimations,
 }: CalendarProps) => {
+  // This is the default zoom level
   const zoom = useGlobalStore((state) => state.zoom);
   const setZoom = useGlobalStore((state) => state.setZoom);
 
+  // Acts as a buffer for the zoom slider
   const [cellSize, setCellSize] = useState(() => cellSizePx ?? zoom);
 
   const { dragging, selection, setSelection, popoverRef, ...listeners } =
@@ -65,8 +67,6 @@ const Calendar = ({
 
   const headerStyle =
     "relative h-full w-full text-center py-2 px-2 mx-2 font-bold ";
-
-  console.log(cellSize);
 
   const handleMouseUp = () => {
     console.log("Setting zoom to: ", cellSize);
@@ -153,7 +153,10 @@ const Calendar = ({
                   key={day}
                 >
                   {manualProps && selection?.day === day && (
-                    <ManualScheduleCard manualProps={manualProps} />
+                    <ManualScheduleCard
+                      manualProps={manualProps}
+                      cellSize={cellSize}
+                    />
                   )}
                   {sortedClasses[day].map((currClass) => {
                     const schedules = currClass.schedules.filter(
