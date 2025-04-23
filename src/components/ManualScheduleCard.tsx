@@ -45,13 +45,17 @@ export default function ManualScheduleCard({
     ? selection.end - selection.start === 15
     : false;
 
+  const usedCourses = useMemo(() => {
+    return new Set([...schedule.classes.map((course) => course.course)]);
+  }, [schedule]);
+
+  const uniqueCourses = useMemo(() => {
+    return [...new Set(selectedData.map((course) => course.courseCode))];
+  }, [selectedData]);
+
   const viableData = useMemo(() => {
     if (!schedule || dragging || !startTime || !endTime || !day || !schedule)
       return [];
-
-    const usedCourses = new Set([
-      ...schedule.classes.map((course) => course.course),
-    ]);
 
     return selectedData
       .map((course) => {
@@ -102,6 +106,7 @@ export default function ManualScheduleCard({
     showOngoing,
     is15MinSlot,
     dragging,
+    usedCourses,
   ]);
 
   if (!schedule || !selection) return null;
@@ -200,7 +205,9 @@ export default function ManualScheduleCard({
         ) : (
           <div className="mt-4 rounded-lg py-8 border-dashed border-border border inline-flex items-center justify-center gap-2 text-muted-foreground w-full">
             <SearchSlash className="size-5" />
-            No classes found...
+            {uniqueCourses.length === usedCourses.size
+              ? "You've already added all available courses"
+              : "No classes found..."}
           </div>
         )}
       </PopoverContent>
