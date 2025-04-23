@@ -4,6 +4,7 @@ import { ColorsEnum } from "@/lib/enums";
 import { cn } from "@/lib/utils";
 import { useToPng } from "@hugocxl/react-to-image";
 import {
+  Copy,
   Download,
   Eye,
   EyeClosed,
@@ -13,7 +14,7 @@ import {
   Tablet,
   Upload,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Calendar from "./Calendar";
 import SchedaddleLogo from "./SchedaddleLogo";
@@ -105,6 +106,8 @@ function DownloadDialog({
   const [showPreview, setShowPreview] = useState(false);
   const isMobile = aspectRatio[0] <= aspectRatio[1];
 
+  const mode = useRef<"copy" | "download">("download");
+
   const [{ isLoading: isPreviewLoading, data }, convertPreview] =
     useToPng<HTMLDivElement>({
       selector: "#wallpaper",
@@ -114,11 +117,24 @@ function DownloadDialog({
 
   const [{ isLoading }, convert, ref] = useToPng<HTMLDivElement>({
     quality: 1,
-    pixelRatio: isMobile ? 3 : 2,
+    pixelRatio: isMobile ? 2.5 : 2,
     onLoading: () => {
       toast.loading("Generating image...");
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      if (mode.current === "copy") {
+        const blob = await fetch(data).then((res) => res.blob());
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "image/png": blob,
+          }),
+        ]);
+        toast.dismiss();
+        toast.success("Copied Image to clipboard!");
+
+        return;
+      }
+
       const link = document.createElement("a");
 
       link.download = "Schedaddle.png";
@@ -196,6 +212,11 @@ function DownloadDialog({
       setImageUrl(null);
       setAspectRatio([2560, 1440]);
     }
+  };
+
+  const handleClick = (newMode: "copy" | "download") => {
+    mode.current = newMode;
+    convert();
   };
 
   return (
@@ -295,6 +316,7 @@ function DownloadDialog({
           </Label>
           <Switch
             id="transparent"
+            className="my-1"
             checked={isTransparent}
             onCheckedChange={setIsTransparent}
           />
@@ -317,6 +339,7 @@ function DownloadDialog({
             onClick={() => setShowPreview(!showPreview)}
             className="inline-flex gap-2"
             variant="outline"
+            disabled={isLoading}
           >
             {showPreview ? (
               <EyeClosed className="size-4" />
@@ -325,7 +348,15 @@ function DownloadDialog({
             )}
             {showPreview ? "Hide" : "Show"} Preview
           </Button>
-          <Button onClick={convert} disabled={isLoading}>
+          <Button
+            onClick={() => handleClick("copy")}
+            className="inline-flex gap-2"
+            variant="outline"
+            disabled={isLoading}
+          >
+            <Copy className="size-4 mr-2" /> Copy
+          </Button>
+          <Button onClick={() => handleClick("download")} disabled={isLoading}>
             <Download className="size-4 mr-2" /> Download
           </Button>
         </DialogFooter>
