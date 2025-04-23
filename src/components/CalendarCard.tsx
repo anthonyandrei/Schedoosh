@@ -14,7 +14,7 @@ import { X } from "lucide-react";
 
 interface CalendarCardProps {
   currClass: Class & ReturnType<typeof getCardColors>;
-  height: number;
+  cardHeight: number;
   top: number;
   hovered: number | false;
   onMouseEnter: () => void;
@@ -26,9 +26,14 @@ interface CalendarCardProps {
   cellSizePx: number;
 }
 
+interface CardDetails {
+  content: string;
+  className?: string;
+}
+
 const CalendarCard = ({
   currClass,
-  height,
+  cardHeight,
   top,
   sched,
   hovered,
@@ -47,8 +52,21 @@ const CalendarCard = ({
     removeColor(currClass.course);
   };
 
-  const isSmall = height <= cellSizePx;
+  const isSmall = cardHeight <= cellSizePx;
   const room = inferRoom(currClass, sched);
+
+  const details: CardDetails[] = [
+    {
+      content: `${formatTime(sched.start)} - ${formatTime(sched.end)}`,
+    },
+    {
+      content: `${isMobile ? currClass.section : ""} ${room === "TBA" ? "" : room}`,
+    },
+    {
+      content: `${toProperCase(currClass.professor)}`,
+      className: cn(isMobile && "line-clamp-2 text-wrap"),
+    },
+  ];
 
   return (
     <Card
@@ -63,7 +81,7 @@ const CalendarCard = ({
         currClass.border
       )}
       style={{
-        height,
+        height: cardHeight,
         top,
       }}
     >
@@ -90,29 +108,25 @@ const CalendarCard = ({
       </div>
       <div
         className={cn(
-          "text-xs bg-background px-2 h-full rounded-t-md py-2 flex flex-col justify-center overflow-hidden",
+          "text-xs bg-background px-2 h-full rounded-t-md py-2 flex flex-col flex-wrap justify-center gap-x-[1000px] overflow-hidden",
           currClass.secondaryColor,
-          isSmall && !isMobile && "py-0.5 text-xs"
+          isSmall && !isMobile && "py-0.5"
         )}
       >
-        {height > cellSizePx && (
-          <div className="font-medium">
-            {isMobile && currClass.section} {room === "TBA" ? "" : room}
-          </div>
-        )}
-        <div className="font-medium">
-          {formatTime(sched.start)} - {formatTime(sched.end)}
-        </div>
-        {currClass.professor && (
-          <div
-            className={cn(
-              "overflow-hidden text-ellipsis text-nowrap",
-              !isSmall && isMobile && "line-clamp-2 text-wrap"
-            )}
-          >
-            {`${toProperCase(currClass.professor)}`}
-          </div>
-        )}
+        <div />
+        {details.map((detail, index) => {
+          return (
+            <div
+              key={index}
+              className={cn(
+                "text-xs font-normal w-full truncate",
+                detail.className
+              )}
+            >
+              {detail.content}
+            </div>
+          );
+        })}
       </div>
     </Card>
   );

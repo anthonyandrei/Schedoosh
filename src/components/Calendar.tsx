@@ -157,7 +157,7 @@ const Calendar = ({
                           key={`${currClass.course}${day}${i}`}
                           currClass={currClass}
                           sched={sched}
-                          height={calculateHeight({
+                          cardHeight={calculateHeight({
                             start,
                             end,
                             cellSizePx: cellSize,
