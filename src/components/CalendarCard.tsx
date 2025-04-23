@@ -31,6 +31,9 @@ interface CardDetails {
   className?: string;
 }
 
+const NO_DETAILS_BREAKPOINT = 50;
+const SMALL_DETAILS_BREAKPOINT = 80;
+
 const CalendarCard = ({
   currClass,
   cardHeight,
@@ -52,7 +55,7 @@ const CalendarCard = ({
     removeColor(currClass.course);
   };
 
-  const isSmall = cardHeight <= cellSizePx;
+  const isSmall = cardHeight <= SMALL_DETAILS_BREAKPOINT;
   const room = inferRoom(currClass, sched);
 
   const details: CardDetails[] = [
@@ -106,28 +109,30 @@ const CalendarCard = ({
           />
         )}
       </div>
-      <div
-        className={cn(
-          "text-xs bg-background px-2 h-full rounded-t-md py-2 flex flex-col flex-wrap justify-center gap-x-[1000px] overflow-hidden",
-          currClass.secondaryColor,
-          isSmall && !isMobile && "py-0.5"
-        )}
-      >
-        <div />
-        {details.map((detail, index) => {
-          return (
-            <div
-              key={index}
-              className={cn(
-                "text-xs font-medium w-full truncate",
-                detail.className
-              )}
-            >
-              {detail.content}
-            </div>
-          );
-        })}
-      </div>
+      {cardHeight >= NO_DETAILS_BREAKPOINT && (
+        <div
+          className={cn(
+            "text-xs bg-background px-2 h-full rounded-t-md py-1.5 flex flex-col flex-wrap justify-center gap-x-[1000px] overflow-hidden",
+            currClass.secondaryColor,
+            isSmall && !isMobile && "py-1"
+          )}
+        >
+          <div />
+          {details.map((detail, index) => {
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "text-xs font-medium w-full truncate",
+                  detail.className
+                )}
+              >
+                {detail.content}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </Card>
   );
 };

@@ -3,6 +3,7 @@ import useManualSchedule from "@/hooks/useManualSchedule";
 import { Class } from "@/lib/definitions";
 import { ColorsEnum, DaysEnum } from "@/lib/enums";
 import { calculateHeight, cn, getCardColors } from "@/lib/utils";
+import { useGlobalStore } from "@/stores/useGlobalStore";
 import { useState } from "react";
 import CalendarCard from "./CalendarCard";
 import ManualScheduleCard from "./ManualScheduleCard";
@@ -26,13 +27,16 @@ interface CalendarProps {
 const Calendar = ({
   classes,
   colors,
-  cellSizePx = CELL_SIZE_PX,
+  cellSizePx,
   isMobile = false,
   manualProps,
   className,
   noAnimations,
 }: CalendarProps) => {
-  const [cellSize, setCellSize] = useState(cellSizePx);
+  const zoom = useGlobalStore((state) => state.zoom);
+  const setZoom = useGlobalStore((state) => state.setZoom);
+
+  const [cellSize, setCellSize] = useState(() => cellSizePx ?? zoom);
 
   const { dragging, selection, setSelection, popoverRef, ...listeners } =
     manualProps ?? {};
@@ -62,6 +66,13 @@ const Calendar = ({
   const headerStyle =
     "relative h-full w-full text-center py-2 px-2 mx-2 font-bold ";
 
+  console.log(cellSize);
+
+  const handleMouseUp = () => {
+    console.log("Setting zoom to: ", cellSize);
+    setZoom(cellSize);
+  };
+
   return (
     <div
       className={cn(
@@ -71,10 +82,11 @@ const Calendar = ({
     >
       {!noAnimations && (
         <Slider
-          min={50}
+          min={36}
           max={100}
           value={[cellSize]}
           onValueChange={(value) => setCellSize(value[0])}
+          onValueCommit={handleMouseUp}
         />
       )}
       {/* Day Indicator Row */}
