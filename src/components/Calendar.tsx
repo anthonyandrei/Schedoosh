@@ -7,6 +7,7 @@ import { useState } from "react";
 import CalendarCard from "./CalendarCard";
 import ManualScheduleCard from "./ManualScheduleCard";
 import { ScrollArea } from "./ui/scroll-area";
+import { Slider } from "./ui/slider";
 
 export const CELL_SIZE_PX = 68;
 export const TOP_OFFSET = 16; // Based on 16px (1rem) padding in the calendar
@@ -31,6 +32,8 @@ const Calendar = ({
   className,
   noAnimations,
 }: CalendarProps) => {
+  const [cellSize, setCellSize] = useState(cellSizePx);
+
   const { dragging, selection, setSelection, popoverRef, ...listeners } =
     manualProps ?? {};
 
@@ -62,10 +65,18 @@ const Calendar = ({
   return (
     <div
       className={cn(
-        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background overflow-clip",
+        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background",
         className
       )}
     >
+      {!noAnimations && (
+        <Slider
+          min={50}
+          max={100}
+          value={[cellSize]}
+          onValueChange={(value) => setCellSize(value[0])}
+        />
+      )}
       {/* Day Indicator Row */}
       <div className="flex w-full flex-row border-b bg-primary/90 text-primary-foreground dark:text-secondary-foreground dark:bg-secondary/40 dark:border-muted py-1">
         <div className="w-[50px] shrink-0" />
@@ -90,7 +101,7 @@ const Calendar = ({
                 className="shrink-0"
                 key={"time" + index}
                 style={{
-                  height: cellSizePx,
+                  height: cellSize,
                 }}
               >
                 {" "}
@@ -109,7 +120,7 @@ const Calendar = ({
                 <div
                   className="after:absolute after:h-[1px] after:w-full after:dark:bg-muted/50 after:bg-muted after:content-['']"
                   style={{
-                    height: index === 15 ? "0" : cellSizePx,
+                    height: index === 15 ? "0" : cellSize,
                   }}
                   key={index}
                 />
@@ -146,12 +157,16 @@ const Calendar = ({
                           key={`${currClass.course}${day}${i}`}
                           currClass={currClass}
                           sched={sched}
-                          height={calculateHeight({ start, end, cellSizePx })}
+                          height={calculateHeight({
+                            start,
+                            end,
+                            cellSizePx: cellSize,
+                          })}
                           top={
                             calculateHeight({
                               start: 700,
                               end: start,
-                              cellSizePx,
+                              cellSizePx: cellSize,
                             }) + TOP_OFFSET
                           }
                           hovered={hovered}
@@ -159,7 +174,7 @@ const Calendar = ({
                           onMouseLeave={() => setHovered(false)}
                           isMobile={isMobile}
                           isManual={!!manualProps}
-                          cellSizePx={cellSizePx}
+                          cellSizePx={cellSize}
                         />
                       );
                     });
