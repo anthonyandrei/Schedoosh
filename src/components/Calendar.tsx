@@ -70,7 +70,6 @@ const Calendar = ({
     "relative h-full w-full text-center py-2 px-2 mx-2 font-bold ";
 
   const handleMouseUp = () => {
-    console.log("Setting zoom to: ", cellSize);
     setZoom(cellSize);
   };
 
@@ -83,6 +82,7 @@ const Calendar = ({
     >
       {!noAnimations && (
         <div className="w-full border border-border px-4 py-1 inline-flex gap-4 items-center">
+          <span className="font-semibold text-xs text-nowrap">Zoom</span>
           <Slider
             min={36}
             max={100}
