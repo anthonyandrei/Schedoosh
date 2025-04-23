@@ -119,7 +119,7 @@ const CalendarCard = ({
             <div
               key={index}
               className={cn(
-                "text-xs font-normal w-full truncate",
+                "text-xs font-medium w-full truncate",
                 detail.className
               )}
             >

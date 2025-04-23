@@ -65,7 +65,7 @@ const Calendar = ({
   return (
     <div
       className={cn(
-        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background",
+        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background grow",
         className
       )}
     >
