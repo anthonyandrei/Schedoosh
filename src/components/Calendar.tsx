@@ -7,6 +7,7 @@ import { useGlobalStore } from "@/stores/useGlobalStore";
 import { useState } from "react";
 import CalendarCard from "./CalendarCard";
 import ManualScheduleCard from "./ManualScheduleCard";
+import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { Slider } from "./ui/slider";
 
@@ -76,18 +77,31 @@ const Calendar = ({
   return (
     <div
       className={cn(
-        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background grow",
+        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background grow overflow-hidden",
         className
       )}
     >
       {!noAnimations && (
-        <Slider
-          min={36}
-          max={100}
-          value={[cellSize]}
-          onValueChange={(value) => setCellSize(value[0])}
-          onValueCommit={handleMouseUp}
-        />
+        <div className="w-full border border-border px-4 py-1 inline-flex gap-4 items-center">
+          <Slider
+            min={36}
+            max={100}
+            value={[cellSize]}
+            onValueChange={(value) => setCellSize(value[0])}
+            onValueCommit={handleMouseUp}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCellSize(CELL_SIZE_PX);
+              setZoom(CELL_SIZE_PX);
+            }}
+          >
+            {" "}
+            Reset
+          </Button>
+        </div>
       )}
       {/* Day Indicator Row */}
       <div className="flex w-full flex-row border-b bg-primary/90 text-primary-foreground dark:text-secondary-foreground dark:bg-secondary/40 dark:border-muted py-1">
