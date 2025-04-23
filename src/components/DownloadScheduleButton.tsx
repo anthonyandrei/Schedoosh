@@ -429,6 +429,7 @@ function Wallpaper({
           cellSizePx={cellSize}
           className="h-max shadow-[0_0_30px_20px_rgba(0,0,0,0.2)] border-none"
           isMobile={isMobile}
+          noAnimations
         />
         {!isMobile && (
           <ScheduleOverview

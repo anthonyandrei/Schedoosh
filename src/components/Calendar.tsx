@@ -3,10 +3,13 @@ import useManualSchedule from "@/hooks/useManualSchedule";
 import { Class } from "@/lib/definitions";
 import { ColorsEnum, DaysEnum } from "@/lib/enums";
 import { calculateHeight, cn, getCardColors } from "@/lib/utils";
+import { useGlobalStore } from "@/stores/useGlobalStore";
 import { useState } from "react";
 import CalendarCard from "./CalendarCard";
 import ManualScheduleCard from "./ManualScheduleCard";
+import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
+import { Slider } from "./ui/slider";
 
 export const CELL_SIZE_PX = 68;
 export const TOP_OFFSET = 16; // Based on 16px (1rem) padding in the calendar
@@ -25,12 +28,19 @@ interface CalendarProps {
 const Calendar = ({
   classes,
   colors,
-  cellSizePx = CELL_SIZE_PX,
+  cellSizePx,
   isMobile = false,
   manualProps,
   className,
   noAnimations,
 }: CalendarProps) => {
+  // This is the default zoom level
+  const zoom = useGlobalStore((state) => state.zoom);
+  const setZoom = useGlobalStore((state) => state.setZoom);
+
+  // Acts as a buffer for the zoom slider
+  const [cellSize, setCellSize] = useState(() => cellSizePx ?? zoom);
+
   const { dragging, selection, setSelection, popoverRef, ...listeners } =
     manualProps ?? {};
 
@@ -59,13 +69,40 @@ const Calendar = ({
   const headerStyle =
     "relative h-full w-full text-center py-2 px-2 mx-2 font-bold ";
 
+  const handleMouseUp = () => {
+    setZoom(cellSize);
+  };
+
   return (
     <div
       className={cn(
-        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background overflow-clip",
+        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background grow overflow-hidden",
         className
       )}
     >
+      {!noAnimations && (
+        <div className="w-full border border-border px-4 py-1 inline-flex gap-4 items-center">
+          <span className="font-semibold text-xs text-nowrap">Zoom</span>
+          <Slider
+            min={36}
+            max={100}
+            value={[cellSize]}
+            onValueChange={(value) => setCellSize(value[0])}
+            onValueCommit={handleMouseUp}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCellSize(CELL_SIZE_PX);
+              setZoom(CELL_SIZE_PX);
+            }}
+          >
+            {" "}
+            Reset
+          </Button>
+        </div>
+      )}
       {/* Day Indicator Row */}
       <div className="flex w-full flex-row border-b bg-primary/90 text-primary-foreground dark:text-secondary-foreground dark:bg-secondary/40 dark:border-muted py-1">
         <div className="w-[50px] shrink-0" />
@@ -90,7 +127,7 @@ const Calendar = ({
                 className="shrink-0"
                 key={"time" + index}
                 style={{
-                  height: cellSizePx,
+                  height: cellSize,
                 }}
               >
                 {" "}
@@ -109,7 +146,7 @@ const Calendar = ({
                 <div
                   className="after:absolute after:h-[1px] after:w-full after:dark:bg-muted/50 after:bg-muted after:content-['']"
                   style={{
-                    height: index === 15 ? "0" : cellSizePx,
+                    height: index === 15 ? "0" : cellSize,
                   }}
                   key={index}
                 />
@@ -130,7 +167,10 @@ const Calendar = ({
                   key={day}
                 >
                   {manualProps && selection?.day === day && (
-                    <ManualScheduleCard manualProps={manualProps} />
+                    <ManualScheduleCard
+                      manualProps={manualProps}
+                      cellSize={cellSize}
+                    />
                   )}
                   {sortedClasses[day].map((currClass) => {
                     const schedules = currClass.schedules.filter(
@@ -146,12 +186,16 @@ const Calendar = ({
                           key={`${currClass.course}${day}${i}`}
                           currClass={currClass}
                           sched={sched}
-                          height={calculateHeight({ start, end, cellSizePx })}
+                          cardHeight={calculateHeight({
+                            start,
+                            end,
+                            cellSizePx: cellSize,
+                          })}
                           top={
                             calculateHeight({
                               start: 700,
                               end: start,
-                              cellSizePx,
+                              cellSizePx: cellSize,
                             }) + TOP_OFFSET
                           }
                           hovered={hovered}
@@ -159,7 +203,7 @@ const Calendar = ({
                           onMouseLeave={() => setHovered(false)}
                           isMobile={isMobile}
                           isManual={!!manualProps}
-                          cellSizePx={cellSizePx}
+                          cellSizePx={cellSize}
                         />
                       );
                     });

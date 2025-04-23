@@ -12,7 +12,7 @@ import {
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { SearchSlash, UsersRound, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { CELL_SIZE_PX, TOP_OFFSET } from "./Calendar";
+import { TOP_OFFSET } from "./Calendar";
 import TooltipWrapper from "./common/TooltipWrapper";
 import OverviewCard from "./OverviewCard";
 import { Badge } from "./ui/badge";
@@ -25,9 +25,11 @@ import { Switch } from "./ui/switch";
 
 interface ManualScheduleCardProps {
   manualProps: ReturnType<typeof useManualSchedule>;
+  cellSize: number;
 }
 export default function ManualScheduleCard({
   manualProps,
+  cellSize,
 }: ManualScheduleCardProps) {
   const [showOngoing, setShowOngoing] = useState(false);
   const setManualSchedule = useGlobalStore((state) => state.setManualSchedule);
@@ -36,7 +38,6 @@ export default function ManualScheduleCard({
     (state) => state.getSelectedData
   )();
   const { dragging, selection, setSelection, popoverRef } = manualProps;
-  const cellSizePx = CELL_SIZE_PX;
   const startTime = selection ? minutesToMilitaryTime(selection.start) : null;
   const endTime = selection ? minutesToMilitaryTime(selection.end) : null;
   const day = selection ? selection.day : null;
@@ -44,13 +45,17 @@ export default function ManualScheduleCard({
     ? selection.end - selection.start === 15
     : false;
 
+  const usedCourses = useMemo(() => {
+    return new Set([...schedule.classes.map((course) => course.course)]);
+  }, [schedule]);
+
+  const uniqueCourses = useMemo(() => {
+    return [...new Set(selectedData.map((course) => course.courseCode))];
+  }, [selectedData]);
+
   const viableData = useMemo(() => {
     if (!schedule || dragging || !startTime || !endTime || !day || !schedule)
       return [];
-
-    const usedCourses = new Set([
-      ...schedule.classes.map((course) => course.course),
-    ]);
 
     return selectedData
       .map((course) => {
@@ -101,6 +106,7 @@ export default function ManualScheduleCard({
     showOngoing,
     is15MinSlot,
     dragging,
+    usedCourses,
   ]);
 
   if (!schedule || !selection) return null;
@@ -127,7 +133,7 @@ export default function ManualScheduleCard({
             height: calculateHeight({
               start: selection.start,
               end: selection.end,
-              cellSizePx,
+              cellSizePx: cellSize,
               type: "minutes",
             }),
             top:
@@ -135,7 +141,7 @@ export default function ManualScheduleCard({
                 start: 420,
                 end: selection.start,
                 type: "minutes",
-                cellSizePx,
+                cellSizePx: cellSize,
               }) + TOP_OFFSET,
           }}
           className={cn(
@@ -199,7 +205,9 @@ export default function ManualScheduleCard({
         ) : (
           <div className="mt-4 rounded-lg py-8 border-dashed border-border border inline-flex items-center justify-center gap-2 text-muted-foreground w-full">
             <SearchSlash className="size-5" />
-            No classes found...
+            {uniqueCourses.length === usedCourses.size
+              ? "You've already added all available courses"
+              : "No classes found..."}
           </div>
         )}
       </PopoverContent>

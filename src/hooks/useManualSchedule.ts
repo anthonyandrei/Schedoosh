@@ -5,6 +5,8 @@ import { useGlobalStore } from "@/stores/useGlobalStore";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export default function useManualSched() {
+  const cellSize = useGlobalStore((state) => state.zoom) || CELL_SIZE_PX;
+
   const days = ["M", "T", "W", "H", "F", "S"] as const;
   const [dragging, setDragging] = useState(false);
   const [selection, setSelection] = useState<{
@@ -34,7 +36,7 @@ export default function useManualSched() {
     );
 
     const column = Math.floor((xPos - LEFT_OFFSET) / sizePerColumn);
-    const timeSlot = Math.floor((yPos - TOP_OFFSET) / (CELL_SIZE_PX / 4));
+    const timeSlot = Math.floor((yPos - TOP_OFFSET) / (cellSize / 4));
 
     const startTime = 7 * 60 + 15 * timeSlot; // 7:00 AM + 15 minutes per slot
 
@@ -112,7 +114,7 @@ export default function useManualSched() {
 
     if (yPos < TOP_OFFSET) return; // Ignore clicks in the time column or extra space
 
-    const timeSlot = Math.floor((yPos - TOP_OFFSET) / (CELL_SIZE_PX / 4));
+    const timeSlot = Math.floor((yPos - TOP_OFFSET) / (cellSize / 4));
 
     const rawTime = 7 * 60 + 15 * timeSlot; // 7:00 AM + 15 minutes per slot
 

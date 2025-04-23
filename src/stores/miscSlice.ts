@@ -6,6 +6,8 @@ export interface MiscStates {
   hasSeenAnnouncement: string | null;
   setHasSeenAnnouncement: (hasSeenAnnouncement: string) => void;
   resetAllSlices: () => void;
+  zoom: number;
+  setZoom: (zoom: number) => void;
 }
 
 export const createMiscSlice: Slice<MiscStates> = (set, get) => ({
@@ -19,5 +21,9 @@ export const createMiscSlice: Slice<MiscStates> = (set, get) => ({
     get().resetSelectedRows();
     get().setSchedules([]);
     get().setSavedSchedules([]);
+  },
+  zoom: 68,
+  setZoom: (zoom) => {
+    set({ zoom });
   },
 });
