@@ -80,6 +80,8 @@ function CourseGroup({
   setGroupPick,
   noOptions = false,
 }: CourseGroupProps) {
+  const courseGroups = useGlobalStore((state) => state.courseGroups);
+
   const { setNodeRef, isOver } = useDroppable({
     id: groupName,
   });
@@ -112,6 +114,25 @@ function CourseGroup({
       toast.error(
         "Group name cannot be empty! Please enter a valid group name."
       );
+      return;
+    }
+
+    if (newTitleFormatted === groupName) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    if (newTitleFormatted.length > 20) {
+      toast.error("Group name cannot exceed 20 characters!");
+      return;
+    }
+
+    if (
+      newTitleFormatted === "Ungrouped" ||
+      newTitleFormatted === "Disabled" ||
+      courseGroups.some((group) => group.name === newTitleFormatted)
+    ) {
+      toast.error("Group name already exists! Please choose a different name.");
       return;
     }
 
@@ -306,6 +327,13 @@ export default function CourseGrid({}: CourseGridProps) {
       <ScrollArea>
         <div className="grid grid-cols-3 2xl:grid-cols-4 gap-4 w-full">
           <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+            <CourseGroup
+              groupName="Disabled"
+              pick={0}
+              courses={courses.filter((course) => course.group === "Disabled")}
+              {...groupFunctions}
+              noOptions
+            />
             <CourseGroup
               groupName="Ungrouped"
               pick={-1}
