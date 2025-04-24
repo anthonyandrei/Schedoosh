@@ -80,6 +80,8 @@ function CourseGroup({
   setGroupPick,
   noOptions = false,
 }: CourseGroupProps) {
+  const courseGroups = useGlobalStore((state) => state.courseGroups);
+
   const { setNodeRef, isOver } = useDroppable({
     id: groupName,
   });
@@ -109,16 +111,42 @@ function CourseGroup({
     const newTitleFormatted = input.trim();
 
     if (!newTitleFormatted) {
-      toast.error(
+      return toast.error(
         "Group name cannot be empty! Please enter a valid group name."
       );
-      return;
     }
 
-    if (groupName !== newTitleFormatted) {
-      renameCourseGroup(groupName, newTitleFormatted);
+    if (newTitleFormatted === groupName) {
+      return setIsEditingTitle(false);
     }
 
+    if (newTitleFormatted.length > 20) {
+      return toast.error("Group name cannot exceed 20 characters!");
+    }
+
+    const isReservedName = ["Ungrouped", "Disabled"].includes(
+      newTitleFormatted
+    );
+    const isDuplicateName = courseGroups.some(
+      (group) => group.name === newTitleFormatted
+    );
+
+    if (isReservedName) {
+      return toast.error(
+        "Group name is reserved! Please choose a different name."
+      );
+    }
+
+    if (isDuplicateName) {
+      return toast.error(
+        "Group name already exists! Please choose a different name."
+      );
+    }
+
+    toast.success(
+      `Group name changed from ${groupName} to ${newTitleFormatted}!`
+    );
+    renameCourseGroup(groupName, newTitleFormatted);
     setIsEditingTitle(false);
   };
 
@@ -148,6 +176,11 @@ function CourseGroup({
               placeholder="Group Name"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleTitleEdit();
+                }
+              }}
             />
             <Button
               onClick={handleTitleEdit}
@@ -193,6 +226,11 @@ function CourseGroup({
                 const re = /^[0-9\b]+$/;
                 if (e.target.value === "" || re.test(e.target.value))
                   setInput(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handlePickEdit();
+                }
               }}
               pattern="\d*"
             />
@@ -306,6 +344,13 @@ export default function CourseGrid({}: CourseGridProps) {
       <ScrollArea>
         <div className="grid grid-cols-3 2xl:grid-cols-4 gap-4 w-full">
           <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+            <CourseGroup
+              groupName="Disabled"
+              pick={0}
+              courses={courses.filter((course) => course.group === "Disabled")}
+              {...groupFunctions}
+              noOptions
+            />
             <CourseGroup
               groupName="Ungrouped"
               pick={-1}

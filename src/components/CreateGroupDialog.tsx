@@ -40,26 +40,32 @@ export default function CreateGroupDialog({
   const [groupName, setGroupName] = useState("");
 
   const handleCreateGroup = (e: React.FormEvent) => {
+    const trimmed = groupName.trim();
     e.preventDefault();
 
-    if (!groupName.trim()) {
+    const reservedNames = ["Ungrouped", "Disabled"];
+
+    if (!trimmed) {
       toast.error("Group name cannot be empty!", {
         description: "Please enter a valid group name.",
       });
       return;
     }
 
-    if (existingGroups.some((group) => group.name === groupName.trim())) {
-      toast.error("Group already exists!", {
-        description: "Please choose a different name.",
+    if (
+      reservedNames.includes(trimmed) ||
+      existingGroups.some((group) => group.name === trimmed)
+    ) {
+      toast.error("Group name is not allowed or already exists!", {
+        description: "Please choose a unique and valid name.",
       });
       return;
     }
 
-    onCreateGroup(groupName.trim());
+    onCreateGroup(trimmed);
 
     if (activeId) {
-      moveCourseToGroup(groupName.trim(), activeId);
+      moveCourseToGroup(trimmed, activeId);
       setActiveId(null);
     }
 
