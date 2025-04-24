@@ -366,7 +366,7 @@ function createSchedules(
 export function doClassesOverlap(sched1: Schedule[], sched2: Schedule[]) {
   const doSchedsOverlap = (sched1: Schedule, sched2: Schedule) => {
     // 915 - 1045 vs 730 - 930
-    return sched1.start <= sched2.end && sched2.start <= sched1.end;
+    return sched1.start < sched2.end && sched2.start < sched1.end;
   };
 
   for (const currSched1 of sched1) {
