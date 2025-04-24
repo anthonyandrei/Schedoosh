@@ -43,6 +43,8 @@ export default function CreateGroupDialog({
     const trimmed = groupName.trim();
     e.preventDefault();
 
+    const reservedNames = ["Ungrouped", "Disabled"];
+
     if (!trimmed) {
       toast.error("Group name cannot be empty!", {
         description: "Please enter a valid group name.",
@@ -51,12 +53,11 @@ export default function CreateGroupDialog({
     }
 
     if (
-      trimmed === "Ungrouped" ||
-      trimmed === "Disabled" ||
+      reservedNames.includes(trimmed) ||
       existingGroups.some((group) => group.name === trimmed)
     ) {
-      toast.error("Group already exists!", {
-        description: "Please choose a different name.",
+      toast.error("Group name is not allowed or already exists!", {
+        description: "Please choose a unique and valid name.",
       });
       return;
     }

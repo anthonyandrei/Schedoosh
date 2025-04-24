@@ -111,35 +111,42 @@ function CourseGroup({
     const newTitleFormatted = input.trim();
 
     if (!newTitleFormatted) {
-      toast.error(
+      return toast.error(
         "Group name cannot be empty! Please enter a valid group name."
       );
-      return;
     }
 
     if (newTitleFormatted === groupName) {
-      setIsEditingTitle(false);
-      return;
+      return setIsEditingTitle(false);
     }
 
     if (newTitleFormatted.length > 20) {
-      toast.error("Group name cannot exceed 20 characters!");
-      return;
+      return toast.error("Group name cannot exceed 20 characters!");
     }
 
-    if (
-      newTitleFormatted === "Ungrouped" ||
-      newTitleFormatted === "Disabled" ||
-      courseGroups.some((group) => group.name === newTitleFormatted)
-    ) {
-      toast.error("Group name already exists! Please choose a different name.");
-      return;
+    const isReservedName = ["Ungrouped", "Disabled"].includes(
+      newTitleFormatted
+    );
+    const isDuplicateName = courseGroups.some(
+      (group) => group.name === newTitleFormatted
+    );
+
+    if (isReservedName) {
+      return toast.error(
+        "Group name is reserved! Please choose a different name."
+      );
     }
 
-    if (groupName !== newTitleFormatted) {
-      renameCourseGroup(groupName, newTitleFormatted);
+    if (isDuplicateName) {
+      return toast.error(
+        "Group name already exists! Please choose a different name."
+      );
     }
 
+    toast.success(
+      `Group name changed from ${groupName} to ${newTitleFormatted}!`
+    );
+    renameCourseGroup(groupName, newTitleFormatted);
     setIsEditingTitle(false);
   };
 
@@ -169,6 +176,11 @@ function CourseGroup({
               placeholder="Group Name"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleTitleEdit();
+                }
+              }}
             />
             <Button
               onClick={handleTitleEdit}
@@ -214,6 +226,11 @@ function CourseGroup({
                 const re = /^[0-9\b]+$/;
                 if (e.target.value === "" || re.test(e.target.value))
                   setInput(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handlePickEdit();
+                }
               }}
               pattern="\d*"
             />
