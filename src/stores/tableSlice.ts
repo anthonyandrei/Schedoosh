@@ -8,14 +8,17 @@ import { Slice } from "./useGlobalStore";
 
 export interface TableStates {
   selectedRows: Record<string, RowSelectionState>;
+  columnVisibility: VisibilityState;
+  columnFilters: Record<string, ColumnFiltersState>;
+}
+
+export interface TableActions {
   setSelectedRows: (
     courseCode: string,
     rowSelection: RowSelectionState
   ) => void;
   getSelectedData: () => Course[];
-  columnVisibility: VisibilityState;
   setColumnVisibility: (columnVisibility: VisibilityState) => void;
-  columnFilters: Record<string, ColumnFiltersState>;
   setColumnFilters: (
     courseCode: string,
     columnFilters: ColumnFiltersState
@@ -26,8 +29,17 @@ export interface TableStates {
   resetColumnFilters: () => void;
 }
 
-export const createTableSlice: Slice<TableStates> = (set, get) => ({
+export type TableSlice = TableStates & TableActions;
+
+const initialState: TableStates = {
   selectedRows: {},
+  columnVisibility: {},
+  columnFilters: {},
+};
+
+export const createTableSlice: Slice<TableSlice> = (set, get) => ({
+  ...initialState,
+
   setSelectedRows: (courseCode, rowSelection) =>
     set((state) => {
       const newSelectedRows = { ...state.selectedRows };
@@ -41,6 +53,7 @@ export const createTableSlice: Slice<TableStates> = (set, get) => ({
 
       return { selectedRows: newSelectedRows };
     }),
+
   getSelectedData: () => {
     const selectedRows = get().selectedRows;
     const courses = get().courses;
@@ -61,20 +74,24 @@ export const createTableSlice: Slice<TableStates> = (set, get) => ({
       return { ...course, classes: courseData };
     });
   },
+
   resetSelectedRows: () => set({ selectedRows: {} }),
-  columnVisibility: {},
+
   setColumnVisibility: (columnVisibility) => set({ columnVisibility }),
-  columnFilters: {},
+
   setColumnFilters: (courseCode, columnFilters) =>
     set((state) => ({
       columnFilters: { ...state.columnFilters, [courseCode]: columnFilters },
     })),
+
   deleteColumnFilters: (courseCode) =>
     set((state) => {
       const newColumnFilters = { ...state.columnFilters };
       delete newColumnFilters[courseCode];
       return { columnFilters: newColumnFilters };
     }),
+
   getColumnFilters: (courseCode) => get().columnFilters[courseCode] ?? [],
+
   resetColumnFilters: () => set({ columnFilters: {} }),
 });

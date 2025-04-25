@@ -1,11 +1,24 @@
 import { Slice } from "./useGlobalStore";
 
-export interface IdStates {
+export interface IdState {
   id: string;
+}
+
+export interface IdActions {
   setId: (id: string) => void;
 }
 
-export const createIdSlice: Slice<IdStates> = (set) => ({
+const initState: IdState = {
   id: "",
-  setId: (id) => set({ id }),
+};
+
+// Combined interface
+export type IdSlice = IdState & IdActions;
+
+export const createIdSlice: Slice<IdSlice> = (set) => ({
+  ...initState,
+  setId: (id: string) =>
+    set({
+      id: id,
+    }),
 });

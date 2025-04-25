@@ -5,6 +5,9 @@ import { Slice } from "./useGlobalStore";
 export interface CourseStates {
   courses: Course[];
   courseGroups: CourseGroup[];
+}
+
+interface CourseActions {
   setCourses: (courses: Course[]) => void;
   addCourse: (course: Course) => void;
   removeCourse: (courseCode: string) => void;
@@ -18,8 +21,15 @@ export interface CourseStates {
   deleteClass: (courseCode: string, classCode: number) => void;
 }
 
-export const createCourseSlice: Slice<CourseStates> = (set, get) => ({
+const initState: CourseStates = {
   courses: [],
+  courseGroups: [],
+};
+
+export type CourseSlice = CourseStates & CourseActions;
+
+export const createCourseSlice: Slice<CourseSlice> = (set, get) => ({
+  ...initState,
   setCourses: (courses) => set({ courses }),
   addCourse: (course) =>
     set((state) => ({
@@ -35,7 +45,6 @@ export const createCourseSlice: Slice<CourseStates> = (set, get) => ({
       };
     });
   },
-  courseGroups: [],
   addCourseGroup: (groupName) =>
     set((state) => ({
       courseGroups: [...state.courseGroups, { name: groupName, pick: 1 }],
