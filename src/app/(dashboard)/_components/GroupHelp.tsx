@@ -1,20 +1,8 @@
-import { StepCard } from "@/components/navbar/HelpDialog";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import StepsDialog, { StepCardProps } from "@/components/wrappers/StepsDialog";
 import { CircleHelp } from "lucide-react";
 
-interface GroupHelpProps {}
-
-const GroupHelp = (props: GroupHelpProps) => {
-  const steps = [
+const GroupHelp = () => {
+  const steps: StepCardProps[] = [
     {
       title: "Create a Group",
       description:
@@ -42,36 +30,12 @@ const GroupHelp = (props: GroupHelpProps) => {
   ];
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <CircleHelp className="size-5" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="inline-flex items-center">
-            <CircleHelp className="mr-2 size-4" /> What are Grouped Courses?
-          </DialogTitle>
-          <DialogDescription>
-            Grouped courses allow you to group courses together to create more
-            flexible schedules.
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="max-h-[500px] w-full">
-          <div className="flex flex-col gap-4">
-            {steps.map(({ description, title }, i) => (
-              <StepCard
-                key={i}
-                step={i + 1}
-                description={description}
-                title={title}
-              />
-            ))}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <StepsDialog
+      steps={steps}
+      title="Grouped Courses"
+      description="Grouped courses allow you to group courses together to create more flexible schedules."
+      triggerIcon={CircleHelp}
+    />
   );
 };
 export default GroupHelp;

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import ConfirmDialog from "@/components/wrappers/ConfirmDialog";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { Class } from "@/lib/definitions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Ellipsis } from "lucide-react";
@@ -39,7 +39,7 @@ export default function RowSettings({ data }: Props) {
         </Button>
       </Dropdown>
       <EditClassDialog data={data} open={openEdit} setOpen={setOpenEdit} />
-      <ConfirmDialog
+      <DialogWrapper
         onSubmit={handleDelete}
         open={openDelete}
         setOpen={setOpenDelete}

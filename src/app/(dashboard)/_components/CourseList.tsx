@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ConfirmDialog from "@/components/wrappers/ConfirmDialog";
 import Dropdown, { DropdownItem } from "@/components/wrappers/Dropdown";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { Course } from "@/lib/definitions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Reorder, useDragControls } from "framer-motion";
@@ -252,11 +252,13 @@ export default function CourseList({
           )}
         </CardContent>
       </ScrollArea>
-      <ConfirmDialog
+      <DialogWrapper
         onSubmit={() => handleReset()}
-        open={open}
         setOpen={setOpen}
+        open={open}
+        title="Remove All Courses"
         description="Are you sure you want to remove all courses? This action cannot be reversed."
+        submitVariant="destructive"
       />
     </Card>
   );

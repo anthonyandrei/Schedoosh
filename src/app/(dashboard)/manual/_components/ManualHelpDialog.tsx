@@ -1,15 +1,4 @@
-import { StepCard } from "@/components/navbar/HelpDialog";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { CircleHelp } from "lucide-react";
+import StepsDialog from "@/components/wrappers/StepsDialog";
 
 export default function ManualHelp() {
   const steps = [
@@ -41,35 +30,10 @@ export default function ManualHelp() {
   ];
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <CircleHelp className="size-5" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="inline-flex items-center">
-            <CircleHelp className="mr-2 size-4" /> What is Smart Manual Mode?
-          </DialogTitle>
-          <DialogDescription>
-            Smart Manual Mode allows you to curate your schedule by giving you
-            fine control using time ranges!
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="max-h-[500px] w-full">
-          <div className="gap-4 flex flex-col">
-            {steps.map(({ description, title }, i) => (
-              <StepCard
-                key={i}
-                step={i + 1}
-                description={description}
-                title={title}
-              />
-            ))}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <StepsDialog
+      steps={steps}
+      title="Smart Manual Mode"
+      description="Smart Manual Mode allows you to curate your schedule by giving you fine control using time ranges!"
+    />
   );
 }

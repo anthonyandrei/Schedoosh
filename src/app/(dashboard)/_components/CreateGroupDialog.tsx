@@ -1,12 +1,6 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { CourseGroup } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
@@ -74,8 +68,8 @@ export default function CreateGroupDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
+    <DialogWrapper
+      trigger={
         <div
           className={cn(
             "border border-primary/30 border-dashed p-4 rounded-lg text-muted-foreground flex flex-col gap-2 items-center justify-center h-[300px] w-full hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors cursor-pointer",
@@ -88,37 +82,37 @@ export default function CreateGroupDialog({
             Drag or Click here to Create New Group
           </span>
         </div>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create New Group</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleCreateGroup} className="flex flex-col gap-4">
-          <Input
-            type="text"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
-            placeholder="Enter group name"
-            autoComplete="off"
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setGroupName("");
-                onOpenChange(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">
-              <Plus className="size-4 mr-2" />
-              Create
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+      }
+      title="Create New Group"
+      description="Add a new group to organize your courses."
+      open={open}
+      setOpen={onOpenChange}
+    >
+      <form onSubmit={handleCreateGroup} className="flex flex-col gap-4">
+        <Input
+          type="text"
+          value={groupName}
+          onChange={(e) => setGroupName(e.target.value)}
+          placeholder="Enter group name"
+          autoComplete="off"
+        />
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setGroupName("");
+              onOpenChange(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button type="submit">
+            <Plus className="size-4 mr-2" />
+            Create
+          </Button>
+        </div>
+      </form>
+    </DialogWrapper>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import ConfirmDialog from "@/components/wrappers/ConfirmDialog";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Bomb } from "lucide-react";
 
@@ -24,16 +24,15 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
         <code className="">Error: {error.message}</code>
       </div>
       <div className="inline-flex gap-4">
-        <ConfirmDialog
+        <DialogWrapper
           onSubmit={() => {
             resetAllSlices();
             reset();
           }}
           title="Are you sure?"
           description="This will clear all data (excluding ID & schedule filters). This action cannot be undone."
-        >
-          <Button variant="destructive">Clear ALL Data</Button>
-        </ConfirmDialog>
+          trigger={<Button variant="destructive">Clear ALL Data</Button>}
+        />
         <Button
           onClick={
             // Attempt to recover by trying to re-render the segment

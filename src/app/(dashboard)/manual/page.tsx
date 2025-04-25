@@ -12,15 +12,13 @@ interface Props {}
 export default function ManualPage({}: Props) {
   const [active, setActive] = useState<number>(0);
 
-  const { schedule, setSchedules, setManualScheduleColors, hasHydrated } =
-    useGlobalStore(
-      useShallow((state) => ({
-        schedule: state.manualSchedule,
-        setSchedules: state.setManualSchedule,
-        setManualScheduleColors: state.setManualScheduleColors,
-        hasHydrated: state._hasHydrated,
-      }))
-    );
+  const { schedule, setManualScheduleColors, hasHydrated } = useGlobalStore(
+    useShallow((state) => ({
+      schedule: state.manualSchedule,
+      setManualScheduleColors: state.setManualScheduleColors,
+      hasHydrated: state._hasHydrated,
+    }))
+  );
 
   const manualProps = useManualSchedule();
 
