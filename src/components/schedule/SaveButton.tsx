@@ -25,6 +25,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
+import DialogWrapper from "../wrappers/GenericDialog";
 
 interface SaveButtonProps extends ButtonProps {
   activeSched: Class[];
@@ -120,6 +121,47 @@ const SaveButton = ({ activeSched, colors, ...props }: SaveButtonProps) => {
   }
 
   return (
+    <DialogWrapper
+      title="Save Schedule"
+      description="What do you want this schedule to be called?"
+      setOpen={setOpen}
+      open={open}
+      trigger={
+        <Button variant="outline" size="icon" {...props}>
+          <Heart className="size-4" />
+        </Button>
+      }
+      footer={
+        <Button form="save-schedule-form" type="submit" className="ml-auto">
+          Save
+        </Button>
+      }
+    >
+      <Form {...form}>
+        <form
+          id="save-schedule-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-6"
+        >
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Schedule Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="e.g. Most Optimal Schedule" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+    </DialogWrapper>
+  );
+
+  return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="icon" {...props}>
@@ -133,33 +175,6 @@ const SaveButton = ({ activeSched, colors, ...props }: SaveButtonProps) => {
             What do you want this schedule to be called?
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-6"
-          >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Schedule Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="e.g. Most Optimal Schedule"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" className="ml-auto">
-              Save
-            </Button>
-          </form>
-        </Form>
       </DialogContent>
     </Dialog>
   );

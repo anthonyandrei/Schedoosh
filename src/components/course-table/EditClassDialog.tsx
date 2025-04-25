@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { Class } from "@/lib/definitions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import ClassForm from "../../app/(dashboard)/_components/ClassForm";
@@ -28,20 +22,18 @@ export default function EditClassDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-[600px] max-h-[80%] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Edit Class Details</DialogTitle>
-          <DialogDescription>
-            Edit the details of the class manually here.
-          </DialogDescription>
-        </DialogHeader>
-        <ClassForm
-          onSubmit={onSubmit}
-          courseCode={data.course}
-          defaultValues={data}
-        />
-      </DialogContent>
-    </Dialog>
+    <DialogWrapper
+      open={open}
+      setOpen={setOpen}
+      isWide
+      title="Edit Class Details"
+      description="Edit the details of the class manually here."
+    >
+      <ClassForm
+        onSubmit={onSubmit}
+        courseCode={data.course}
+        defaultValues={data}
+      />
+    </DialogWrapper>
   );
 }

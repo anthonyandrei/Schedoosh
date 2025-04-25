@@ -1,13 +1,5 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Form,
   FormControl,
   FormField,
@@ -16,6 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { UserSchedule } from "@/lib/definitions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -85,48 +78,38 @@ const RenameButton = ({ activeSched }: RenameButtonProps) => {
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <DialogWrapper
+      open={open}
+      setOpen={setOpen}
+      title="Rename Schedule"
+      description="What do you want this schedule to be called?"
+      className="w-[380px]"
+      onSubmit={form.handleSubmit(onSubmit)}
+      submitText="Save"
+      trigger={
         <Button variant="outline" size="icon">
           <Edit className="size-4" />
         </Button>
-      </DialogTrigger>
-      <DialogContent className="w-[380px]">
-        <DialogHeader>
-          <DialogTitle>Rename Schedule</DialogTitle>
-          <DialogDescription>
-            What do you want this schedule to be called?
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-6"
-          >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Schedule Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="e.g. Most Optimal Schedule"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" className="ml-auto">
-              Save
-            </Button>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+      }
+    >
+      <Form {...form}>
+        <form className="flex flex-col gap-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Schedule Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="e.g. Most Optimal Schedule" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
+    </DialogWrapper>
   );
 };
 

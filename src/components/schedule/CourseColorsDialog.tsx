@@ -1,17 +1,8 @@
 import { Button, ButtonProps } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { UserSchedule } from "@/lib/definitions";
 import { ColorsEnum, ColorsEnumSchema } from "@/lib/enums";
 import { getCardColors } from "@/lib/utils";
@@ -63,62 +54,62 @@ export default function CourseColorsDialog({
     setColors(activeSched ? { ...activeSched.colors } : { ...courseColors });
   }, [activeSched, courseColors]);
 
+  const trigger = (
+    <Button variant="outline" size="icon" {...props}>
+      <Palette className="size-4" />
+    </Button>
+  );
+
+  const footer = (
+    <>
+      <div className="flex items-center gap-2 mr-auto">
+        <Switch
+          id="randomize-colors"
+          checked={randomizeColors}
+          onCheckedChange={setRandomizeColors}
+        />
+        <Label htmlFor="randomize-colors">Randomize Colors on Generate?</Label>
+      </div>
+      <Button onClick={handleSave}>
+        <CheckCheck className="size-4 mr-2" />
+        Save
+      </Button>
+    </>
+  );
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" {...props}>
-          <Palette className="size-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[75%] h-max flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Course Colors</DialogTitle>
-          <DialogDescription>
-            Change how your courses colors look!
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="flex flex-col">
-          <div className="flex flex-col gap-4">
-            {Object.entries(colors).map(([course, color]) => (
-              <Card key={course} className="flex flex-col gap-2 p-4">
-                <div className="font-bold">{course}</div>
-                <div className="grid grid-cols-9 gap-2 w-full h-16">
-                  {ColorsEnumSchema.options.map((colorEnum) => {
-                    const { color: colorCSS } = getCardColors(colorEnum);
-                    return (
-                      <div
-                        key={colorEnum}
-                        className={`size-7 ${colorCSS} rounded-full cursor-pointer inline-flex items-center justify-center w-full`}
-                        onClick={() =>
-                          setColors({ ...colors, [course]: colorEnum })
-                        }
-                      >
-                        {color === colorEnum && <Check className="size-4" />}
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </ScrollArea>
-        <DialogFooter>
-          <div className="flex items-center gap-2 mr-auto">
-            <Switch
-              id="randomize-colors"
-              checked={randomizeColors}
-              onCheckedChange={setRandomizeColors}
-            />
-            <Label htmlFor="randomize-colors">
-              Randomize Colors on Generate?
-            </Label>
-          </div>
-          <Button onClick={handleSave}>
-            <CheckCheck className="size-4 mr-2" />
-            Save
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <DialogWrapper
+      open={open}
+      setOpen={setOpen}
+      title="Course Colors"
+      description="Change how your courses colors look!"
+      trigger={trigger}
+      footer={footer}
+      isWide
+    >
+      <div className="flex flex-col gap-4">
+        {Object.entries(colors).map(([course, color]) => (
+          <Card key={course} className="flex flex-col gap-2 p-4">
+            <div className="font-bold">{course}</div>
+            <div className="grid grid-cols-9 gap-2 w-full h-16">
+              {ColorsEnumSchema.options.map((colorEnum) => {
+                const { color: colorCSS } = getCardColors(colorEnum);
+                return (
+                  <div
+                    key={colorEnum}
+                    className={`size-7 ${colorCSS} rounded-full cursor-pointer inline-flex items-center justify-center w-full`}
+                    onClick={() =>
+                      setColors({ ...colors, [course]: colorEnum })
+                    }
+                  >
+                    {color === colorEnum && <Check className="size-4" />}
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        ))}
+      </div>
+    </DialogWrapper>
   );
 }
