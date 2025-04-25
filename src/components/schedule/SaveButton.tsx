@@ -1,13 +1,5 @@
 import { Button, ButtonProps } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Form,
   FormControl,
   FormField,
@@ -23,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Heart, HeartOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import DialogWrapper from "../wrappers/GenericDialog";
@@ -97,11 +90,17 @@ const SaveButton = ({ activeSched, colors, ...props }: SaveButtonProps) => {
     };
 
     addSaved(newSchedule);
+    toast.success("Schedule successfully saved!", {
+      description: `Your schedule has been saved as ${data.name}, go to the saved tab to see it.`,
+    });
     setOpen(false);
   };
 
   const onDelete = (name: string) => {
     deleteSaved(name);
+    toast.success("Schedule successfully deleted!", {
+      description: `Your schedule named ${name} has been deleted.`,
+    });
     setOpen(false);
   };
 
@@ -114,9 +113,21 @@ const SaveButton = ({ activeSched, colors, ...props }: SaveButtonProps) => {
 
   if (isSaved) {
     return (
-      <Button variant="secondary" size="icon" onClick={() => onDelete(isSaved)}>
-        <HeartOff className="size-4" />
-      </Button>
+      <DialogWrapper
+        title="Are you sure?"
+        description="This will remove the schedule from your saved schedules."
+        setOpen={setOpen}
+        open={open}
+        trigger={
+          <Button variant="secondary" size="icon">
+            <HeartOff className="size-4" />
+          </Button>
+        }
+        onSubmit={() => {
+          onDelete(isSaved);
+        }}
+        submitVariant="destructive"
+      />
     );
   }
 
@@ -159,24 +170,6 @@ const SaveButton = ({ activeSched, colors, ...props }: SaveButtonProps) => {
         </form>
       </Form>
     </DialogWrapper>
-  );
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" {...props}>
-          <Heart className="size-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="w-[380px]">
-        <DialogHeader>
-          <DialogTitle>Save Schedule</DialogTitle>
-          <DialogDescription>
-            What do you want this schedule to be called?
-          </DialogDescription>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
   );
 };
 

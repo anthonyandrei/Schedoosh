@@ -16,6 +16,7 @@ const FilterSettings = () => {
       setOpen={setOpen}
       isWide
       trigger={<Button variant="outline">Filter Settings</Button>}
+      preventClickOutside
     >
       <FilterForm setOpen={setOpen} />
     </DialogWrapper>

@@ -20,6 +20,7 @@ import { DaysEnum, DaysEnumSchema, ModalityEnumSchema } from "@/lib/enums";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 
 export const defaultGeneralFilters: FilterOptions = {
@@ -65,6 +66,7 @@ const FilterForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
 
     setFilter(values);
     form.reset(values);
+    toast.success("Filter settings saved!");
     setOpen(false);
   }
 

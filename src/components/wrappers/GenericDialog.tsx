@@ -55,7 +55,9 @@ export default function DialogWrapper({
   const isOpen = controlledOpen ?? localOpen;
   const setOpenState = controlledSetOpen ?? setLocalOpen;
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     onSubmit?.();
     setOpenState(false);
   };
@@ -83,9 +85,11 @@ export default function DialogWrapper({
             )}
           </DialogHeader>
         )}
-        <div className="grow flex min-h-0">
-          <ScrollArea className="w-full [&>*]:p-1">{children}</ScrollArea>
-        </div>
+        {children && (
+          <div className="grow flex min-h-0">
+            <ScrollArea className="w-full [&>*]:p-1">{children}</ScrollArea>
+          </div>
+        )}
 
         {(footer || onSubmit) && (
           <DialogFooter className="p-1">
@@ -96,6 +100,7 @@ export default function DialogWrapper({
                     variant={submitVariant}
                     onClick={handleSubmit}
                     size="sm"
+                    type="button"
                   >
                     {submitText}
                   </Button>
