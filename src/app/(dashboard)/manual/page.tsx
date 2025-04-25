@@ -1,8 +1,8 @@
 "use client";
 
-import Calendar from "@/components/Calendar";
-import ScheduleBar from "@/components/ScheduleBar";
-import ScheduleOverview from "@/components/ScheduleOverview";
+import Calendar from "@/components/schedule/Calendar";
+import ScheduleBar from "@/components/schedule/ScheduleBar";
+import ScheduleOverview from "@/components/schedule/ScheduleOverview";
 import useManualSchedule from "@/hooks/useManualSchedule";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { useState } from "react";

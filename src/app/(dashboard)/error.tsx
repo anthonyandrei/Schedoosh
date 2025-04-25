@@ -1,6 +1,6 @@
 "use client";
-import ConfirmDialog from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
+import ConfirmDialog from "@/components/wrappers/ConfirmDialog";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Bomb } from "lucide-react";
 

@@ -1,4 +1,4 @@
-import NavigationBar from "@/components/NavigationBar";
+import NavigationBar from "@/components/navbar/NavigationBar";
 import StoreProvider from "@/providers/StoreProvider";
 import React from "react";
 

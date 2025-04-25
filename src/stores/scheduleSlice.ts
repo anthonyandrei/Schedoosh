@@ -1,7 +1,7 @@
 import {
   defaultGeneralFilters,
   defaultSpecificFilters,
-} from "@/components/FilterForm";
+} from "@/app/(dashboard)/schedules/_components/FilterForm";
 import { Filter, UserSchedule } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { Slice } from "./useGlobalStore";

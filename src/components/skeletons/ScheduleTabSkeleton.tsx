@@ -1,4 +1,4 @@
-import { Card } from "../ui/card";
+import { Card } from "@/components/ui/card";
 import ButtonSkeleton from "./ButtonSkeleton";
 import CalendarSkeleton from "./CalendarSkeleton";
 import ScheduleOverviewSkeleton from "./ScheduleOverviewSkeleton";

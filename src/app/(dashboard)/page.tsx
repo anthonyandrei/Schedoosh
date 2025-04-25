@@ -1,4 +1,4 @@
-import CourseTab from "@/components/CourseTab";
+import CourseTab from "@/app/(dashboard)/_components/CourseTab";
 
 const Home = () => {
   return <CourseTab />;

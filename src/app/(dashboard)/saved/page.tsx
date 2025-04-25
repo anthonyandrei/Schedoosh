@@ -1,5 +1,4 @@
-import SavedTab from "@/components/SavedTab";
-import ScheduleTab from "@/components/ScheduleTab";
+import SavedTab from "@/app/(dashboard)/saved/_components/SavedTab";
 
 const Home = () => {
   return <SavedTab />;
