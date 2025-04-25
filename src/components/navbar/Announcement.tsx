@@ -1,21 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog } from "@/components/ui/dialog";
+import StepsDialog from "@/components/wrappers/StepsDialog";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Megaphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { StepCard } from "./HelpDialog";
 
 export default function Announcement() {
   const [open, setOpen] = useState(false);
@@ -32,8 +22,8 @@ export default function Announcement() {
   );
 
   const title = "The Calendar & Manual Update!";
-  const description = "I've added a lot of things! Check them out!";
   const patchDate = "April 19, 2025 (Part 3)";
+  const description = `I've added a lot of things! Check them out!\nPatch Date: ${patchDate}`;
 
   const updates = [
     {
@@ -63,38 +53,16 @@ export default function Announcement() {
       setOpen(true);
       setHasSeenAnnouncement(patchDate);
     }
-  }, [hasHydrated, hasSeenAnnouncement, setHasSeenAnnouncement]);
+  }, [hasHydrated, hasSeenAnnouncement, setHasSeenAnnouncement, patchDate]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Megaphone className="size-5" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="max-h-[500px] w-full">
-          <div className="flex flex-col gap-4 min-h-0 overflow-y-auto">
-            {updates.map(({ title, description }, i) => (
-              <StepCard
-                key={i}
-                step={i + 1}
-                description={description}
-                title={title}
-              />
-            ))}
-          </div>
-        </ScrollArea>
-        <DialogFooter className="sm:justify-start">
-          <p className="text-sm text-muted-foreground">
-            Patch Date: {patchDate}
-          </p>
-        </DialogFooter>
-      </DialogContent>
+      <StepsDialog
+        steps={updates}
+        title={title}
+        description={description}
+        triggerIcon={Megaphone}
+      />
     </Dialog>
   );
 }
