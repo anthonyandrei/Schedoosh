@@ -15,6 +15,7 @@ import { usePathname } from "next/navigation";
 import SchedaddleLogo from "../SchedaddleLogo";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -144,7 +145,7 @@ function NavigationBarMobile({ children }: NavigationBarMobile) {
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-[75vw]" side="left">
+      <SheetContent className="w-[75vw] max-h-svh flex flex-col" side="left">
         <SheetHeader>
           <SheetTitle>
             <Link
@@ -164,23 +165,26 @@ function NavigationBarMobile({ children }: NavigationBarMobile) {
         </SheetHeader>
         <div className="mt-4 flex flex-col gap-2">
           {navigationItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={pathName === item.href ? activeButton : normalButton}
-            >
-              <item.icon strokeWidth={2} size={20} />
-              {item.label}
-            </Link>
+            <SheetClose asChild key={item.href}>
+              <Link
+                href={item.href}
+                className={pathName === item.href ? activeButton : normalButton}
+              >
+                <item.icon strokeWidth={2} size={20} />
+                {item.label}
+              </Link>
+            </SheetClose>
           ))}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Announcement />
-          <SocialsDialog />
-          <IDInput />
-          <ModeToggle />
-          <HelpDialog />
+        <div className="mt-auto">
+          <div className="flex flex-col gap-2">
+            <Announcement />
+            <SocialsDialog />
+            <IDInput />
+            <ModeToggle />
+            <HelpDialog />
+          </div>
         </div>
       </SheetContent>
     </Sheet>
