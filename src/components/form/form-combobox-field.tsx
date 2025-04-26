@@ -6,8 +6,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { Combobox, ComboboxProps } from "@/components/ui/combobox";
 import { FieldValues, Path, PathValue, UseFormReturn } from "react-hook-form";
-import { Combobox, ComboboxProps } from "../ui/combobox";
 
 type BooleanPath<T> = {
   [K in Path<T>]: PathValue<T, K> extends boolean ? K : never;

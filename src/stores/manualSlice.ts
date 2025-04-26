@@ -15,14 +15,18 @@ export interface ManualActions {
   removeManualScheduleColor: (course: string) => void;
 }
 
-export type ManualSlice = ManualStates & ManualActions;
-
-export const createManualSlice: Slice<ManualSlice> = (set) => ({
+const initState: ManualStates = {
   manualSchedule: {
     name: "Manual",
     classes: [],
     colors: {},
   },
+};
+
+export type ManualSlice = ManualStates & ManualActions;
+
+export const createManualSlice: Slice<ManualSlice> = (set) => ({
+  ...initState,
   setManualSchedule: (schedule) =>
     set(() => ({
       manualSchedule: schedule,

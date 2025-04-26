@@ -1,7 +1,7 @@
 import {
   defaultGeneralFilters,
   defaultSpecificFilters,
-} from "@/components/FilterForm";
+} from "@/app/(dashboard)/schedules/_components/FilterForm";
 import { Filter, UserSchedule } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { Slice } from "./useGlobalStore";
@@ -27,14 +27,19 @@ export interface ScheduleActions {
 
 export type ScheduleSlice = ScheduleStates & ScheduleActions;
 
-export const createScheduleSlice: Slice<ScheduleSlice> = (set) => ({
+const initState: ScheduleStates = {
   schedules: [],
-  setSchedules: (schedules) => set({ schedules }),
   courseColors: {},
-  setCourseColors: (courseColors) => set({ courseColors }),
   filter: { general: defaultGeneralFilters, specific: defaultSpecificFilters },
-  setFilter: (filter) => set({ filter }),
   savedSchedules: [],
+  randomizeColors: true,
+};
+
+export const createScheduleSlice: Slice<ScheduleSlice> = (set) => ({
+  ...initState,
+  setSchedules: (schedules) => set({ schedules }),
+  setCourseColors: (courseColors) => set({ courseColors }),
+  setFilter: (filter) => set({ filter }),
   addSavedSchedule: (schedule) =>
     set((state) => ({ savedSchedules: [...state.savedSchedules, schedule] })),
   deleteSavedSchedule: (name) =>
@@ -54,6 +59,5 @@ export const createScheduleSlice: Slice<ScheduleSlice> = (set) => ({
     });
   },
   setSavedSchedules: (schedules) => set({ savedSchedules: schedules }),
-  randomizeColors: true,
   setRandomizeColors: (randomizeColors) => set({ randomizeColors }),
 });

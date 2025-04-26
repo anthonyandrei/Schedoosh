@@ -1,4 +1,8 @@
-import { CELL_SIZE_PX, LEFT_OFFSET, TOP_OFFSET } from "@/components/Calendar";
+import {
+  CELL_SIZE_PX,
+  LEFT_OFFSET,
+  TOP_OFFSET,
+} from "@/components/schedule/Calendar";
 import { DaysEnum } from "@/lib/enums";
 import { minutesToMilitaryTime } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";

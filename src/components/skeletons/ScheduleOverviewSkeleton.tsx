@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { ScrollArea } from "../ui/scroll-area";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ScheduleCardSkeleton = () => (
   <Card className="bg-muted/30">

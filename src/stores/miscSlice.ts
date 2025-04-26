@@ -1,19 +1,29 @@
 import { Slice } from "./useGlobalStore";
 
-export interface MiscStates {
+interface MiscStates {
   _hasHydrated: boolean;
-  setHasHydrated: (hasHydrated: boolean) => void;
   hasSeenAnnouncement: string | null;
+  zoom: number;
+}
+
+interface MiscActions {
+  setHasHydrated: (hasHydrated: boolean) => void;
   setHasSeenAnnouncement: (hasSeenAnnouncement: string) => void;
   resetAllSlices: () => void;
-  zoom: number;
   setZoom: (zoom: number) => void;
 }
 
-export const createMiscSlice: Slice<MiscStates> = (set, get) => ({
+export type MiscSlice = MiscStates & MiscActions;
+
+const initialState: MiscStates = {
   _hasHydrated: false,
-  setHasHydrated: (hasHydrated) => set({ _hasHydrated: hasHydrated }),
   hasSeenAnnouncement: null,
+  zoom: 68,
+};
+
+export const createMiscSlice: Slice<MiscSlice> = (set, get) => ({
+  ...initialState,
+  setHasHydrated: (hasHydrated) => set({ _hasHydrated: hasHydrated }),
   setHasSeenAnnouncement: (hasSeenAnnouncement) => set({ hasSeenAnnouncement }),
   resetAllSlices: () => {
     get().setCourses([]);
@@ -22,7 +32,6 @@ export const createMiscSlice: Slice<MiscStates> = (set, get) => ({
     get().setSchedules([]);
     get().setSavedSchedules([]);
   },
-  zoom: 68,
   setZoom: (zoom) => {
     set({ zoom });
   },

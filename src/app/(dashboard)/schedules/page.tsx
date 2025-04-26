@@ -1,4 +1,4 @@
-import ScheduleTab from "@/components/ScheduleTab";
+import ScheduleTab from "@/app/(dashboard)/schedules/_components/ScheduleTab";
 
 type Props = {};
 

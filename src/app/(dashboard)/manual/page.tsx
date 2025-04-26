@@ -1,8 +1,8 @@
 "use client";
 
-import Calendar from "@/components/Calendar";
-import ScheduleBar from "@/components/ScheduleBar";
-import ScheduleOverview from "@/components/ScheduleOverview";
+import Calendar from "@/components/schedule/Calendar";
+import ScheduleBar from "@/components/schedule/ScheduleBar";
+import ScheduleOverview from "@/components/schedule/ScheduleOverview";
 import useManualSchedule from "@/hooks/useManualSchedule";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { useState } from "react";
@@ -12,15 +12,13 @@ interface Props {}
 export default function ManualPage({}: Props) {
   const [active, setActive] = useState<number>(0);
 
-  const { schedule, setSchedules, setManualScheduleColors, hasHydrated } =
-    useGlobalStore(
-      useShallow((state) => ({
-        schedule: state.manualSchedule,
-        setSchedules: state.setManualSchedule,
-        setManualScheduleColors: state.setManualScheduleColors,
-        hasHydrated: state._hasHydrated,
-      }))
-    );
+  const { schedule, setManualScheduleColors, hasHydrated } = useGlobalStore(
+    useShallow((state) => ({
+      schedule: state.manualSchedule,
+      setManualScheduleColors: state.setManualScheduleColors,
+      hasHydrated: state._hasHydrated,
+    }))
+  );
 
   const manualProps = useManualSchedule();
 

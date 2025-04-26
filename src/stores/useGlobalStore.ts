@@ -3,12 +3,12 @@ import { hasOwnProperty } from "@/lib/utils";
 import { del, get, set } from "idb-keyval"; // can use anything: IndexedDB, Ionic Storage, etc.
 import { create, StateCreator } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
-import { CourseStates, createCourseSlice } from "./courseSlice";
-import { createIdSlice, IdStates } from "./idSlice";
+import { CourseSlice, createCourseSlice } from "./courseSlice";
+import { createIdSlice, IdSlice } from "./idSlice";
 import { createManualSlice, ManualSlice } from "./manualSlice";
-import { createMiscSlice, MiscStates } from "./miscSlice";
+import { createMiscSlice, MiscSlice } from "./miscSlice";
 import { createScheduleSlice, ScheduleSlice } from "./scheduleSlice";
-import { createTableSlice, TableStates } from "./tableSlice";
+import { createTableSlice, TableSlice } from "./tableSlice";
 
 // Custom Storage to interface with IndexedDB
 const storage: StateStorage = {
@@ -25,11 +25,11 @@ const storage: StateStorage = {
 
 // Collection of all the states stored in the store
 interface GlobalStates
-  extends CourseStates,
-    IdStates,
-    TableStates,
+  extends CourseSlice,
+    IdSlice,
+    TableSlice,
     ScheduleSlice,
-    MiscStates,
+    MiscSlice,
     ManualSlice {}
 
 // Abstracted type for creating slices
