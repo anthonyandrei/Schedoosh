@@ -324,15 +324,19 @@ function DownloadDialog({
             checked={isTransparent}
             onCheckedChange={setIsTransparent}
           />
-          <Label htmlFor="clockOffset" className="text-nowrap">
-            Leave space for clock?
-          </Label>
-          <Switch
-            id="clockOffset"
-            className="my-1"
-            checked={hasClockOffset}
-            onCheckedChange={setHasClockOffset}
-          />
+          {isMobile && (
+            <>
+              <Label htmlFor="clockOffset" className="text-nowrap">
+                Leave space for clock?
+              </Label>
+              <Switch
+                id="clockOffset"
+                className="my-1"
+                checked={hasClockOffset}
+                onCheckedChange={setHasClockOffset}
+              />
+            </>
+          )}
         </div>
         <div className="flex items-center justify-center max-h-[300px]">
           {showPreview && (
@@ -446,7 +450,7 @@ function Wallpaper({
           cellSizePx={cellSize}
           className={cn(
             "h-max shadow-[0_0_30px_20px_rgba(0,0,0,0.2)] border-none",
-            hasClockOffset && "self-end"
+            hasClockOffset && isMobile && "self-end"
           )}
           isMobile={isMobile}
           noAnimations
