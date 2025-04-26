@@ -429,7 +429,7 @@ function Wallpaper({
       };
 
   return (
-    <div className="absolute -left-[50vw]" style={{ width, height }}>
+    <div className="absolute -left-[9999px]" style={{ width, height }}>
       <div
         className={cn(
           "flex flex-row gap-8 min-h-0 h-full w-full p-8 bg-cover bg-center overflow-hidden items-center justify-center",
@@ -438,6 +438,7 @@ function Wallpaper({
         style={background}
         id="wallpaper"
         ref={ref}
+        key={`${cellSize}-${width}-${height}`}
       >
         <Calendar
           classes={classes}
