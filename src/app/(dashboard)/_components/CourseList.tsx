@@ -7,10 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Dropdown, { DropdownItem } from "@/components/wrappers/Dropdown";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
+import useBetterMediaQuery from "@/hooks/useBetterMediaQuery";
 import { Course } from "@/lib/definitions";
+import { cn } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Reorder, useDragControls } from "framer-motion";
 import {
+  ChevronDown,
   CircleOff,
   Ellipsis,
   GripVertical,
@@ -197,12 +200,62 @@ export default function CourseList({
     },
   ];
 
+  const courseItems: DropdownItem[] =
+    courses?.map((course) => ({
+      name: course.courseCode,
+      onClick: () => {
+        setActiveCourse(
+          courses.findIndex((c) => c.courseCode === course.courseCode)
+        );
+      },
+    })) ?? [];
+
   const handleReset = () => {
     setCourses([]);
     setActiveCourse(-1);
     resetSelectedRows();
     resetColumnFilters();
   };
+
+  const isMobile = useBetterMediaQuery("(max-width: 720px)");
+
+  if (isMobile) {
+    return (
+      <Card>
+        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
+          <CardTitle>Course List</CardTitle>
+          <Dropdown items={courseSettingsItems} align="start" className="w-52">
+            <Button size="icon" variant="outline" disabled={isFetching}>
+              {isFetching ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <Ellipsis className="size-4" />
+              )}
+            </Button>
+          </Dropdown>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 pb-0">
+          <Dropdown
+            items={courseItems}
+            align="start"
+            className="dropdown-content-width-full"
+          >
+            <Button
+              className={cn(
+                "w-full justify-between mb-4",
+                activeCourse === -1 && "text-muted-foreground"
+              )}
+              variant={activeCourse === -1 ? "default" : "outline"}
+              onClick={() => setActiveCourse(-1)}
+            >
+              {courses[activeCourse]?.courseCode ?? "No courses yet"}{" "}
+              <ChevronDown className="size-4" />
+            </Button>
+          </Dropdown>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="flex flex-col grow shrink min-h-0">
