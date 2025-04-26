@@ -101,6 +101,7 @@ function DownloadDialog({
     2560, 1440,
   ]);
   const [isTransparent, setIsTransparent] = useState(false);
+  const [hasClockOffset, setHasClockOffset] = useState(false);
   const [imgName, setImgName] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -113,11 +114,13 @@ function DownloadDialog({
       selector: "#wallpaper",
       quality: 0.3,
       pixelRatio: 0.5,
+      skipFonts: true,
     });
 
   const [{ isLoading }, convert, ref] = useToPng<HTMLDivElement>({
     quality: 1,
     pixelRatio: isMobile ? 2.5 : 2,
+    skipFonts: true,
     onLoading: () => {
       toast.loading("Generating image...");
     },
@@ -149,6 +152,7 @@ function DownloadDialog({
       setImgName(null);
       setShowPreview(false);
       setAspectRatio([2560, 1440]);
+      setHasClockOffset(false);
     },
   });
 
@@ -202,7 +206,7 @@ function DownloadDialog({
     // Disabled because the function changes everytime it's run
     // useCallback did not work here, so this is the next best thing
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPreview, aspectRatio, imageUrl, isTransparent]);
+  }, [showPreview, aspectRatio, imageUrl, isTransparent, hasClockOffset]);
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
@@ -320,6 +324,15 @@ function DownloadDialog({
             checked={isTransparent}
             onCheckedChange={setIsTransparent}
           />
+          <Label htmlFor="clockOffset" className="text-nowrap">
+            Leave space for clock?
+          </Label>
+          <Switch
+            id="clockOffset"
+            className="my-1"
+            checked={hasClockOffset}
+            onCheckedChange={setHasClockOffset}
+          />
         </div>
         <div className="flex items-center justify-center max-h-[300px]">
           {showPreview && (
@@ -369,6 +382,7 @@ function DownloadDialog({
           colors={colors}
           aspectRatio={aspectRatio}
           isTransparent={isTransparent}
+          hasClockOffset={hasClockOffset}
         />
       </div>
     </Dialog>
@@ -382,6 +396,7 @@ interface WallpaperProps {
   aspectRatio: [width: number, height: number];
   ref: (node: HTMLDivElement) => void;
   isTransparent: boolean;
+  hasClockOffset?: boolean;
 }
 
 function Wallpaper({
@@ -391,10 +406,14 @@ function Wallpaper({
   aspectRatio,
   ref,
   isTransparent,
+  hasClockOffset = false,
 }: WallpaperProps) {
   const isMobile = aspectRatio[0] <= aspectRatio[1];
   const [width, height] = aspectRatio;
-  const cellSize = Math.min(height / (17.5 + (isMobile ? 4 : 0)), 0.7 * height);
+
+  // Calculate the cell size based on the aspect ratio
+  // So either height / 17.5 (approx. the amount of rows in the calendar) + 6 for mobile since it's longer
+  const cellSize = height / (17.5 + (isMobile ? 6 : 0));
 
   const background = isTransparent
     ? {
@@ -410,14 +429,11 @@ function Wallpaper({
       };
 
   return (
-    <div
-      className="absolute -left-[9999px] -top-[1000px]"
-      style={{ width, height }}
-    >
+    <div className="absolute -left-[50vw]" style={{ width, height }}>
       <div
         className={cn(
           "flex flex-row gap-8 min-h-0 h-full w-full p-8 bg-cover bg-center overflow-hidden items-center justify-center",
-          isMobile && "p-20 py-[12.5%]"
+          isMobile && "p-20 pt-20"
         )}
         style={background}
         id="wallpaper"
@@ -427,7 +443,10 @@ function Wallpaper({
           classes={classes}
           colors={colors}
           cellSizePx={cellSize}
-          className="h-max shadow-[0_0_30px_20px_rgba(0,0,0,0.2)] border-none"
+          className={cn(
+            "h-max shadow-[0_0_30px_20px_rgba(0,0,0,0.2)] border-none",
+            hasClockOffset && "self-end"
+          )}
           isMobile={isMobile}
           noAnimations
         />
