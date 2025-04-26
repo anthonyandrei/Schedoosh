@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DialogProps } from "@radix-ui/react-dialog";
 import { CircleHelp, LucideIcon } from "lucide-react";
 
 export interface StepCardProps {
@@ -34,7 +35,7 @@ export function StepCard({ step, description, title }: StepCardProps) {
   );
 }
 
-interface StepsDialogProps {
+interface StepsDialogProps extends DialogProps {
   steps: StepCardProps[];
   title?: string;
   description?: string;
@@ -50,13 +51,17 @@ export default function StepsDialog({
   triggerIcon: TriggerIcon = CircleHelp,
   titleIcon: TitleIcon = CircleHelp,
   triggerVariant = "outline",
+  children,
+  ...props
 }: StepsDialogProps) {
   return (
-    <Dialog>
+    <Dialog {...props}>
       <DialogTrigger asChild>
-        <Button variant={triggerVariant} size="icon">
-          <TriggerIcon className="size-5" />
-        </Button>
+        {children ?? (
+          <Button variant={triggerVariant} size="icon">
+            <TriggerIcon className="size-5" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

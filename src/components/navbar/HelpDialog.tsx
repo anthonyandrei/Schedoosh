@@ -1,4 +1,6 @@
 import { Card } from "@/components/ui/card";
+import { CircleHelp } from "lucide-react";
+import ResponsiveButton from "../wrappers/ResponsiveButton";
 import StepsDialog from "../wrappers/StepsDialog";
 
 interface StepCardProps {
@@ -64,5 +66,9 @@ export default function HelpDialog({}: HelpDialogProps) {
     },
   ];
 
-  return <StepsDialog steps={steps} />;
+  return (
+    <StepsDialog steps={steps}>
+      <ResponsiveButton icon={CircleHelp}>Site Tutorial</ResponsiveButton>
+    </StepsDialog>
+  );
 }

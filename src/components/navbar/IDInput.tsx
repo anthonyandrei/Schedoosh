@@ -24,7 +24,6 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { cn } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IdCard } from "lucide-react";
@@ -32,6 +31,7 @@ import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
+import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 const FormSchema = z.object({
   idNumber: z
@@ -69,13 +69,12 @@ const IDInput = ({ children }: IDInputProps) => {
     <Dialog>
       <DialogTrigger asChild>
         {children ?? (
-          <Button
-            variant="outline"
-            size="icon"
-            className={cn(!id && "border-primary animate-pulse")}
+          <ResponsiveButton
+            icon={IdCard}
+            className={!id ? "border-primary animate-pulse" : ""}
           >
-            <IdCard className="size-5" />
-          </Button>
+            Set ID No.
+          </ResponsiveButton>
         )}
       </DialogTrigger>
       <DialogContent className="w-[380px]">
