@@ -226,9 +226,11 @@ export const columns: ColumnDef<Class>[] = [
     cell: ({ row }) => {
       return <RowSettings data={row.original} />;
     },
+    enableHiding: false,
   },
   {
     id: "schedules",
+    enableHiding: false,
     accessorFn: (row) => {
       const schedules = row.schedules.reduce<Schedule[]>((acc, curr) => {
         if (

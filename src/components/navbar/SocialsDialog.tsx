@@ -2,16 +2,13 @@ import { Button } from "@/components/ui/button";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { AtSign, SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
+import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 interface Props {}
 export default function SocialsDialog({}: Props) {
   return (
     <DialogWrapper
-      trigger={
-        <Button variant="outline" size="icon">
-          <AtSign className="size-5" />
-        </Button>
-      }
+      trigger={<ResponsiveButton icon={AtSign}>Socials</ResponsiveButton>}
       title="Socials"
       description="Here are my socials in case you want to reach out to me! I am always open to feedback and suggestions."
     >

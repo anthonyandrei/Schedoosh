@@ -67,7 +67,7 @@ const Calendar = ({
   );
 
   const headerStyle =
-    "relative h-full w-full text-center py-2 px-2 mx-2 font-bold ";
+    "relative h-full w-full text-center py-2 px-2 mx-2 font-bold min-w-[134px]";
 
   const handleMouseUp = () => {
     setZoom(cellSize);
@@ -76,7 +76,7 @@ const Calendar = ({
   return (
     <div
       className={cn(
-        "flex flex-shrink min-h-0 w-full flex-col border border-border rounded-lg bg-background grow overflow-hidden",
+        "flex flex-shrink min-h-[300px] w-full flex-col border border-border rounded-lg bg-background grow overflow-hidden",
         className
       )}
     >
@@ -103,117 +103,113 @@ const Calendar = ({
           </Button>
         </div>
       )}
-      {/* Day Indicator Row */}
-      <div className="flex w-full flex-row border-b bg-primary/90 text-primary-foreground dark:text-secondary-foreground dark:bg-secondary/40 dark:border-muted py-1">
-        <div className="w-[50px] shrink-0" />
-        <div className="w-2 shrink-0" />
-
-        <div className={headerStyle}>MONDAY</div>
-        <div className={headerStyle}>TUESDAY</div>
-        <div className={headerStyle}>WEDNESDAY</div>
-        <div className={headerStyle}>THURSDAY</div>
-        <div className={headerStyle}>FRIDAY</div>
-        <div className={headerStyle}>SATURDAY</div>
-      </div>
-
-      {/* Scrollable Container */}
-      <ScrollArea>
-        {/* Calendar Content */}
-        <div className="flex h-max w-full flex-row" {...listeners}>
-          {/* Time Column */}
-          <div className="ml-2 flex w-[50px] shrink-0 flex-col items-end">
-            {[...Array(16)].map((_, index) => (
-              <div
-                className="shrink-0"
-                key={"time" + index}
-                style={{
-                  height: cellSize,
-                }}
-              >
-                {" "}
-                <span className="relative top-[3px] w-7 text-nowrap pr-2 text-right text-xs text-gray-500">
-                  {index + 7 > 12 ? index - 5 : index + 7}{" "}
-                  {index + 7 >= 12 ? "PM" : "AM"}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative flex w-full flex-row">
-            {/* Row Separators */}
-            <div className="h-full w-0 pt-4">
+      <div className="overflow-x-auto flex flex-col">
+        {/* Day Indicator Row */}
+        <div className="flex lg:w-full w-max flex-row border-b bg-primary/90 text-primary-foreground dark:text-secondary-foreground dark:bg-secondary/40 dark:border-muted py-1">
+          <div className="w-[50px] shrink-0 ml-2" />
+          <div className="w-2 shrink-0" />
+          <div className={headerStyle}>MONDAY</div>
+          <div className={headerStyle}>TUESDAY</div>
+          <div className={headerStyle}>WEDNESDAY</div>
+          <div className={headerStyle}>THURSDAY</div>
+          <div className={headerStyle}>FRIDAY</div>
+          <div className={headerStyle}>SATURDAY</div>
+        </div>
+        {/* Scrollable Container */}
+        <ScrollArea className="w-max lg:w-full max-h-[300px] overflow-y-auto lg:max-h-full">
+          {/* Calendar Content */}
+          <div className="flex h-max w-full flex-row" {...listeners}>
+            {/* Time Column */}
+            <div className="ml-2 flex w-[50px] shrink-0 flex-col items-end">
               {[...Array(16)].map((_, index) => (
                 <div
-                  className="after:absolute after:h-[1px] after:w-full after:dark:bg-muted/50 after:bg-muted after:content-['']"
+                  className="shrink-0"
+                  key={"time" + index}
                   style={{
-                    height: index === 15 ? "0" : cellSize,
+                    height: cellSize,
                   }}
-                  key={index}
-                />
+                >
+                  {" "}
+                  <span className="relative top-[3px] w-7 text-nowrap pr-2 text-right text-xs text-gray-500">
+                    {index + 7 > 12 ? index - 5 : index + 7}{" "}
+                    {index + 7 >= 12 ? "PM" : "AM"}
+                  </span>
+                </div>
               ))}
             </div>
-
-            <div className="h-full w-2 shrink-0" />
-            {(Object.keys(sortedClasses) as Array<DaysEnum>).map((day) => {
-              return (
-                <div
-                  className={cn(
-                    `relative flex h-full w-full flex-col border-l border-muted/50 pr-2`,
-                    ["M", "W", "F"].includes(day) &&
-                      "dark:bg-muted/10 bg-muted/30",
-                    !noAnimations &&
-                      "animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-                  )}
-                  key={day}
-                >
-                  {manualProps && selection?.day === day && (
-                    <ManualScheduleCard
-                      manualProps={manualProps}
-                      cellSize={cellSize}
-                    />
-                  )}
-                  {sortedClasses[day].map((currClass) => {
-                    const schedules = currClass.schedules.filter(
-                      (sched) => sched.day === day
-                    );
-
-                    return schedules.map((sched, i) => {
-                      const start = sched.start;
-                      const end = sched.end;
-
-                      return (
-                        <CalendarCard
-                          key={`${currClass.course}${day}${i}`}
-                          currClass={currClass}
-                          sched={sched}
-                          cardHeight={calculateHeight({
-                            start,
-                            end,
-                            cellSizePx: cellSize,
-                          })}
-                          top={
-                            calculateHeight({
-                              start: 700,
-                              end: start,
-                              cellSizePx: cellSize,
-                            }) + TOP_OFFSET
-                          }
-                          hovered={hovered}
-                          onMouseEnter={() => setHovered(currClass.code)}
-                          onMouseLeave={() => setHovered(false)}
-                          isMobile={isMobile}
-                          isManual={!!manualProps}
-                          cellSizePx={cellSize}
-                        />
+            <div className="relative flex w-full flex-row">
+              {/* Row Separators */}
+              <div className="h-full w-0 pt-4">
+                {[...Array(16)].map((_, index) => (
+                  <div
+                    className="after:absolute after:h-[1px] after:w-full after:dark:bg-muted/50 after:bg-muted after:content-['']"
+                    style={{
+                      height: index === 15 ? "0" : cellSize,
+                    }}
+                    key={index}
+                  />
+                ))}
+              </div>
+              <div className="h-full w-2 shrink-0" />
+              {(Object.keys(sortedClasses) as Array<DaysEnum>).map((day) => {
+                return (
+                  <div
+                    className={cn(
+                      `relative flex h-full w-full flex-col border-l border-muted/50 pr-2 min-w-[150px]`,
+                      ["M", "W", "F"].includes(day) &&
+                        "dark:bg-muted/10 bg-muted/30",
+                      !noAnimations &&
+                        "animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+                    )}
+                    key={day}
+                  >
+                    {manualProps && selection?.day === day && (
+                      <ManualScheduleCard
+                        manualProps={manualProps}
+                        cellSize={cellSize}
+                      />
+                    )}
+                    {sortedClasses[day].map((currClass) => {
+                      const schedules = currClass.schedules.filter(
+                        (sched) => sched.day === day
                       );
-                    });
-                  })}
-                </div>
-              );
-            })}
+                      return schedules.map((sched, i) => {
+                        const start = sched.start;
+                        const end = sched.end;
+                        return (
+                          <CalendarCard
+                            key={`${currClass.course}${day}${i}`}
+                            currClass={currClass}
+                            sched={sched}
+                            cardHeight={calculateHeight({
+                              start,
+                              end,
+                              cellSizePx: cellSize,
+                            })}
+                            top={
+                              calculateHeight({
+                                start: 700,
+                                end: start,
+                                cellSizePx: cellSize,
+                              }) + TOP_OFFSET
+                            }
+                            hovered={hovered}
+                            onMouseEnter={() => setHovered(currClass.code)}
+                            onMouseLeave={() => setHovered(false)}
+                            isMobile={isMobile}
+                            isManual={!!manualProps}
+                            cellSizePx={cellSize}
+                          />
+                        );
+                      });
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </ScrollArea>
+        </ScrollArea>
+      </div>
     </div>
   );
 };

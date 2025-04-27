@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import DialogWrapper from "../wrappers/GenericDialog";
+import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 interface SaveButtonProps extends ButtonProps {
   activeSched: Class[];
@@ -119,9 +120,16 @@ const SaveButton = ({ activeSched, colors, ...props }: SaveButtonProps) => {
         setOpen={setOpen}
         open={open}
         trigger={
-          <Button variant="secondary" size="icon">
-            <HeartOff className="size-4" />
-          </Button>
+          <ResponsiveButton
+            size="icon"
+            icon={HeartOff}
+            variant="secondary"
+            {...props}
+            hasOutline
+            className="justify-center"
+          >
+            Unsave
+          </ResponsiveButton>
         }
         onSubmit={() => {
           onDelete(isSaved);
@@ -138,9 +146,15 @@ const SaveButton = ({ activeSched, colors, ...props }: SaveButtonProps) => {
       setOpen={setOpen}
       open={open}
       trigger={
-        <Button variant="outline" size="icon" {...props}>
-          <Heart className="size-4" />
-        </Button>
+        <ResponsiveButton
+          size="icon"
+          icon={Heart}
+          {...props}
+          hasOutline
+          className="justify-center"
+        >
+          Save
+        </ResponsiveButton>
       }
       footer={
         <Button form="save-schedule-form" type="submit" className="ml-auto">

@@ -19,10 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import useToImage from "@/hooks/useToImage";
 import { Class } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { cn } from "@/lib/utils";
-import { useToPng } from "@hugocxl/react-to-image";
 import {
   Copy,
   Download,
@@ -34,7 +34,7 @@ import {
   Tablet,
   Upload,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import SchedaddleLogo from "../SchedaddleLogo";
 import Calendar from "./Calendar";
@@ -107,52 +107,25 @@ function DownloadDialog({
   const [showPreview, setShowPreview] = useState(false);
   const isMobile = aspectRatio[0] <= aspectRatio[1];
 
-  const mode = useRef<"copy" | "download">("download");
-
-  const [{ isLoading: isPreviewLoading, data }, convertPreview] =
-    useToPng<HTMLDivElement>({
-      selector: "#wallpaper",
-      quality: 0.3,
-      pixelRatio: 0.5,
-      skipFonts: true,
-    });
-
-  const [{ isLoading }, convert, ref] = useToPng<HTMLDivElement>({
-    quality: 1,
-    pixelRatio: isMobile ? 2.5 : 2,
-    skipFonts: true,
+  const {
+    isLoading,
+    ref,
+    download,
+    copy,
+    preview,
+    convertPreview,
+    isPreviewLoading,
+  } = useToImage({
+    options: { quality: 1, pixelRatio: isMobile ? 2.5 : 2, skipFonts: true },
     onLoading: () => {
       toast.loading("Generating image...");
     },
-    onSuccess: async (data) => {
-      if (mode.current === "copy") {
-        const blob = await fetch(data).then((res) => res.blob());
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            "image/png": blob,
-          }),
-        ]);
-        toast.dismiss();
-        toast.success("Copied Image to clipboard!");
-
-        return;
-      }
-
-      const link = document.createElement("a");
-
-      link.download = "Schedaddle.png";
-      link.href = data;
-      link.click();
-      link.remove();
-
+    onError: (error) => {
+      toast.error("Failed to generate image");
+      console.error(error);
+    },
+    onSuccess: async () => {
       toast.dismiss();
-      toast.success("Downloaded Image successfully!");
-      setImageUrl(null);
-      setOpen(false);
-      setImgName(null);
-      setShowPreview(false);
-      setAspectRatio([2560, 1440]);
-      setHasClockOffset(false);
     },
   });
 
@@ -191,8 +164,13 @@ function DownloadDialog({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) {
-      const tempUrl = URL.createObjectURL(file);
-      setImageUrl(tempUrl);
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file); // ← read as Base64 instead of blob URL
+
       setImgName(file.name);
     } else {
       toast.error("Please select a valid image file.");
@@ -208,19 +186,34 @@ function DownloadDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPreview, aspectRatio, imageUrl, isTransparent, hasClockOffset]);
 
+  useEffect(() => {
+    return () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl]);
+
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
     if (!open) {
-      setShowPreview(false);
-      setImgName(null);
       setImageUrl(null);
+      setOpen(false);
+      setImgName(null);
+      setShowPreview(false);
       setAspectRatio([2560, 1440]);
+      setHasClockOffset(false);
     }
   };
 
-  const handleClick = (newMode: "copy" | "download") => {
-    mode.current = newMode;
-    convert();
+  const handleDownload = async () => {
+    await download();
+    toast.success("Image downloaded successfully!");
+  };
+
+  const handleCopy = async () => {
+    await copy();
+    toast.success("Image copied to clipboard!");
   };
 
   return (
@@ -344,8 +337,8 @@ function DownloadDialog({
               {isPreviewLoading ? (
                 <Loader2 className="size-20 my-20 animate-spin text-muted-foreground" />
               ) : (
-                data && (
-                  <img src={data} alt="Image Preview" className="h-full" />
+                preview && (
+                  <img src={preview} alt="Image Preview" className="h-full" />
                 )
               )}
             </>
@@ -366,14 +359,14 @@ function DownloadDialog({
             {showPreview ? "Hide" : "Show"} Preview
           </Button>
           <Button
-            onClick={() => handleClick("copy")}
+            onClick={handleCopy}
             className="inline-flex gap-2"
             variant="outline"
             disabled={isLoading}
           >
             <Copy className="size-4 mr-2" /> Copy
           </Button>
-          <Button onClick={() => handleClick("download")} disabled={isLoading}>
+          <Button onClick={handleDownload} disabled={isLoading}>
             <Download className="size-4 mr-2" /> Download
           </Button>
         </DialogFooter>
@@ -398,7 +391,7 @@ interface WallpaperProps {
   classes: Class[];
   colors: Record<string, ColorsEnum>;
   aspectRatio: [width: number, height: number];
-  ref: (node: HTMLDivElement) => void;
+  ref: React.RefObject<HTMLDivElement | null>;
   isTransparent: boolean;
   hasClockOffset?: boolean;
 }
@@ -419,31 +412,33 @@ function Wallpaper({
   // So either height / 17.5 (approx. the amount of rows in the calendar) + 6 for mobile since it's longer
   const cellSize = height / (17.5 + (isMobile ? 6 : 0));
 
-  const background = isTransparent
-    ? {
-        backgroundColor: "transparent",
-        backgroundImage: "none",
-      }
-    : {
-        backgroundImage: imageUrl
-          ? `url(${imageUrl})`
-          : isMobile
-            ? `url(/SchedaddleBG.Mobile.png)`
-            : `url(/SchedaddleBG.Desktop.png)`,
-      };
+  const bgImageUrl =
+    imageUrl ??
+    (isMobile ? "/SchedaddleBG.Mobile.png" : "/SchedaddleBG.Desktop.png");
 
   return (
-    <div className="absolute -left-[9999px]" style={{ width, height }}>
+    <div
+      className="absolute -left-[9999px] -top-[9999px]"
+      style={{ width, height }}
+    >
       <div
         className={cn(
           "flex flex-row gap-8 min-h-0 h-full w-full p-8 bg-cover bg-center overflow-hidden items-center justify-center",
-          isMobile && "p-20 pt-20"
+          isMobile && "p-20 pt-20",
+          isTransparent && "bg-background/0"
         )}
-        style={background}
         id="wallpaper"
         ref={ref}
         key={`${cellSize}-${width}-${height}`}
       >
+        {!isTransparent && (
+          <img
+            alt=""
+            src={bgImageUrl}
+            className="absolute inset-0 w-full h-full object-cover -z-10 pointer-events-none select-none"
+            draggable={false}
+          />
+        )}
         <Calendar
           classes={classes}
           colors={colors}
@@ -460,7 +455,7 @@ function Wallpaper({
             activeSchedule={classes}
             colors={colors}
             columns={2}
-            className="w-[45%] bg-background/30 dark:bg-background/40 border-none backdrop-blur-lg shadow-[0_0_20px_10px_rgba(0,0,0,0.2)]"
+            className="min-w-[700px] shrink-0 bg-background/30 dark:bg-background/40 border-none backdrop-blur-lg shadow-[0_0_20px_10px_rgba(0,0,0,0.2)]"
             noAnimations
           />
         )}

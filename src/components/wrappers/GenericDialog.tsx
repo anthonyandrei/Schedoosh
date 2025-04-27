@@ -8,9 +8,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import useBetterMediaQuery from "@/hooks/useBetterMediaQuery";
 import { cn } from "@/lib/utils";
-import { ReactNode, useState } from "react";
-import { ScrollArea } from "../ui/scroll-area";
+import { ReactNode, useEffect, useState } from "react";
 
 interface DialogWrapperProps {
   open?: boolean;
@@ -55,12 +65,67 @@ export default function DialogWrapper({
   const isOpen = controlledOpen ?? localOpen;
   const setOpenState = controlledSetOpen ?? setLocalOpen;
 
+  const isMobile = useBetterMediaQuery("(max-width: 720px)");
+
   const handleSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onSubmit?.();
     setOpenState(false);
   };
+
+  useEffect(() => {
+    console.log("isMobile", isMobile);
+  }, [isMobile]);
+
+  if (isMobile) {
+    return (
+      <Drawer open={isOpen} onOpenChange={setOpenState}>
+        {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+        <DrawerContent
+          className={className}
+          onPointerDownOutside={(e) => {
+            if (preventClickOutside) {
+              e.preventDefault();
+            }
+          }}
+        >
+          {(title || description) && (
+            <DrawerHeader className="pt-4 text-left">
+              {title && <DrawerTitle>{title}</DrawerTitle>}
+              {description && (
+                <DrawerDescription>{description}</DrawerDescription>
+              )}
+            </DrawerHeader>
+          )}
+          {children && (
+            <div className="grow flex min-h-0 px-4">
+              <ScrollArea className="w-full [&>*]:p-1">{children}</ScrollArea>
+            </div>
+          )}
+
+          {(footer || onSubmit) && (
+            <DrawerFooter className="p-4 pt-0">
+              {footer || (
+                <>
+                  {onSubmit && (
+                    <Button
+                      variant={submitVariant}
+                      onClick={handleSubmit}
+                      size="sm"
+                      type="button"
+                    >
+                      {submitText}
+                    </Button>
+                  )}
+                </>
+              )}
+            </DrawerFooter>
+          )}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpenState}>

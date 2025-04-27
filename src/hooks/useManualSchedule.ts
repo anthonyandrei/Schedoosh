@@ -155,14 +155,155 @@ export default function useManualSched() {
       end: newTime + 15,
     });
   };
+  const touchStartTimerRef = useRef<number | null>(null);
+  const touchStartPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const touchMovedRef = useRef<boolean>(false);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const xPos = touch.clientX - e.currentTarget.getBoundingClientRect().left;
+    const yPos = touch.clientY - e.currentTarget.getBoundingClientRect().top;
+
+    // Store initial touch position
+    // This is used to determine if the user has moved their finger significantly
+    touchStartPositionRef.current = { x: touch.clientX, y: touch.clientY };
+    touchMovedRef.current = false;
+
+    if (xPos < LEFT_OFFSET || yPos < TOP_OFFSET) return; // Ignore clicks in the time column or extra space
+
+    const sizePerColumn = Math.floor(
+      (e.currentTarget.getBoundingClientRect().width - LEFT_OFFSET) / 6
+    );
+
+    const column = Math.floor((xPos - LEFT_OFFSET) / sizePerColumn);
+    const timeSlot = Math.floor((yPos - TOP_OFFSET) / (cellSize / 4));
+
+    const startTime = 7 * 60 + 15 * timeSlot; // 7:00 AM + 15 minutes per slot
+
+    if (selection) {
+      const isInsideCard =
+        selection.day === (days[column] as DaysEnum) &&
+        selection.start <= startTime &&
+        selection.end >= startTime + 15;
+
+      if (!isInsideCard && !popoverRef.current?.contains(e.target as Node)) {
+        setDragging(false);
+        setSelection(null);
+      }
+      return;
+    }
+
+    if (activeSchedClasses.length > 0) {
+      const militaryStartTime = minutesToMilitaryTime(startTime);
+      const isInsideCard = activeSchedClasses.some((classItem) => {
+        return classItem.schedules.some(
+          (classSched) =>
+            classSched.day === (days[column] as DaysEnum) &&
+            militaryStartTime >= classSched.start &&
+            militaryStartTime < classSched.end
+        );
+      });
+
+      if (isInsideCard) return;
+    }
+
+    // Set a timer for 500ms before initiating drag
+    touchStartTimerRef.current = window.setTimeout(() => {
+      // Only start dragging if the user hasn't moved significantly
+      if (!touchMovedRef.current) {
+        setDragging(true);
+        setSelection({
+          baseStart: startTime,
+          baseEnd: startTime + 15,
+          start: startTime,
+          end: startTime + 15,
+          day: days[column] as DaysEnum,
+        });
+      }
+    }, 500);
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (touchStartTimerRef.current) {
+      clearTimeout(touchStartTimerRef.current);
+      touchStartTimerRef.current = null;
+    }
+    touchStartPositionRef.current = null;
+    touchMovedRef.current = false;
+    setDragging(false);
+  };
+
+  const MOVE_THRESHOLD = 10; // Minimum distance in pixels to consider a move
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!dragging || !selection) return;
+    const touch = e.touches[0];
+    const yPos = touch.clientY - e.currentTarget.getBoundingClientRect().top;
+
+    // Calculate distance moved from initial touch position
+    const deltaX = Math.abs(touch.clientX - touchStartPositionRef.current!.x);
+    const deltaY = Math.abs(touch.clientY - touchStartPositionRef.current!.y);
+
+    // If user has moved finger more than a threshold amount, consider it a move
+    if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
+      touchMovedRef.current = true;
+
+      // Cancel the touch timer if it's active
+      if (touchStartTimerRef.current) {
+        clearTimeout(touchStartTimerRef.current);
+        touchStartTimerRef.current = null;
+      }
+    }
+
+    if (yPos < TOP_OFFSET) return; // Ignore clicks in the time column or extra space
+
+    const timeSlot = Math.floor((yPos - TOP_OFFSET) / (cellSize / 4));
+
+    const rawTime = 7 * 60 + 15 * timeSlot; // 7:00 AM + 15 minutes per slot
+
+    const newTime = rawTime;
+
+    if (activeSchedClasses.length > 0) {
+      const militaryTime = minutesToMilitaryTime(newTime);
+      const militaryEndTime = minutesToMilitaryTime(selection.baseEnd);
+      const militaryStartTime = minutesToMilitaryTime(selection.baseStart);
+
+      if (
+        checkOverlappingSchedules(
+          militaryTime,
+          militaryStartTime,
+          militaryEndTime
+        )
+      )
+        return;
+    }
+
+    if (rawTime < selection.baseEnd) {
+      setSelection({
+        ...selection,
+        start: newTime,
+        end: selection.baseEnd,
+      });
+
+      return;
+    }
+
+    setSelection({
+      ...selection,
+      start: selection.baseStart,
+      end: newTime + 15,
+    });
+  };
 
   useEffect(() => {
     if (window === undefined) return;
 
     if (dragging) {
       window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchend", handleTouchEnd);
     } else {
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleTouchEnd);
     }
 
     return () => {
@@ -177,5 +318,7 @@ export default function useManualSched() {
     onMouseMove,
     setSelection,
     popoverRef,
+    onTouchStart,
+    onTouchMove,
   };
 }

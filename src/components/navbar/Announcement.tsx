@@ -1,11 +1,11 @@
 "use client";
 
-import { Dialog } from "@/components/ui/dialog";
 import StepsDialog from "@/components/wrappers/StepsDialog";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Megaphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 export default function Announcement() {
   const [open, setOpen] = useState(false);
@@ -56,13 +56,17 @@ export default function Announcement() {
   }, [hasHydrated, hasSeenAnnouncement, setHasSeenAnnouncement, patchDate]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <StepsDialog
-        steps={updates}
-        title={title}
-        description={description}
-        triggerIcon={Megaphone}
-      />
-    </Dialog>
+    <StepsDialog
+      open={open}
+      onOpenChange={setOpen}
+      steps={updates}
+      title={title}
+      description={description}
+      triggerIcon={Megaphone}
+    >
+      <ResponsiveButton icon={Megaphone}>
+        <span className="text-sm">Announcements</span>
+      </ResponsiveButton>
+    </StepsDialog>
   );
 }

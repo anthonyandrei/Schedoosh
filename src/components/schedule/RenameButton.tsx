@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,6 +16,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
+import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 type RenameButtonProps = {
   activeSched: UserSchedule;
@@ -83,13 +83,12 @@ const RenameButton = ({ activeSched }: RenameButtonProps) => {
       setOpen={setOpen}
       title="Rename Schedule"
       description="What do you want this schedule to be called?"
-      className="w-[380px]"
       onSubmit={form.handleSubmit(onSubmit)}
       submitText="Save"
       trigger={
-        <Button variant="outline" size="icon">
-          <Edit className="size-4" />
-        </Button>
+        <ResponsiveButton icon={Edit} hasOutline className="justify-center">
+          Rename
+        </ResponsiveButton>
       }
     >
       <Form {...form}>

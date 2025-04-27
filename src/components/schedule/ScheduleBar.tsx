@@ -50,9 +50,9 @@ export default function ScheduleBar({
   const setManualSchedule = useGlobalStore((state) => state.setManualSchedule);
 
   return (
-    <Card className="flex flex-row gap-4 p-4 px-6">
+    <Card className="flex flex-col lg:flex-row gap-4 p-4 px-6">
       {!isManual ? (
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 max-w-full lg:max-w-80 w-full">
           <Button
             onClick={() => setActive(active - 1)}
             disabled={active <= 0}
@@ -67,7 +67,7 @@ export default function ScheduleBar({
             onValueChange={(val) => setActive(Number(val))}
             disabled={schedules.length === 0}
           >
-            <SelectTrigger className="w-64" suppressHydrationWarning>
+            <SelectTrigger className="w-full" suppressHydrationWarning>
               <SelectValue>
                 {activeSchedule ? schedules[active].name : "No schedules found"}
               </SelectValue>
@@ -107,9 +107,9 @@ export default function ScheduleBar({
           <ManualHelp />
         </div>
       )}
-      {children}
+      <div className="flex flex-col lg:flex-row gap-2 grow">{children}</div>
       {activeScheduleClasses && (
-        <div className="ml-auto flex gap-2">
+        <div className="lg:ml-auto lg:flex gap-2 grid grid-cols-2 lg:flex-row">
           <SaveButton
             activeSched={activeScheduleClasses}
             colors={colors}
