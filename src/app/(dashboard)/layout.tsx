@@ -13,7 +13,9 @@ export default function DashboardLayout({
     <>
       <StoreProvider>
         <NavigationBar />
-        {children}
+        <div className="overflow-y-auto flex-1 flex flex-col items-stretch">
+          {children}
+        </div>
       </StoreProvider>
     </>
   );

@@ -15,7 +15,7 @@ const CourseTab = () => {
   const [activeCourse, setActiveCourse] = useState<number>(0);
 
   return (
-    <div className="flex gap-4 flex-col xl:flex-row flex-grow px-6 py-8 xl:px-16 w-full self-stretch min-h-0 overflow-auto">
+    <div className="flex gap-4 flex-col lg:flex-row grow px-6 py-8 lg:px-16 w-full self-stretch min-h-0 overflow-auto">
       <div className="flex flex-col gap-4 w-full xl:min-w-72 xl:max-w-72">
         <Card>
           <CardContent className="pt-6">

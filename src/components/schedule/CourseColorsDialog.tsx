@@ -11,6 +11,7 @@ import { Check, CheckCheck, Palette } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 interface CourseColorsDialogProps extends ButtonProps {
   activeSched?: UserSchedule;
@@ -55,9 +56,14 @@ export default function CourseColorsDialog({
   }, [activeSched, courseColors]);
 
   const trigger = (
-    <Button variant="outline" size="icon" {...props}>
-      <Palette className="size-4" />
-    </Button>
+    <ResponsiveButton
+      icon={Palette}
+      hasOutline
+      className="justify-center"
+      {...props}
+    >
+      Customize
+    </ResponsiveButton>
   );
 
   const footer = (

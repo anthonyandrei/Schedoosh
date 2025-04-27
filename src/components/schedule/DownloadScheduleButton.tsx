@@ -463,7 +463,7 @@ function Wallpaper({
             activeSchedule={classes}
             colors={colors}
             columns={2}
-            className="w-[45%] bg-background/30 dark:bg-background/40 border-none backdrop-blur-lg shadow-[0_0_20px_10px_rgba(0,0,0,0.2)]"
+            className="min-w-[700px] shrink-0 bg-background/30 dark:bg-background/40 border-none backdrop-blur-lg shadow-[0_0_20px_10px_rgba(0,0,0,0.2)]"
             noAnimations
           />
         )}

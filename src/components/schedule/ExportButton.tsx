@@ -43,7 +43,12 @@ export default function ExportButton({ classes, ...props }: ExportButtonProps) {
   return (
     <div>
       <Dropdown items={dropdownItems} align="start" className="w-52">
-        <Button onClick={handleDownload} variant="secondary" {...props}>
+        <Button
+          onClick={handleDownload}
+          className="w-full"
+          variant="secondary"
+          {...props}
+        >
           <CalendarArrowDownIcon className="size-4 mr-2" />
           Export
         </Button>
