@@ -151,7 +151,7 @@ export function CourseDataTable<TData, TValue>({
       {isMobile ? (
         <DialogWrapper
           trigger={
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="shrink-0">
               <FilterIcon className="size-4 mr-2" /> Open Filters
             </Button>
           }
