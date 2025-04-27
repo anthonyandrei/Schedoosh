@@ -31,8 +31,8 @@ const SavedTab = () => {
   };
 
   return (
-    <div className="flex flex-row w-full min-h-0 py-8 px-16 gap-4 h-full">
-      <div className="flex flex-col gap-4 grow">
+    <div className="flex gap-4 flex-col lg:flex-row px-6 py-8 lg:px-16 w-full self-stretch min-h-0 overflow-auto flex-1">
+      <div className="flex flex-col gap-4 grow min-h-0 shrink-0 order-2 lg:order-1">
         {activeSched ? (
           <>
             <ScheduleBar
@@ -59,9 +59,10 @@ const SavedTab = () => {
         <ScheduleOverview
           activeSchedule={activeSched.classes}
           colors={activeSched.colors}
+          className="order-1 lg:order-2"
         />
       ) : (
-        <Card className="w-[20%] p-6"></Card>
+        <Card className="w-full lg:w-[20%] p-6 order-1 lg:order-2" />
       )}
     </div>
   );
