@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
+import useBetterMediaQuery from "@/hooks/useBetterMediaQuery";
 import useManualSchedule from "@/hooks/useManualSchedule";
 import { Class, Course, Schedule } from "@/lib/definitions";
 import { DaysEnum } from "@/lib/enums";
@@ -23,6 +24,13 @@ import {
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { SearchSlash, UsersRound, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "../ui/drawer";
 import TooltipWrapper from "../wrappers/TooltipWrapper";
 import { TOP_OFFSET } from "./Calendar";
 import OverviewCard from "./OverviewCard";
@@ -113,6 +121,8 @@ export default function ManualScheduleCard({
     usedCourses,
   ]);
 
+  const isMobile = useBetterMediaQuery("(max-width: 720px)");
+
   if (!schedule || !selection) return null;
 
   const hasViableData = viableData.length > 0;
@@ -128,6 +138,105 @@ export default function ManualScheduleCard({
     });
     setSelection(null);
   };
+
+  const onDrawerClose = (newVal: boolean) => {
+    if (newVal === false) setSelection(null);
+  };
+
+  if (isMobile) {
+    return (
+      <div>
+        <Card
+          style={{
+            height: calculateHeight({
+              start: selection.start,
+              end: selection.end,
+              cellSizePx: cellSize,
+              type: "minutes",
+            }),
+            top:
+              calculateHeight({
+                start: 420,
+                end: selection.start,
+                type: "minutes",
+                cellSizePx: cellSize,
+              }) + TOP_OFFSET,
+          }}
+          className={cn(
+            "bg-primary/10 border-primary/50 animate-border-pulse absolute p-2 flex items-center text-xs justify-between select-none text-accent-foreground w-full",
+            dragging && "cursor-grabbing"
+          )}
+        >
+          {is15MinSlot
+            ? `Starts at ${formatTime(selection.start, "minutes")}`
+            : `${formatTime(selection.start, "minutes")} - ${formatTime(
+                selection.end,
+                "minutes"
+              )}`}
+          <span
+            className="rounded-full p-1 text-muted-foreground hover:text-destructive-foreground hover:bg-destructive/80 transition-colors duration-200 ease-in-out cursor-pointer"
+            onClick={() => setSelection(null)}
+          >
+            <X className="size-4" />
+          </span>
+        </Card>
+        <Drawer open={selection && !dragging} onOpenChange={onDrawerClose}>
+          <DrawerContent>
+            <DrawerHeader className="text-left gap-4">
+              <DrawerTitle>Select a Class</DrawerTitle>
+              <DrawerDescription className="inline-flex items-center gap-2 w-full">
+                <Switch
+                  id="between-switch"
+                  checked={showOngoing}
+                  onCheckedChange={setShowOngoing}
+                  className="h-5 [&>*]:h-4"
+                />
+                <Label className="text-nowrap" htmlFor="between-switch">
+                  Include classes happening during this time?
+                </Label>
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <div className="p-4 pt-0">
+              {hasViableData ? (
+                <ScrollArea className="mt-4 [&>[data-radix-scroll-area-viewport]]:max-h-[500px] w-full">
+                  <div className="flex flex-col gap-4 w-full">
+                    {viableData.map((course) => (
+                      <div
+                        key={course.courseCode}
+                        className="flex flex-col gap-2"
+                      >
+                        <h3 className="font-semibold text-sm">
+                          {course.courseCode}
+                        </h3>
+                        <div className="flex flex-col gap-2">
+                          {course.classes.map((classData) => (
+                            <AvailableClassButton
+                              key={classData.code}
+                              classData={classData}
+                              handleClick={handleAddClass}
+                              givenDay={selection.day}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              ) : (
+                <div className="mt-4 rounded-lg py-8 border-dashed border-border border inline-flex items-center justify-center gap-2 text-muted-foreground w-full">
+                  <SearchSlash className="size-5" />
+                  {uniqueCourses.length === usedCourses.size
+                    ? "You've already added all available courses"
+                    : "No classes found..."}
+                </div>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+    );
+  }
 
   return (
     <Popover open={selection && !dragging}>
