@@ -25,7 +25,8 @@ const storage: StateStorage = {
 
 // Collection of all the states stored in the store
 interface GlobalStates
-  extends CourseSlice,
+  extends
+    CourseSlice,
     IdSlice,
     TableSlice,
     ScheduleSlice,
