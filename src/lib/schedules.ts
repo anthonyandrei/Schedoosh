@@ -206,7 +206,7 @@ export function createGroupedSchedules({
 
   const generatedSchedules: UserSchedule[] = [];
   let generatedColors: Record<string, ColorsEnum> = {};
-  let errorTally: Record<string, number> = {};
+  const errorTally: Record<string, number> = {};
 
   for (const cartesian of groupsCartesianProduct) {
     const flattenedCombination = cartesian.flat();
@@ -265,7 +265,7 @@ function createSchedules(
 } {
   // This will let us know what caused 0 schedules.
   // Key = cause, Value = number of times it happened.
-  let errorTally: Record<string, number> = {};
+  const errorTally: Record<string, number> = {};
 
   // This will store all currently made schedules.
   let createdScheds: Class[][] = [[]];

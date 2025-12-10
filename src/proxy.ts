@@ -13,7 +13,7 @@ const ratelimit = new Ratelimit({
   limiter: Ratelimit.fixedWindow(8, "60 s"),
 });
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (request.method === "POST") {
     const ip = (request.headers.get("x-forwarded-for") ?? "127.0.0.1").split(
       ","

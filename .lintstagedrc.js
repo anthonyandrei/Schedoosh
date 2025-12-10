@@ -1,3 +1,5 @@
-module.exports = {
-  "*.{js,jsx,ts,tsx}": ["pnpm dlx prettier --write ./src"],
+const moduleExports = {
+  "*.{js,jsx,ts,tsx}": ["pnpm dlx prettier --write"],
 };
+
+export default moduleExports;

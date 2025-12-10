@@ -49,7 +49,7 @@ function CourseItem({ course, removeCourse }: CourseItemProps) {
       <span>{course.courseCode}</span>
       <div
         className="size-6 rounded-lg cursor-pointer flex items-center justify-center opacity-40 hover:opacity-100 group hover:bg-destructive hover:text-destructive-foreground transition-colors select-none"
-        onPointerDown={(e) => {
+        onPointerDown={() => {
           removeCourse(course.courseCode);
         }}
       >

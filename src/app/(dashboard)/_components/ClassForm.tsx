@@ -10,7 +10,7 @@ import { ModalityEnumSchema } from "@/lib/enums";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, CheckCheck, Plus, Trash2 } from "lucide-react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 interface ClassFormProps {
@@ -119,6 +119,11 @@ export default function ClassForm({
   const handleDeleteSchedule = (index: number) => {
     schedules.remove(index);
   };
+
+  const schedulesLength = useWatch({
+    control: form.control,
+    name: "schedules",
+  }).length;
 
   return (
     <Form {...form}>
@@ -236,13 +241,13 @@ export default function ClassForm({
                   className="shrink-0"
                   type="button"
                   onClick={() => handleDeleteSchedule(i)}
-                  disabled={form.watch("schedules").length === 1}
+                  disabled={schedulesLength === 1}
                 >
                   <Trash2 className="size-4" />
                 </Button>
               </div>
             ))}
-            {form.watch("schedules").length < 5 && (
+            {schedulesLength < 5 && (
               <Button
                 size="sm"
                 variant="ghost"
