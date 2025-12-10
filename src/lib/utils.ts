@@ -257,7 +257,7 @@ export function addDaysToDate(date: Date, days: number | DaysEnum) {
     days = mapping[days as DaysEnum];
   }
 
-  var result = new Date(date);
+  const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 }
