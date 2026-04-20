@@ -1,0 +1,108 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto",
+    "bracketSameLine": false,
+    "bracketSpacing": true,
+    "expand": "auto"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "a11y": {
+        "noLabelWithoutControl": "off",
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "noStaticElementInteractions": "off",
+        "useKeyWithClickEvents": "off",
+        "useSemanticElements": "off",
+        "useMediaCaption": "off",
+        "noAutofocus": "off",
+        "useAriaPropsSupportedByRole": "off"
+      },
+      "correctness": {
+        "noUnusedImports": {
+          "fix": "safe",
+          "level": "warn"
+        },
+        "noUnusedVariables": "warn",
+        "useExhaustiveDependencies": {
+          "level": "error",
+          "options": {
+            "reportUnnecessaryDependencies": false
+          }
+        },
+        "useParseIntRadix": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "info",
+          "fix": "safe",
+          "options": {
+            "attributes": ["className", "divClassName"],
+            "functions": ["cn"]
+          }
+        }
+      },
+      "style": {
+        "useImportType": "off",
+        "useNodejsImportProtocol": "off",
+        "noNonNullAssertion": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "info"
+      },
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noArrayIndexKey": "off",
+        "useIterableCallbackReturn": {
+          "level": "warn",
+          "options": { "checkForEach": false }
+        },
+        "noFallthroughSwitchClause": "warn"
+      },
+      "complexity": {
+        "useOptionalChain": {
+          "fix": "safe",
+          "level": "info"
+        }
+      },
+      "performance": {
+        "noImgElement": "info"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "es5",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "quoteStyle": "double",
+      "attributePosition": "auto",
+      "bracketSpacing": true
+    }
+  },
+  "css": {
+    "parser": { "tailwindDirectives": true }
+  },
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": false,
+      "selfCloseVoidElements": "always"
+    }
+  },
+  "vcs": {
+    "enabled": true,
+    "useIgnoreFile": true,
+    "clientKind": "git"
+  }
+}
