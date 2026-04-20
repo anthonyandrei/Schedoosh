@@ -1,16 +1,5 @@
 "use client";
 
-import { fetchMultipleCourses } from "@/actions/course";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import Dropdown, { DropdownItem } from "@/components/wrappers/Dropdown";
-import DialogWrapper from "@/components/wrappers/GenericDialog";
-import useBetterMediaQuery from "@/hooks/useBetterMediaQuery";
-import { Course } from "@/lib/definitions";
-import { cn } from "@/lib/utils";
-import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Reorder, useDragControls } from "framer-motion";
 import {
   ChevronDown,
@@ -27,6 +16,17 @@ import {
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import { fetchMultipleCourses } from "@/actions/course";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Dropdown, { DropdownItem } from "@/components/wrappers/Dropdown";
+import DialogWrapper from "@/components/wrappers/GenericDialog";
+import useBetterMediaQuery from "@/hooks/useBetterMediaQuery";
+import { Course } from "@/lib/definitions";
+import { cn } from "@/lib/utils";
+import { useGlobalStore } from "@/stores/useGlobalStore";
 
 interface CourseItemProps {
   course: Course;
@@ -41,15 +41,13 @@ function CourseItem({
   activeCourse,
   setActiveCourse,
 }: CourseItemProps) {
-  const { courses, removeCourse, selectedRows, setSelectedRows } =
-    useGlobalStore(
-      useShallow((state) => ({
-        courses: state.courses,
-        removeCourse: state.removeCourse,
-        selectedRows: state.selectedRows,
-        setSelectedRows: state.setSelectedRows,
-      }))
-    );
+  const { courses, removeCourse, selectedRows } = useGlobalStore(
+    useShallow((state) => ({
+      courses: state.courses,
+      removeCourse: state.removeCourse,
+      selectedRows: state.selectedRows,
+    }))
+  );
   const handleDelete = (courseCode: string) => {
     if (activeCourse >= 0 && courses[activeCourse].courseCode === courseCode) {
       setActiveCourse(0);
@@ -66,13 +64,13 @@ function CourseItem({
     <Reorder.Item
       key={course.courseCode}
       value={course}
-      className="flex flex-row gap-2 items-center"
+      className="flex flex-row items-center gap-2"
       dragControls={controls}
       dragListener={false}
     >
       <GripVertical
         onPointerDown={(e) => controls.start(e)}
-        className="shrink-0 text-muted-foreground cursor-grab"
+        className="shrink-0 cursor-grab text-muted-foreground"
       />
       <Button
         variant={
@@ -87,7 +85,7 @@ function CourseItem({
         {selectedRows[course.courseCode] && (
           <Badge
             variant="secondary"
-            className="rounded-sm font-bold p-1 size-5 justify-center font-mono"
+            className="size-5 justify-center rounded-sm p-1 font-bold font-mono"
           >
             {Object.keys(selectedRows[course.courseCode]).length}
           </Badge>
@@ -95,7 +93,7 @@ function CourseItem({
       </Button>
       <Button
         size="icon"
-        className="shrink-0 group hover:bg-destructive/80"
+        className="group shrink-0 hover:bg-destructive/80"
         variant="outline"
         onClick={() => handleDelete(course.courseCode)}
       >
@@ -172,7 +170,7 @@ export default function CourseList({
           description: "The courses should now display updated data.",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong while fetching...", {
         description:
           "The server is facing some issues right now, try again in a bit.",
@@ -222,7 +220,7 @@ export default function CourseList({
   if (isMobile) {
     return (
       <Card>
-        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
           <CardTitle>Course List</CardTitle>
           <Dropdown items={courseSettingsItems} align="start" className="w-52">
             <Button size="icon" variant="outline" disabled={isFetching}>
@@ -242,7 +240,7 @@ export default function CourseList({
           >
             <Button
               className={cn(
-                "w-full justify-between mb-4",
+                "mb-4 w-full justify-between",
                 activeCourse === -1 && "text-muted-foreground"
               )}
               variant={activeCourse === -1 ? "default" : "outline"}
@@ -258,8 +256,8 @@ export default function CourseList({
   }
 
   return (
-    <Card className="flex flex-col grow shrink min-h-0">
-      <CardHeader className="pb-4 flex flex-row items-center justify-between space-y-0">
+    <Card className="flex min-h-0 shrink grow flex-col">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle>Course List</CardTitle>
         <Dropdown items={courseSettingsItems} align="start" className="w-52">
           <Button size="icon" variant="outline" disabled={isFetching}>
@@ -274,15 +272,15 @@ export default function CourseList({
       <ScrollArea className="min-h-0 grow">
         <CardContent>
           <Button
-            className="w-full mb-4"
+            className="mb-4 w-full"
             variant={activeCourse === -1 ? "default" : "outline"}
             onClick={() => setActiveCourse(-1)}
           >
-            <Group className="size-4 mr-2" /> Group Courses
+            <Group className="mr-2 size-4" /> Group Courses
           </Button>
           {courses.length !== 0 ? (
             <Reorder.Group
-              className="flex gap-2 row flex-col"
+              className="row flex flex-col gap-2"
               axis="y"
               values={courses}
               onReorder={handleSwap}
@@ -298,7 +296,7 @@ export default function CourseList({
               ))}
             </Reorder.Group>
           ) : (
-            <div className="text-sm text-muted-foreground size-full flex flex-col gap-2 items-center justify-center mt-6">
+            <div className="mt-6 flex size-full flex-col items-center justify-center gap-2 text-muted-foreground text-sm">
               <CircleOff />
               None added yet.
             </div>

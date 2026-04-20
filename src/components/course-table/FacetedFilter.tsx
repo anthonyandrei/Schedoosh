@@ -1,6 +1,6 @@
 import { CheckIcon } from "@radix-ui/react-icons";
 import { Column } from "@tanstack/react-table";
-
+import { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
 interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
@@ -50,7 +49,7 @@ export function FacetedFilter<TData, TValue>({
           {selectedValues?.size > 0 && (
             <Badge
               variant="default"
-              className="rounded-sm px-1 ml-2 size-5 items-center justify-center"
+              className="ml-2 size-5 items-center justify-center rounded-sm px-1"
             >
               {selectedValues.size}
             </Badge>

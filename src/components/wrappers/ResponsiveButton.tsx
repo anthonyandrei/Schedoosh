@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button, ButtonProps } from "../ui/button";
 
 interface ResponsiveButtonProps extends ButtonProps {
@@ -19,7 +19,7 @@ export default function ResponsiveButton({
       variant="outline"
       size="icon"
       className={cn(
-        "w-auto gap-2 px-4 py-2 xl:px-0 xl:py-0 xl:w-10 justify-start xl:justify-center xl:border-solid",
+        "w-auto justify-start gap-2 px-4 py-2 xl:w-10 xl:justify-center xl:border-solid xl:px-0 xl:py-0",
         !hasOutline && "border-none",
         className
       )}

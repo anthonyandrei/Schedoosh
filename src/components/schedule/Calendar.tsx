@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
@@ -7,7 +8,6 @@ import { Class } from "@/lib/definitions";
 import { ColorsEnum, DaysEnum } from "@/lib/enums";
 import { calculateHeight, cn, getCardColors } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { useState } from "react";
 import CalendarCard from "./CalendarCard";
 import ManualScheduleCard from "./ManualScheduleCard";
 
@@ -76,13 +76,13 @@ const Calendar = ({
   return (
     <div
       className={cn(
-        "flex flex-shrink min-h-[300px] w-full flex-col border border-border rounded-lg bg-background grow overflow-hidden",
+        "flex min-h-[300px] w-full flex-shrink grow flex-col overflow-hidden rounded-lg border border-border bg-background",
         className
       )}
     >
       {!noAnimations && (
-        <div className="w-full border border-border px-4 py-1 inline-flex gap-4 items-center">
-          <span className="font-semibold text-xs text-nowrap">Zoom</span>
+        <div className="inline-flex w-full items-center gap-4 border border-border px-4 py-1">
+          <span className="text-nowrap font-semibold text-xs">Zoom</span>
           <Slider
             min={36}
             max={100}
@@ -103,10 +103,10 @@ const Calendar = ({
           </Button>
         </div>
       )}
-      <div className="overflow-x-auto flex flex-col">
+      <div className="flex flex-col overflow-x-auto">
         {/* Day Indicator Row */}
-        <div className="flex lg:w-full w-max flex-row border-b bg-primary/90 text-primary-foreground dark:text-secondary-foreground dark:bg-secondary/40 dark:border-muted py-1">
-          <div className="w-[50px] shrink-0 ml-2" />
+        <div className="flex w-max flex-row border-b bg-primary/90 py-1 text-primary-foreground lg:w-full dark:border-muted dark:bg-secondary/40 dark:text-secondary-foreground">
+          <div className="ml-2 w-[50px] shrink-0" />
           <div className="w-2 shrink-0" />
           <div className={headerStyle}>MONDAY</div>
           <div className={headerStyle}>TUESDAY</div>
@@ -116,7 +116,7 @@ const Calendar = ({
           <div className={headerStyle}>SATURDAY</div>
         </div>
         {/* Scrollable Container */}
-        <ScrollArea className="w-max lg:w-full max-h-[300px] overflow-y-auto lg:max-h-full">
+        <ScrollArea className="max-h-[300px] w-max overflow-y-auto lg:max-h-full lg:w-full">
           {/* Calendar Content */}
           <div className="flex h-max w-full flex-row" {...listeners}>
             {/* Time Column */}
@@ -124,13 +124,13 @@ const Calendar = ({
               {[...Array(16)].map((_, index) => (
                 <div
                   className="shrink-0"
-                  key={"time" + index}
+                  key={`time${index}`}
                   style={{
                     height: cellSize,
                   }}
                 >
                   {" "}
-                  <span className="relative top-[3px] w-7 text-nowrap pr-2 text-right text-xs text-gray-500">
+                  <span className="relative top-[3px] w-7 text-nowrap pr-2 text-right text-gray-500 text-xs">
                     {index + 7 > 12 ? index - 5 : index + 7}{" "}
                     {index + 7 >= 12 ? "PM" : "AM"}
                   </span>
@@ -142,7 +142,7 @@ const Calendar = ({
               <div className="h-full w-0 pt-4">
                 {[...Array(16)].map((_, index) => (
                   <div
-                    className="after:absolute after:h-[1px] after:w-full after:dark:bg-muted/50 after:bg-muted after:content-['']"
+                    className="after:absolute after:h-[1px] after:w-full after:bg-muted after:content-[''] after:dark:bg-muted/50"
                     style={{
                       height: index === 15 ? "0" : cellSize,
                     }}
@@ -155,11 +155,11 @@ const Calendar = ({
                 return (
                   <div
                     className={cn(
-                      `relative flex h-full w-full flex-col border-l border-muted/50 pr-2 min-w-[150px]`,
+                      `relative flex h-full w-full min-w-[150px] flex-col border-muted/50 border-l pr-2`,
                       ["M", "W", "F"].includes(day) &&
-                        "dark:bg-muted/10 bg-muted/30",
+                        "bg-muted/30 dark:bg-muted/10",
                       !noAnimations &&
-                        "animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+                        "fade-in-0 slide-in-from-bottom-4 animate-in duration-500"
                     )}
                     key={day}
                   >

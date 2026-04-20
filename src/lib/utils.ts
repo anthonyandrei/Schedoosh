@@ -199,11 +199,11 @@ export function getCardColors(color: ColorsEnum) {
   };
 }
 
-export function hasOwnProperty<X extends {}, Y extends PropertyKey>(
+export function hasOwnProp<X extends {}, Y extends PropertyKey>(
   obj: X,
   prop: Y
 ): obj is X & Record<Y, unknown> {
-  return obj.hasOwnProperty(prop);
+  return Object.hasOwn(obj, prop);
 }
 
 export function inferRoom(classData: Class, sched: Schedule): string {

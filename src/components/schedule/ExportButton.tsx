@@ -1,10 +1,10 @@
 "use client";
 
+import { CalendarArrowDownIcon, CalendarSync, FileDown } from "lucide-react";
 import { Button, ButtonProps } from "@/components/ui/button";
 import useGoogleCalendar from "@/hooks/useGoogleCalendar";
 import { createICalendar } from "@/lib/calendar";
 import { Class } from "@/lib/definitions";
-import { CalendarArrowDownIcon, CalendarSync, FileDown } from "lucide-react";
 import Dropdown, { DropdownItem } from "../wrappers/Dropdown";
 import GoogleSyncDialog from "./GoogleSyncDialog";
 
@@ -49,7 +49,7 @@ export default function ExportButton({ classes, ...props }: ExportButtonProps) {
           variant="secondary"
           {...props}
         >
-          <CalendarArrowDownIcon className="size-4 mr-2" />
+          <CalendarArrowDownIcon className="mr-2 size-4" />
           Export
         </Button>
       </Dropdown>

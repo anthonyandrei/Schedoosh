@@ -1,3 +1,6 @@
+import { FieldValues, Path, PathValue, UseFormReturn } from "react-hook-form";
+
+import { Combobox, ComboboxProps } from "@/components/ui/combobox";
 import {
   FormDescription,
   FormField,
@@ -6,17 +9,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { Combobox, ComboboxProps } from "@/components/ui/combobox";
-import { FieldValues, Path, PathValue, UseFormReturn } from "react-hook-form";
-
 type BooleanPath<T> = {
   [K in Path<T>]: PathValue<T, K> extends boolean ? K : never;
 }[Path<T>];
 
-interface FormFieldComboboxProps<T extends FieldValues> extends Omit<
-  ComboboxProps,
-  "value" | "onValueChange" | "onCustomChange"
-> {
+interface FormFieldComboboxProps<T extends FieldValues>
+  extends Omit<ComboboxProps, "value" | "onValueChange" | "onCustomChange"> {
   form: UseFormReturn<T>;
   label?: string;
   formKey: Path<T>;

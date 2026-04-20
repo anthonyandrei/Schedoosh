@@ -1,3 +1,5 @@
+import { DialogProps } from "@radix-ui/react-dialog";
+import { CircleHelp, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -9,8 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DialogProps } from "@radix-ui/react-dialog";
-import { CircleHelp, LucideIcon } from "lucide-react";
 
 export interface StepCardProps {
   step?: number;
@@ -20,9 +20,9 @@ export interface StepCardProps {
 
 export function StepCard({ step, description, title }: StepCardProps) {
   return (
-    <Card className="p-4 flex flex-col gap-2">
-      <div className="inline-flex gap-2 items-center">
-        <div className="rounded-sm border-border border size-6 text-accent-foreground flex items-center justify-center font-bold flex-shrink-0 bg-accent">
+    <Card className="flex flex-col gap-2 p-4">
+      <div className="inline-flex items-center gap-2">
+        <div className="flex size-6 flex-shrink-0 items-center justify-center rounded-sm border border-border bg-accent font-bold text-accent-foreground">
           {step}
         </div>
         <div className="font-semibold text-card-foreground">{title}</div>
@@ -71,7 +71,7 @@ export default function StepsDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[500px] w-full">
-          <div className="gap-4 flex flex-col">
+          <div className="flex flex-col gap-4">
             {steps.map(({ description, title }, i) => (
               <StepCard
                 key={i}

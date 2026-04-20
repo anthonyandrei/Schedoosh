@@ -5,14 +5,14 @@ import ScheduleOverviewSkeleton from "./ScheduleOverviewSkeleton";
 
 const ScheduleTabSkeleton = () => {
   return (
-    <div className="flex flex-row w-full min-h-0 py-8 px-16 gap-4 h-full">
-      <div className="flex flex-col gap-4 grow">
+    <div className="flex h-full min-h-0 w-full flex-row gap-4 px-16 py-8">
+      <div className="flex grow flex-col gap-4">
         {/* Top control bar */}
         <Card className="flex flex-row gap-4 p-4">
           <div className="flex flex-row gap-2">
             {/* Navigation buttons and dropdown */}
             <ButtonSkeleton isIcon />
-            <div className="w-64 h-10 bg-muted animate-pulse rounded-md" />
+            <div className="h-10 w-64 animate-pulse rounded-md bg-muted" />
             <ButtonSkeleton isIcon />
           </div>
 

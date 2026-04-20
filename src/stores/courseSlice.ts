@@ -1,5 +1,5 @@
-import { Class, Course, CourseGroup } from "@/lib/definitions";
 import { RowSelectionState } from "@tanstack/react-table";
+import { Class, Course, CourseGroup } from "@/lib/definitions";
 import { Slice } from "./useGlobalStore";
 
 export interface CourseStates {

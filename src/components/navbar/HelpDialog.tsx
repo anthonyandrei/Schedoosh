@@ -1,5 +1,5 @@
-import { Card } from "@/components/ui/card";
 import { CircleHelp } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import ResponsiveButton from "../wrappers/ResponsiveButton";
 import StepsDialog from "../wrappers/StepsDialog";
 
@@ -11,9 +11,9 @@ interface StepCardProps {
 
 export function StepCard({ step, description, title }: StepCardProps) {
   return (
-    <Card className="p-4 flex flex-col gap-2">
-      <div className="inline-flex gap-2 items-center">
-        <div className="rounded-sm border-border border size-6 text-accent-foreground flex items-center justify-center font-bold flex-shrink-0 bg-accent">
+    <Card className="flex flex-col gap-2 p-4">
+      <div className="inline-flex items-center gap-2">
+        <div className="flex size-6 flex-shrink-0 items-center justify-center rounded-sm border border-border bg-accent font-bold text-accent-foreground">
           {step}
         </div>
         <div className="font-semibold text-card-foreground">{title}</div>
@@ -26,8 +26,7 @@ export function StepCard({ step, description, title }: StepCardProps) {
   );
 }
 
-interface HelpDialogProps {}
-export default function HelpDialog({}: HelpDialogProps) {
+export default function HelpDialog() {
   const steps = [
     {
       title: "Enter ID",

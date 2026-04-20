@@ -1,8 +1,8 @@
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Class } from "@/lib/definitions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { Plus } from "lucide-react";
-import { useState } from "react";
 import ClassForm from "../../app/(dashboard)/_components/ClassForm";
 import DialogWrapper from "../wrappers/GenericDialog";
 
@@ -27,7 +27,7 @@ export default function AddCustomClass({ courseCode }: AddCustomClassProps) {
       description="For classes/schedules that aren't found in MLS."
       trigger={
         <Button variant="outline" size="sm">
-          <Plus className="size-4 mr-2" />
+          <Plus className="mr-2 size-4" />
           Add Class
         </Button>
       }

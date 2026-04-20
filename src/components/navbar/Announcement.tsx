@@ -1,10 +1,10 @@
 "use client";
 
-import StepsDialog from "@/components/wrappers/StepsDialog";
-import { useGlobalStore } from "@/stores/useGlobalStore";
 import { Megaphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import StepsDialog from "@/components/wrappers/StepsDialog";
+import { useGlobalStore } from "@/stores/useGlobalStore";
 import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 export default function Announcement() {

@@ -1,9 +1,9 @@
 "use server";
 
-import { Class } from "@/lib/definitions";
-import { convertClassToEvent } from "@/lib/sched-utils";
 import { calendar_v3, google } from "googleapis";
 import { GaxiosPromise } from "googleapis/build/src/apis/abusiveexperiencereport";
+import { Class } from "@/lib/definitions";
+import { convertClassToEvent } from "@/lib/sched-utils";
 
 export async function getCalendars(accessToken: string) {
   const calendarsRaw = await google.calendar("v3").calendarList.list({

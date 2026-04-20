@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Table } from "@tanstack/react-table";
 import {
   Calendar,
@@ -14,6 +13,7 @@ import {
   TableOfContents,
   User,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { FacetedFilter } from "./FacetedFilter";
 
 interface FilterEntry {
@@ -47,7 +47,7 @@ export function FilterBar<TData>({ table }: FilterBarProps<TData>) {
   ];
 
   return (
-    <div className="flex flex-1 items-center flex-wrap gap-2">
+    <div className="flex flex-1 flex-wrap items-center gap-2">
       {filterEntries.map(
         (filter) =>
           table.getColumn(filter.column) && (

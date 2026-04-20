@@ -1,4 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
+
+import {
+  Copy,
+  Download,
+  Eye,
+  EyeClosed,
+  Loader2,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Upload,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button, ButtonProps } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,19 +37,6 @@ import useToImage from "@/hooks/useToImage";
 import { Class } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { cn } from "@/lib/utils";
-import {
-  Copy,
-  Download,
-  Eye,
-  EyeClosed,
-  Loader2,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Upload,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import SchedaddleLogo from "../SchedaddleLogo";
 import Calendar from "./Calendar";
 import ScheduleOverview from "./ScheduleOverview";
@@ -163,7 +164,7 @@ function DownloadDialog({
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
+    if (file?.type.startsWith("image/")) {
       const reader = new FileReader();
 
       reader.onloadend = () => {
@@ -184,7 +185,14 @@ function DownloadDialog({
     // Disabled because the function changes everytime it's run
     // useCallback did not work here, so this is the next best thing
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPreview, aspectRatio, imageUrl, isTransparent, hasClockOffset]);
+  }, [
+    showPreview,
+    aspectRatio,
+    imageUrl,
+    isTransparent,
+    hasClockOffset,
+    convertPreview,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -288,13 +296,13 @@ function DownloadDialog({
           <Button
             onClick={() => document.getElementById("fileUpload")?.click()}
             variant="outline"
-            className="justify-start w-full min-w-0"
+            className="w-full min-w-0 justify-start"
             disabled={isTransparent}
           >
-            <Upload className="size-4 mr-2" />
+            <Upload className="mr-2 size-4" />
             <span
               className={cn(
-                "text-ellipsis w-[35ch] truncate text-left ",
+                "w-[35ch] truncate text-ellipsis text-left",
                 !imgName && "text-muted-foreground"
               )}
             >
@@ -331,18 +339,15 @@ function DownloadDialog({
             </>
           )}
         </div>
-        <div className="flex items-center justify-center max-h-[300px]">
-          {showPreview && (
-            <>
-              {isPreviewLoading ? (
-                <Loader2 className="size-20 my-20 animate-spin text-muted-foreground" />
-              ) : (
-                preview && (
-                  <img src={preview} alt="Image Preview" className="h-full" />
-                )
-              )}
-            </>
-          )}
+        <div className="flex max-h-[300px] items-center justify-center">
+          {showPreview &&
+            (isPreviewLoading ? (
+              <Loader2 className="my-20 size-20 animate-spin text-muted-foreground" />
+            ) : (
+              preview && (
+                <img src={preview} alt="Schedule Preview" className="h-full" />
+              )
+            ))}
         </div>
         <DialogFooter>
           <Button
@@ -364,10 +369,10 @@ function DownloadDialog({
             variant="outline"
             disabled={isLoading}
           >
-            <Copy className="size-4 mr-2" /> Copy
+            <Copy className="mr-2 size-4" /> Copy
           </Button>
           <Button onClick={handleDownload} disabled={isLoading}>
-            <Download className="size-4 mr-2" /> Download
+            <Download className="mr-2 size-4" /> Download
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -418,12 +423,12 @@ function Wallpaper({
 
   return (
     <div
-      className="absolute -left-[9999px] -top-[9999px]"
+      className="absolute -top-[9999px] -left-[9999px]"
       style={{ width, height }}
     >
       <div
         className={cn(
-          "flex flex-row gap-8 min-h-0 h-full w-full p-8 bg-cover bg-center overflow-hidden items-center justify-center",
+          "flex h-full min-h-0 w-full flex-row items-center justify-center gap-8 overflow-hidden bg-center bg-cover p-8",
           isMobile && "p-20 pt-20",
           isTransparent && "bg-background/0"
         )}
@@ -435,7 +440,7 @@ function Wallpaper({
           <img
             alt=""
             src={bgImageUrl}
-            className="absolute inset-0 w-full h-full object-cover -z-10 pointer-events-none select-none"
+            className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover"
             draggable={false}
           />
         )}
@@ -444,7 +449,7 @@ function Wallpaper({
           colors={colors}
           cellSizePx={cellSize}
           className={cn(
-            "h-max shadow-[0_0_30px_20px_rgba(0,0,0,0.2)] border-none",
+            "h-max border-none shadow-[0_0_30px_20px_rgba(0,0,0,0.2)]",
             hasClockOffset && isMobile && "self-end"
           )}
           isMobile={isMobile}
@@ -455,14 +460,14 @@ function Wallpaper({
             activeSchedule={classes}
             colors={colors}
             columns={2}
-            className="min-w-[700px] shrink-0 bg-background/30 dark:bg-background/40 border-none backdrop-blur-lg shadow-[0_0_20px_10px_rgba(0,0,0,0.2)]"
+            className="min-w-[700px] shrink-0 border-none bg-background/30 shadow-[0_0_20px_10px_rgba(0,0,0,0.2)] backdrop-blur-lg dark:bg-background/40"
             noAnimations
           />
         )}
         {!isMobile && (
           <div
             className={cn(
-              "p-2 bg-accent rounded-lg flex justify-center pl-3 absolute w-max",
+              "absolute flex w-max justify-center rounded-lg bg-accent p-2 pl-3",
               "right-12 bottom-12"
             )}
           >

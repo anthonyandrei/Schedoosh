@@ -1,3 +1,5 @@
+import { Table } from "@tanstack/react-table";
+import { Columns } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -5,8 +7,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Table } from "@tanstack/react-table";
-import { Columns } from "lucide-react";
 
 interface ViewColumnsDropdownProps<T> {
   table: Table<T>;
@@ -19,7 +19,7 @@ export default function ViewColumnsDropdown<T>({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
-          <Columns className="size-4 mr-2" /> View
+          <Columns className="mr-2 size-4" /> View
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

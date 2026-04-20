@@ -236,7 +236,7 @@ export function createGroupedSchedules({
     name: `Schedule ${i + 1}`,
   }));
 
-  let error: "overflow" | string[] | undefined = undefined;
+  let error: "overflow" | string[] | undefined;
   if (overflow) {
     error = "overflow";
   } else if (formattedSchedules.length === 0) {
@@ -354,7 +354,7 @@ function createSchedules(
   const courseNames = createdScheds[0].map((courseClass) => courseClass.course);
   const colors = getRandomColors(courseNames);
 
-  const formattedSchedules: UserSchedule[] = createdScheds.map((sched, i) => ({
+  const formattedSchedules: UserSchedule[] = createdScheds.map((sched, _i) => ({
     name: ``,
     classes: sched,
     colors: {},

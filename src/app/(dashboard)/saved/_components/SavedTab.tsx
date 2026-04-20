@@ -1,5 +1,8 @@
 "use client";
 
+import { HeartCrack } from "lucide-react";
+import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import Calendar from "@/components/schedule/Calendar";
 import ScheduleBar from "@/components/schedule/ScheduleBar";
 import ScheduleOverview from "@/components/schedule/ScheduleOverview";
@@ -7,9 +10,6 @@ import SavedTabSkeleton from "@/components/skeletons/SavedTabSkeleton";
 import { Card } from "@/components/ui/card";
 import { ColorsEnum } from "@/lib/enums";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { HeartCrack } from "lucide-react";
-import { useState } from "react";
-import { useShallow } from "zustand/react/shallow";
 
 const SavedTab = () => {
   const { schedules, hasHydrated, setColors } = useGlobalStore(
@@ -31,8 +31,8 @@ const SavedTab = () => {
   };
 
   return (
-    <div className="flex gap-4 flex-col lg:flex-row px-6 py-8 lg:px-16 w-full self-stretch min-h-0 overflow-auto flex-1">
-      <div className="flex flex-col gap-4 grow min-h-0 shrink-0 order-2 lg:order-1">
+    <div className="flex min-h-0 w-full flex-1 flex-col gap-4 self-stretch overflow-auto px-6 py-8 lg:flex-row lg:px-16">
+      <div className="order-2 flex min-h-0 shrink-0 grow flex-col gap-4 lg:order-1">
         {activeSched ? (
           <>
             <ScheduleBar
@@ -49,7 +49,7 @@ const SavedTab = () => {
             />
           </>
         ) : (
-          <Card className="p-6 w-full grow items-center flex flex-col justify-center text-muted-foreground gap-2">
+          <Card className="flex w-full grow flex-col items-center justify-center gap-2 p-6 text-muted-foreground">
             <HeartCrack size={100} />
             No schedules saved yet.
           </Card>
@@ -62,7 +62,7 @@ const SavedTab = () => {
           className="order-1 lg:order-2"
         />
       ) : (
-        <Card className="w-full lg:w-[20%] p-6 order-1 lg:order-2" />
+        <Card className="order-1 w-full p-6 lg:order-2 lg:w-[20%]" />
       )}
     </div>
   );

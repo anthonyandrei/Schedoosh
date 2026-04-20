@@ -1,8 +1,8 @@
-import { Class, Course, Schedule, UserSchedule } from "@/lib/definitions";
-import { hasOwnProperty } from "@/lib/utils";
 import { del, get, set } from "idb-keyval"; // can use anything: IndexedDB, Ionic Storage, etc.
 import { create, StateCreator } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
+import { Class, Course, Schedule, UserSchedule } from "@/lib/definitions";
+import { hasOwnProp } from "@/lib/utils";
 import { CourseSlice, createCourseSlice } from "./courseSlice";
 import { createIdSlice, IdSlice } from "./idSlice";
 import { createManualSlice, ManualSlice } from "./manualSlice";
@@ -25,8 +25,7 @@ const storage: StateStorage = {
 
 // Collection of all the states stored in the store
 interface GlobalStates
-  extends
-    CourseSlice,
+  extends CourseSlice,
     IdSlice,
     TableSlice,
     ScheduleSlice,
@@ -69,11 +68,11 @@ export const useGlobalStore = create<GlobalStates>()(
 
         if (
           version === 0 &&
-          hasOwnProperty(persistedState, "courseGroups") &&
-          !Array.isArray(persistedState["courseGroups"])
+          hasOwnProp(persistedState, "courseGroups") &&
+          !Array.isArray(persistedState.courseGroups)
         ) {
-          persistedState["courseGroups"] = Object.entries(
-            persistedState["courseGroups"] as Record<string, number>
+          persistedState.courseGroups = Object.entries(
+            persistedState.courseGroups as Record<string, number>
           ).map(([key, value]) => ({
             name: key,
             pick: value,
@@ -82,16 +81,15 @@ export const useGlobalStore = create<GlobalStates>()(
 
         if (
           version < 2 &&
-          hasOwnProperty(persistedState, "courses") &&
-          hasOwnProperty(persistedState, "schedules") &&
-          hasOwnProperty(persistedState, "savedSchedules")
+          hasOwnProp(persistedState, "courses") &&
+          hasOwnProp(persistedState, "schedules") &&
+          hasOwnProp(persistedState, "savedSchedules")
         ) {
-          const courses = persistedState["courses"] as Course[];
+          const courses = persistedState.courses as Course[];
 
-          const schedules = persistedState["schedules"] as Class[][];
-          const savedSchedules = persistedState[
-            "savedSchedules"
-          ] as UserSchedule[];
+          const schedules = persistedState.schedules as Class[][];
+          const savedSchedules =
+            persistedState.savedSchedules as UserSchedule[];
 
           const newCourses = courses.map((course) => ({
             ...course,
@@ -133,13 +131,13 @@ export const useGlobalStore = create<GlobalStates>()(
             })
           );
 
-          persistedState["schedules"] = newSchedules;
-          persistedState["savedSchedules"] = newSavedSchedules;
-          persistedState["courses"] = newCourses;
+          persistedState.schedules = newSchedules;
+          persistedState.savedSchedules = newSavedSchedules;
+          persistedState.courses = newCourses;
         }
 
-        if (version < 3 && hasOwnProperty(persistedState, "schedules")) {
-          persistedState["schedules"] = [];
+        if (version < 3 && hasOwnProp(persistedState, "schedules")) {
+          persistedState.schedules = [];
         }
 
         return persistedState;

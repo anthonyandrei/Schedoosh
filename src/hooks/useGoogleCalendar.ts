@@ -1,8 +1,8 @@
-import { createBatchEvents, getCalendars } from "@/actions/google-calendar";
-import { Class } from "@/lib/definitions";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import { toast } from "sonner";
+import { createBatchEvents, getCalendars } from "@/actions/google-calendar";
+import { Class } from "@/lib/definitions";
 
 export default function useGoogleCalendar(scheduleClasses: Class[]) {
   const [calendars, setCalendars] = useState<

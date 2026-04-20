@@ -1,13 +1,3 @@
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import Dropdown from "@/components/wrappers/Dropdown";
-import TooltipWrapper from "@/components/wrappers/TooltipWrapper";
-import { Course } from "@/lib/definitions";
-import { cn } from "@/lib/utils";
-import { useGlobalStore } from "@/stores/useGlobalStore";
 import {
   DndContext,
   DragEndEvent,
@@ -20,6 +10,16 @@ import { Check, MousePointerClick, SquareMousePointer, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Dropdown from "@/components/wrappers/Dropdown";
+import TooltipWrapper from "@/components/wrappers/TooltipWrapper";
+import { Course } from "@/lib/definitions";
+import { cn } from "@/lib/utils";
+import { useGlobalStore } from "@/stores/useGlobalStore";
 import CreateGroupDialog from "./CreateGroupDialog";
 import GroupHelp from "./GroupHelp";
 
@@ -41,14 +41,14 @@ function CourseItem({ course, removeCourse }: CourseItemProps) {
       className={buttonVariants({
         variant: "outline",
         className: cn(
-          "cursor-grab justify-between animate-out fade-out-0",
+          "fade-out-0 animate-out cursor-grab justify-between",
           isDragging && "opacity-30"
         ),
       })}
     >
       <span>{course.courseCode}</span>
       <div
-        className="size-6 rounded-lg cursor-pointer flex items-center justify-center opacity-40 hover:opacity-100 group hover:bg-destructive hover:text-destructive-foreground transition-colors select-none"
+        className="group flex size-6 cursor-pointer select-none items-center justify-center rounded-lg opacity-40 transition-colors hover:bg-destructive hover:text-destructive-foreground hover:opacity-100"
         onPointerDown={() => {
           removeCourse(course.courseCode);
         }}
@@ -153,7 +153,7 @@ function CourseGroup({
   const handlePickEdit = () => {
     const newPick = parseInt(input);
 
-    if (isNaN(newPick) || newPick < 0) {
+    if (Number.isNaN(newPick) || newPick < 0) {
       toast.error("Invalid number of courses! Please enter a valid number.");
       return;
     }
@@ -164,14 +164,14 @@ function CourseGroup({
 
   return (
     <Card
-      className={`flex flex-col gap-4 p-4 w-full min-h-[300px] ${
+      className={`flex min-h-[300px] w-full flex-col gap-4 p-4 ${
         isOver ? "animate-border-pulse border-primary" : ""
       }`}
       ref={setNodeRef}
     >
-      <div className="flex justify-between items-center w-full">
+      <div className="flex w-full items-center justify-between">
         {isEditingTitle ? (
-          <div className="inline-flex gap-2 w-full">
+          <div className="inline-flex w-full gap-2">
             <Input
               placeholder="Group Name"
               value={input}
@@ -192,7 +192,7 @@ function CourseGroup({
             </Button>
           </div>
         ) : (
-          <h3 className="text-xl font-semibold truncate">{groupName}</h3>
+          <h3 className="truncate font-semibold text-xl">{groupName}</h3>
         )}
         {!noOptions && !isEditingTitle && !isEditingPick && (
           <div className="inline-flex gap-2">
@@ -202,7 +202,7 @@ function CourseGroup({
             >
               <Badge
                 variant="secondary"
-                className="size-8 justify-center select-none"
+                className="size-8 select-none justify-center"
               >
                 {pick}
               </Badge>
@@ -217,7 +217,7 @@ function CourseGroup({
           </div>
         )}
         {isEditingPick && (
-          <div className="inline-flex gap-2 w-40">
+          <div className="inline-flex w-40 gap-2">
             <Input
               type="text"
               placeholder="# of courses to pick"
@@ -245,7 +245,7 @@ function CourseGroup({
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-2 grow">
+      <div className="flex grow flex-col gap-2">
         {courses.length ? (
           courses.map((course) => (
             <CourseItem
@@ -255,7 +255,7 @@ function CourseGroup({
             />
           ))
         ) : (
-          <div className="border border-border border-dashed p-4 rounded-lg text-muted-foreground flex flex-col gap-2 items-center justify-center grow">
+          <div className="flex grow flex-col items-center justify-center gap-2 rounded-lg border border-border border-dashed p-4 text-muted-foreground">
             <SquareMousePointer className="size-8" strokeWidth={2} />
             <span className="text-balance text-center">
               Drag & Drop Courses here
@@ -267,9 +267,7 @@ function CourseGroup({
   );
 }
 
-interface CourseGridProps {}
-
-export default function CourseGrid({}: CourseGridProps) {
+export default function CourseGrid() {
   const {
     courseGroups,
     courses,
@@ -319,7 +317,7 @@ export default function CourseGrid({}: CourseGridProps) {
 
   if (!courses.length) {
     return (
-      <Card className="flex flex-row items-center justify-center gap-6 text-muted-foreground p-6 grow">
+      <Card className="flex grow flex-row items-center justify-center gap-6 p-6 text-muted-foreground">
         <MousePointerClick strokeWidth={1} size={80} />
         <span className="flex flex-col gap-1">
           <span className="font-bold text-xl">No courses yet...</span>
@@ -330,9 +328,9 @@ export default function CourseGrid({}: CourseGridProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex w-full flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <div className="inline-flex gap-4 items-center">
+        <div className="inline-flex items-center gap-4">
           <h2 className="font-bold text-2xl">Group Courses</h2>
           <GroupHelp />
         </div>
@@ -342,7 +340,7 @@ export default function CourseGrid({}: CourseGridProps) {
         </p>
       </div>
       <ScrollArea>
-        <div className="grid grid-cols-3 2xl:grid-cols-4 gap-4 w-full">
+        <div className="grid w-full grid-cols-3 gap-4 2xl:grid-cols-4">
           <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <CourseGroup
               groupName="Disabled"

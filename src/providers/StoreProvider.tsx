@@ -1,7 +1,7 @@
 "use client";
 
-import { useGlobalStore } from "@/stores/useGlobalStore";
 import { ReactNode, useEffect } from "react";
+import { useGlobalStore } from "@/stores/useGlobalStore";
 
 interface StoreProviderProps {
   children: ReactNode;

@@ -1,7 +1,3 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Class, Schedule } from "@/lib/definitions";
-import { ColorsEnum } from "@/lib/enums";
-import { cn, formatTime, getCardColors, toProperCase } from "@/lib/utils";
 import {
   CalendarClock,
   Clock,
@@ -13,6 +9,10 @@ import {
 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Class, Schedule } from "@/lib/definitions";
+import { ColorsEnum } from "@/lib/enums";
+import { cn, formatTime, getCardColors, toProperCase } from "@/lib/utils";
 import TooltipWrapper from "../wrappers/TooltipWrapper";
 
 interface cardItem {
@@ -111,18 +111,18 @@ export default function OverviewCard({
     <Card
       key={classData.code}
       className={cn(
-        "bg-background border-none overflow-hidden",
+        "overflow-hidden border-none bg-background",
         className,
         secondaryColor
       )}
       {...props}
     >
-      <CardHeader className={cn(color, "p-2.5 px-4 mb-4")}>
+      <CardHeader className={cn(color, "mb-4 p-2.5 px-4")}>
         <div className="flex items-center gap-2 font-bold text-lg">
           <div
             className={cn(
               secondaryColor,
-              "text-xs font-semibold px-2.5 py-0.5 rounded-full inline-flex items-center focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 "
+              "inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             )}
           >
             {classData.section}
@@ -134,19 +134,19 @@ export default function OverviewCard({
                 toast.success("Successfully copied class code to clipboard!");
                 navigator.clipboard.writeText(`${classData.code}`);
               }}
-              className="cursor-pointer opacity-50 text-sm font-medium hover:opacity-100 transition-opacity duration-200 group inline-flex items-center ml-auto"
+              className="group ml-auto inline-flex cursor-pointer items-center font-medium text-sm opacity-50 transition-opacity duration-200 hover:opacity-100"
             >
-              #{classData.code} <Copy className="size-4 ml-2" strokeWidth={3} />
+              #{classData.code} <Copy className="ml-2 size-4" strokeWidth={3} />
             </span>
           </TooltipWrapper>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 text-sm pb-4">
+      <CardContent className="flex flex-col gap-2 pb-4 text-sm">
         {classDetails.map((item, index) => {
           if (!item.shouldRender) return null;
           return (
             <div key={index} className="inline-flex items-center gap-2 text-sm">
-              <item.icon className="size-4 mr-2 shrink-0" strokeWidth={3} />
+              <item.icon className="mr-2 size-4 shrink-0" strokeWidth={3} />
               {item.content}
             </div>
           );

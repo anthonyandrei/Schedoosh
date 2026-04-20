@@ -1,9 +1,9 @@
-import { Course } from "@/lib/definitions";
 import {
   ColumnFiltersState,
   RowSelectionState,
   VisibilityState,
 } from "@tanstack/react-table";
+import { Course } from "@/lib/definitions";
 import { Slice } from "./useGlobalStore";
 
 export interface TableStates {

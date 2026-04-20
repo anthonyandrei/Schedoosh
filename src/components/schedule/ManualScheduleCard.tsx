@@ -1,3 +1,5 @@
+import { SearchSlash, UsersRound, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,8 +24,6 @@ import {
   toProperCase,
 } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { SearchSlash, UsersRound, X } from "lucide-react";
-import { useMemo, useState } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -163,7 +163,7 @@ export default function ManualScheduleCard({
               }) + TOP_OFFSET,
           }}
           className={cn(
-            "bg-primary/10 border-primary/50 animate-border-pulse absolute p-2 flex items-center text-xs justify-between select-none text-accent-foreground w-full",
+            "absolute flex w-full animate-border-pulse select-none items-center justify-between border-primary/50 bg-primary/10 p-2 text-accent-foreground text-xs",
             dragging && "cursor-grabbing"
           )}
         >
@@ -174,7 +174,7 @@ export default function ManualScheduleCard({
                 "minutes"
               )}`}
           <span
-            className="rounded-full p-1 text-muted-foreground hover:text-destructive-foreground hover:bg-destructive/80 transition-colors duration-200 ease-in-out cursor-pointer"
+            className="cursor-pointer rounded-full p-1 text-muted-foreground transition-colors duration-200 ease-in-out hover:bg-destructive/80 hover:text-destructive-foreground"
             onClick={() => setSelection(null)}
           >
             <X className="size-4" />
@@ -182,9 +182,9 @@ export default function ManualScheduleCard({
         </Card>
         <Drawer open={selection && !dragging} onOpenChange={onDrawerClose}>
           <DrawerContent>
-            <DrawerHeader className="text-left gap-4">
+            <DrawerHeader className="gap-4 text-left">
               <DrawerTitle>Select a Class</DrawerTitle>
-              <DrawerDescription className="inline-flex items-center gap-2 w-full">
+              <DrawerDescription className="inline-flex w-full items-center gap-2">
                 <Switch
                   id="between-switch"
                   checked={showOngoing}
@@ -199,8 +199,8 @@ export default function ManualScheduleCard({
 
             <div className="p-4 pt-0">
               {hasViableData ? (
-                <ScrollArea className="mt-4 [&>[data-radix-scroll-area-viewport]]:max-h-[500px] w-full">
-                  <div className="flex flex-col gap-4 w-full">
+                <ScrollArea className="mt-4 w-full [&>[data-radix-scroll-area-viewport]]:max-h-[500px]">
+                  <div className="flex w-full flex-col gap-4">
                     {viableData.map((course) => (
                       <div
                         key={course.courseCode}
@@ -224,7 +224,7 @@ export default function ManualScheduleCard({
                   </div>
                 </ScrollArea>
               ) : (
-                <div className="mt-4 rounded-lg py-8 border-dashed border-border border inline-flex items-center justify-center gap-2 text-muted-foreground w-full">
+                <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border border-dashed py-8 text-muted-foreground">
                   <SearchSlash className="size-5" />
                   {uniqueCourses.length === usedCourses.size
                     ? "You've already added all available courses"
@@ -258,7 +258,7 @@ export default function ManualScheduleCard({
               }) + TOP_OFFSET,
           }}
           className={cn(
-            "bg-primary/10 border-primary/50 animate-border-pulse absolute p-2 flex items-center text-xs justify-between select-none text-accent-foreground w-full",
+            "absolute flex w-full animate-border-pulse select-none items-center justify-between border-primary/50 bg-primary/10 p-2 text-accent-foreground text-xs",
             dragging && "cursor-grabbing"
           )}
         >
@@ -269,7 +269,7 @@ export default function ManualScheduleCard({
                 "minutes"
               )}`}
           <span
-            className="rounded-full p-1 text-muted-foreground hover:text-destructive-foreground hover:bg-destructive/80 transition-colors duration-200 ease-in-out cursor-pointer"
+            className="cursor-pointer rounded-full p-1 text-muted-foreground transition-colors duration-200 ease-in-out hover:bg-destructive/80 hover:text-destructive-foreground"
             onClick={() => setSelection(null)}
           >
             <X className="size-4" />
@@ -278,12 +278,12 @@ export default function ManualScheduleCard({
       </PopoverAnchor>
       <PopoverContent
         side="right"
-        className="max-w-[700px] w-max"
+        className="w-max max-w-[700px]"
         ref={popoverRef}
       >
-        <div className="flex flex-col gap-2 w-[500px]">
+        <div className="flex w-[500px] flex-col gap-2">
           <h2 className="font-bold text-xl">Select a Class</h2>
-          <div className="inline-flex items-center gap-2 w-full">
+          <div className="inline-flex w-full items-center gap-2">
             <Switch
               id="between-switch"
               checked={showOngoing}
@@ -296,8 +296,8 @@ export default function ManualScheduleCard({
           </div>
         </div>
         {hasViableData ? (
-          <ScrollArea className="mt-4 [&>[data-radix-scroll-area-viewport]]:max-h-[500px] w-full">
-            <div className="flex flex-col gap-4 w-full">
+          <ScrollArea className="mt-4 w-full [&>[data-radix-scroll-area-viewport]]:max-h-[500px]">
+            <div className="flex w-full flex-col gap-4">
               {viableData.map((course) => (
                 <div key={course.courseCode} className="flex flex-col gap-2">
                   <h3 className="font-semibold text-sm">{course.courseCode}</h3>
@@ -316,7 +316,7 @@ export default function ManualScheduleCard({
             </div>
           </ScrollArea>
         ) : (
-          <div className="mt-4 rounded-lg py-8 border-dashed border-border border inline-flex items-center justify-center gap-2 text-muted-foreground w-full">
+          <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border border-dashed py-8 text-muted-foreground">
             <SearchSlash className="size-5" />
             {uniqueCourses.length === usedCourses.size
               ? "You've already added all available courses"
@@ -360,7 +360,7 @@ function AvailableClassButton({
       side="right"
     >
       <Button
-        className="flex flex-row items-center gap-2 w-full justify-start text-xs"
+        className="flex w-full flex-row items-center justify-start gap-2 text-xs"
         variant="outline"
         size="sm"
         onClick={() => handleClick(classData)}
@@ -373,7 +373,7 @@ function AvailableClassButton({
           {formatTime(schedule.start)} - {formatTime(schedule.end)}
         </Badge>
         <Badge
-          className="inline-flex gap-2 items-center"
+          className="inline-flex items-center gap-2"
           variant={
             classData.enrollCap === classData.enrolled
               ? "destructive"

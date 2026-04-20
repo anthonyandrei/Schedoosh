@@ -5,12 +5,12 @@ const CalendarSkeleton = () => {
   const days = ["M", "T", "W", "H", "F", "S"];
 
   return (
-    <div className="bg-card rounded-lg border p-2 h-full w-full overflow-hidden">
+    <div className="h-full w-full overflow-hidden rounded-lg border bg-card p-2">
       {/* Header row */}
-      <div className="grid grid-cols-[3.5rem,repeat(6,1fr)] gap-2 mb-4">
-        <div className="h-14 bg-muted animate-pulse rounded-md" />
+      <div className="mb-4 grid grid-cols-[3.5rem,repeat(6,1fr)] gap-2">
+        <div className="h-14 animate-pulse rounded-md bg-muted" />
         {days.map((day) => (
-          <div key={day} className="h-14 bg-muted animate-pulse rounded-md" />
+          <div key={day} className="h-14 animate-pulse rounded-md bg-muted" />
         ))}
       </div>
 
@@ -19,12 +19,12 @@ const CalendarSkeleton = () => {
         {timeSlots.map((slot) => (
           <React.Fragment key={`row-${slot}`}>
             {/* Time label column */}
-            <div className="h-20 bg-muted/20 animate-pulse rounded-md" />
+            <div className="h-20 animate-pulse rounded-md bg-muted/20" />
             {/* Day columns */}
             {days.map((day) => (
               <div
                 key={`${day}-${slot}`}
-                className="h-20 bg-muted/20 animate-pulse rounded-md"
+                className="h-20 animate-pulse rounded-md bg-muted/20"
               />
             ))}
           </React.Fragment>

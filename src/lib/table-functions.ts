@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: Will revisit this in the future, for now grandfathered in */
 import { getMemoOptions, memo, RowData, Table } from "@tanstack/react-table";
 
 export function getFacetedUniqueValues<TData extends RowData>(): (

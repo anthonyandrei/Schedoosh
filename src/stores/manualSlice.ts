@@ -1,6 +1,6 @@
+import { toast } from "sonner";
 import { Class, UserSchedule } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
-import { toast } from "sonner";
 import { Slice } from "./useGlobalStore";
 
 export interface ManualStates {

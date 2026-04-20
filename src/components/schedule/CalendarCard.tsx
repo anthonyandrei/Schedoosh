@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Class, Schedule } from "@/lib/definitions";
 import {
@@ -10,7 +11,6 @@ import {
   toProperCase,
 } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { X } from "lucide-react";
 
 interface CalendarCardProps {
   currClass: Class & ReturnType<typeof getCardColors>;
@@ -44,7 +44,6 @@ const CalendarCard = ({
   onMouseLeave,
   isMobile = false,
   isManual = false,
-  cellSizePx,
 }: CalendarCardProps) => {
   const removeClass = useGlobalStore((state) => state.removeClass);
   const removeColor = useGlobalStore(
@@ -77,10 +76,10 @@ const CalendarCard = ({
       onMouseLeave={onMouseLeave}
       className={cn(
         hovered === currClass.code &&
-          `scale-105 shadow-[0_0px_10px_3px_rgba(0,0,0,0.3)] -translate-y-2` +
+          `-translate-y-2 scale-105 shadow-[0_0px_10px_3px_rgba(0,0,0,0.3)]` +
             currClass.shadow,
         `absolute w-[95%] transition-all ${currClass.color} duration-200 ease-out`,
-        "flex h-full flex-col justify-center overflow-hidden cursor-default",
+        "flex h-full cursor-default flex-col justify-center overflow-hidden",
         currClass.border
       )}
       style={{
@@ -90,7 +89,7 @@ const CalendarCard = ({
     >
       <div
         className={cn(
-          "text-xs font-bold tracking-tight px-3 py-2",
+          "px-3 py-2 font-bold text-xs tracking-tight",
           isMobile && "text-lg",
           isManual && "flex flex-row",
           isSmall && "py-1"
@@ -102,7 +101,7 @@ const CalendarCard = ({
         {isManual && (
           <X
             className={cn(
-              "ml-auto size-4 rounded-full hover:bg-black/50 hover:dark:bg-black/50 cursor-pointer opacity-50 transition-all",
+              "ml-auto size-4 cursor-pointer rounded-full opacity-50 transition-all hover:bg-black/50 hover:dark:bg-black/50",
               currClass.color
             )}
             onClick={handleRemoveClass}
@@ -112,7 +111,7 @@ const CalendarCard = ({
       {cardHeight >= NO_DETAILS_BREAKPOINT && (
         <div
           className={cn(
-            "text-xs bg-background px-2 h-full rounded-t-md py-1.5 flex flex-col flex-wrap justify-center gap-x-[1000px] overflow-hidden",
+            "flex h-full flex-col flex-wrap justify-center gap-x-[1000px] overflow-hidden rounded-t-md bg-background px-2 py-1.5 text-xs",
             currClass.secondaryColor,
             isSmall && !isMobile && "py-1"
           )}
@@ -123,7 +122,7 @@ const CalendarCard = ({
               <div
                 key={index}
                 className={cn(
-                  "text-xs font-medium w-full truncate",
+                  "w-full truncate font-medium text-xs",
                   detail.className
                 )}
               >

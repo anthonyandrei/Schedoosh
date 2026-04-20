@@ -1,11 +1,11 @@
 "use client";
 
+import { ColumnDef } from "@tanstack/react-table";
+import { SquareArrowOutUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Class, Schedule } from "@/lib/definitions";
 import { formatTime, toProperCase } from "@/lib/utils";
-import { ColumnDef } from "@tanstack/react-table";
-import { SquareArrowOutUpRight } from "lucide-react";
 import TooltipWrapper from "../wrappers/TooltipWrapper";
 import RowSettings from "./RowSettings";
 import { SortableHeader } from "./SortableHeader";
@@ -85,13 +85,14 @@ export const columns: ColumnDef<Class>[] = [
       return (
         <TooltipWrapper content="View ArcherEye Profile" delayDuration={300}>
           <a
-            href={"https://archer-eye.com/professor" + profLink}
+            href={`https://archer-eye.com/professor${profLink}`}
             target="_blank"
-            className="inline-flex gap-2 items-center"
+            className="inline-flex items-center gap-2"
+            rel="noopener"
           >
             {cell.getValue() as string}{" "}
             <SquareArrowOutUpRight
-              className="size-3 text-accent-foreground shrink-0"
+              className="size-3 shrink-0 text-accent-foreground"
               strokeWidth={2.5}
             />
           </a>
@@ -121,7 +122,7 @@ export const columns: ColumnDef<Class>[] = [
               <Badge
                 key={i}
                 variant="outline"
-                className={`bg-background/50 select-none flex gap-2 rounded-lg p-2 px-4 font-medium w-[160px]  justify-center items-center`}
+                className={`flex w-[160px] select-none items-center justify-center gap-2 rounded-lg bg-background/50 p-2 px-4 font-medium`}
               >
                 {sched.start === sched.end
                   ? "N/A"
@@ -244,7 +245,7 @@ export const columns: ColumnDef<Class>[] = [
         (sched) => `${formatTime(sched.start)} - ${formatTime(sched.end)}`
       );
     },
-    filterFn: (row, columnId, filterValue) => {
+    filterFn: (row, _columnId, filterValue) => {
       const formattedSchedules = row.original.schedules.map(
         (sched) => `${formatTime(sched.start)} - ${formatTime(sched.end)}`
       );

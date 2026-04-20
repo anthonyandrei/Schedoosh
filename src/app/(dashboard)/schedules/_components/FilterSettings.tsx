@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
-import { useState } from "react";
 import FilterForm from "./FilterForm";
 
 const FilterSettings = () => {

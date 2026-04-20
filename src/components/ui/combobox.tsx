@@ -1,7 +1,8 @@
 "use client";
 
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import * as React from "react";
-
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -15,9 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
-
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Badge } from "./badge";
@@ -98,7 +96,7 @@ export function Combobox({
       <PopoverContent className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] p-0">
         <Command
           filter={(value, search, keywords = []) => {
-            const extendValue = value + " " + keywords.join(" ");
+            const extendValue = `${value} ${keywords.join(" ")}`;
             if (extendValue.toLowerCase().includes(search.toLowerCase())) {
               return 1;
             }

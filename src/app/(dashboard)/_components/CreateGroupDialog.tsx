@@ -1,13 +1,13 @@
+import { useDroppable } from "@dnd-kit/core";
+import { Plus, PlusSquare } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { CourseGroup } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { useDroppable } from "@dnd-kit/core";
-import { Plus, PlusSquare } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 interface CreateGroupDialogProps {
   onCreateGroup: (groupName: string) => void;
@@ -72,7 +72,7 @@ export default function CreateGroupDialog({
       trigger={
         <div
           className={cn(
-            "border border-primary/30 border-dashed p-4 rounded-lg text-muted-foreground flex flex-col gap-2 items-center justify-center h-[300px] w-full hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors cursor-pointer",
+            "flex h-[300px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-primary/30 border-dashed p-4 text-muted-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary",
             isOver && "animate-border-pulse border-primary"
           )}
           ref={setNodeRef}
@@ -108,7 +108,7 @@ export default function CreateGroupDialog({
             Cancel
           </Button>
           <Button type="submit">
-            <Plus className="size-4 mr-2" />
+            <Plus className="mr-2 size-4" />
             Create
           </Button>
         </div>

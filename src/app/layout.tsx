@@ -1,12 +1,12 @@
-import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
-import { ThemeProvider } from "@/providers/ThemeProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -25,7 +25,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "max-h-svh min-h-svh dark:bg-background bg-primary/[4%] font-sans antialiased flex flex-col",
+          "flex max-h-svh min-h-svh flex-col bg-primary/[4%] font-sans antialiased dark:bg-background",
           inter.variable
         )}
       >

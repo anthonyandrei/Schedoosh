@@ -1,18 +1,4 @@
 "use client";
-import { fetchCourse } from "@/actions/course";
-import IDInput from "@/components/navbar/IDInput";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import Dropdown, { DropdownItem } from "@/components/wrappers/Dropdown";
-import { useGlobalStore } from "@/stores/useGlobalStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChevronDown,
@@ -27,6 +13,20 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import { useShallow } from "zustand/react/shallow";
+import { fetchCourse } from "@/actions/course";
+import IDInput from "@/components/navbar/IDInput";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import Dropdown, { DropdownItem } from "@/components/wrappers/Dropdown";
+import { useGlobalStore } from "@/stores/useGlobalStore";
 
 const formSchema = z.object({
   courseCode: z.string().length(7, "Length should be 7!"),
@@ -131,7 +131,7 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
 
     try {
       await handleFetch(values.courseCode.toUpperCase());
-    } catch (error) {
+    } catch (_error) {
       toast.error("Something went wrong while fetching...", {
         description:
           "The server is facing some issues right now, try again in a bit.",
@@ -177,9 +177,9 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
       <IDInput>
         <Button
           variant="outline"
-          className="w-full border-primary animate-pulse inline-flex items-center"
+          className="inline-flex w-full animate-pulse items-center border-primary"
         >
-          <IdCard className="size-4 mr-2" /> Set ID Number
+          <IdCard className="mr-2 size-4" /> Set ID Number
         </Button>
       </IDInput>
     );
@@ -216,9 +216,9 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
               <LoaderCircle className="size-4 animate-spin" />
             ) : (
               <>
-                <ListPlus className="size-4 mr-2" />
+                <ListPlus className="mr-2 size-4" />
                 Add Course
-                <ChevronDown className="size-4 ml-2" />
+                <ChevronDown className="ml-2 size-4" />
               </>
             )}
           </Button>

@@ -1,8 +1,8 @@
 "use client";
+import { Bomb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { Bomb } from "lucide-react";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -12,7 +12,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
   const resetAllSlices = useGlobalStore((state) => state.resetAllSlices);
 
   return (
-    <div className="w-full h-full flex items-center justify-center flex-col gap-4">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-4">
       <Bomb className="size-40 text-muted-foreground" />
       <h2 className="font-bold text-3xl">Whoops, something went wrong!</h2>
       <p className="w-[700px] text-center">
@@ -20,7 +20,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
         if it still doesn't work, please hit "Clear Data" and send a screenshot
         of this page to the developer.`}
       </p>
-      <div className="py-2 px-4 rounded-lg bg-destructive/10 text-destructive-foreground border border-destructive/20">
+      <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-2 text-destructive-foreground">
         <code className="">Error: {error.message}</code>
       </div>
       <div className="inline-flex gap-4">

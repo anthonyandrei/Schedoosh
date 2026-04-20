@@ -12,6 +12,9 @@
     "bracketSpacing": true,
     "expand": "auto"
   },
+  "files": {
+    "includes": ["src/**/*.{ts,tsx,js,jsx,json}"]
+  },
   "linter": {
     "enabled": true,
     "rules": {

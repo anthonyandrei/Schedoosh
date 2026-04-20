@@ -1,7 +1,5 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   CalendarRange,
   Heart,
@@ -12,6 +10,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import SchedaddleLogo from "../SchedaddleLogo";
 import {
   Sheet,
@@ -63,23 +63,23 @@ export default function NavigationBar() {
     buttonVariants({
       variant: "ghost",
     }),
-    "flex gap-2 items-center font-medium"
+    "flex items-center gap-2 font-medium"
   );
 
   const activeButton = cn(
     buttonVariants({
       variant: "default",
     }),
-    "flex gap-2 items-center font-medium"
+    "flex items-center gap-2 font-medium"
   );
 
   return (
-    <div className="py-4 flex items-center justify-between gap-2 w-full border-b px-8 xl:px-16 bg-background">
+    <div className="flex w-full items-center justify-between gap-2 border-b bg-background px-8 py-4 xl:px-16">
       <Link
         href="/"
-        className="flex gap-2 font-extrabold text-lg items-center tracking-tight"
+        className="flex items-center gap-2 font-extrabold text-lg tracking-tight"
       >
-        <div className="p-2 bg-accent rounded-lg flex justify-center pl-3 max-w-[40px] ">
+        <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-2 pl-3">
           <SchedaddleLogo
             className="text-accent-foreground"
             width={24}
@@ -88,7 +88,7 @@ export default function NavigationBar() {
         </div>
         Schedaddle
       </Link>
-      <div className="hidden gap-2 absolute left-1/2 -translate-x-1/2 xl:flex">
+      <div className="absolute left-1/2 hidden -translate-x-1/2 gap-2 xl:flex">
         {navigationItems.map((item) => (
           <Link
             key={item.href}
@@ -110,7 +110,7 @@ export default function NavigationBar() {
           </Button>
         </NavigationBarMobile>
       </div>
-      <div className="hidden xl:flex flex-row gap-2">
+      <div className="hidden flex-row gap-2 xl:flex">
         <Announcement />
         <SocialsDialog />
         <IDInput />
@@ -132,27 +132,27 @@ function NavigationBarMobile({ children }: NavigationBarMobile) {
     buttonVariants({
       variant: "ghost",
     }),
-    "flex gap-2 items-center font-medium justify-start"
+    "flex items-center justify-start gap-2 font-medium"
   );
 
   const activeButton = cn(
     buttonVariants({
       variant: "default",
     }),
-    "flex gap-2 items-center font-medium justify-start"
+    "flex items-center justify-start gap-2 font-medium"
   );
 
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-[75vw] max-h-svh flex flex-col" side="left">
+      <SheetContent className="flex max-h-svh w-[75vw] flex-col" side="left">
         <SheetHeader>
           <SheetTitle>
             <Link
               href="/"
-              className="flex gap-2 font-extrabold text-lg items-center tracking-tight"
+              className="flex items-center gap-2 font-extrabold text-lg tracking-tight"
             >
-              <div className="p-2 bg-accent rounded-lg flex justify-center pl-3 max-w-[40px] ">
+              <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-2 pl-3">
                 <SchedaddleLogo
                   className="text-accent-foreground"
                   width={24}

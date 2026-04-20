@@ -1,11 +1,11 @@
+import { TooltipContentProps, TooltipProps } from "@radix-ui/react-tooltip";
+import { ReactNode } from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TooltipContentProps, TooltipProps } from "@radix-ui/react-tooltip";
-import { ReactNode } from "react";
 
 interface TooltipWrapperProps extends TooltipProps {
   children: ReactNode;

@@ -1,8 +1,6 @@
 import ScheduleTab from "@/app/(dashboard)/schedules/_components/ScheduleTab";
 
-type Props = {};
-
-const Home = (props: Props) => {
+const Home = () => {
   return <ScheduleTab />;
 };
 

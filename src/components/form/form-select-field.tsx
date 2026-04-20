@@ -1,3 +1,4 @@
+import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -13,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 interface FormSelectFieldProps<T extends FieldValues> {
   form: UseFormReturn<T>;

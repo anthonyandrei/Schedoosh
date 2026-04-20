@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -8,8 +10,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ReactElement } from "react";
-import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 interface FormTextFieldProps<T extends FieldValues> {
   form: UseFormReturn<T>;

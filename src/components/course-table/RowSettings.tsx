@@ -1,9 +1,9 @@
+import { Ellipsis } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { Class } from "@/lib/definitions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { Ellipsis } from "lucide-react";
-import { useState } from "react";
 import Dropdown, { DropdownItem } from "../wrappers/Dropdown";
 import EditClassDialog from "./EditClassDialog";
 

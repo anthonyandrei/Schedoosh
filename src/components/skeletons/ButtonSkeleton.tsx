@@ -9,7 +9,7 @@ const ButtonSkeleton = ({ className, isIcon }: ButtonSkeletonProps) => {
   return (
     <div
       className={cn(
-        "bg-muted animate-pulse rounded-md",
+        "animate-pulse rounded-md bg-muted",
         isIcon ? "h-10 w-10" : "h-10 w-24",
         className
       )}

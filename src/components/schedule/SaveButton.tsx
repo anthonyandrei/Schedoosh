@@ -1,3 +1,10 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Heart, HeartOff } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { useShallow } from "zustand/react/shallow";
 import { Button, ButtonProps } from "@/components/ui/button";
 import {
   Form,
@@ -11,13 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Class, UserSchedule } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Heart, HeartOff } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { useShallow } from "zustand/react/shallow";
 import DialogWrapper from "../wrappers/GenericDialog";
 import ResponsiveButton from "../wrappers/ResponsiveButton";
 

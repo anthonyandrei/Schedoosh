@@ -1,5 +1,5 @@
-import StepsDialog, { StepCardProps } from "@/components/wrappers/StepsDialog";
 import { CircleHelp } from "lucide-react";
+import StepsDialog, { StepCardProps } from "@/components/wrappers/StepsDialog";
 
 const GroupHelp = () => {
   const steps: StepCardProps[] = [

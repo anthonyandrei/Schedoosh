@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
 import useGoogleCalendar from "@/hooks/useGoogleCalendar";
-import { Loader2 } from "lucide-react";
 
 interface GoogleSyncProps {
   hookProps: Omit<ReturnType<typeof useGoogleCalendar>, "handleClick">;
@@ -40,7 +40,7 @@ export default function GoogleSyncDialog({ hookProps }: GoogleSyncProps) {
           variant="outline"
           disabled={!selectedCalendar || importing}
         >
-          {importing && <Loader2 className="size-4 animate-spin mr-2" />}
+          {importing && <Loader2 className="mr-2 size-4 animate-spin" />}
           {importing ? "Importing..." : "Import"}
         </Button>
       }

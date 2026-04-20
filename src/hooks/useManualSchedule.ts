@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CELL_SIZE_PX,
   LEFT_OFFSET,
@@ -6,7 +7,6 @@ import {
 import { DaysEnum } from "@/lib/enums";
 import { minutesToMilitaryTime } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export default function useManualSched() {
   const cellSize = useGlobalStore((state) => state.zoom) || CELL_SIZE_PX;
@@ -81,9 +81,9 @@ export default function useManualSched() {
     });
   };
 
-  const handleMouseUp = (e: MouseEvent) => {
+  const handleMouseUp = useCallback((_e: MouseEvent) => {
     setDragging(false);
-  };
+  }, []);
 
   const checkOverlappingSchedules = useCallback(
     (
@@ -223,7 +223,7 @@ export default function useManualSched() {
     }, 500);
   };
 
-  const handleTouchEnd = (e: TouchEvent) => {
+  const handleTouchEnd = useCallback((_e: TouchEvent) => {
     if (touchStartTimerRef.current) {
       clearTimeout(touchStartTimerRef.current);
       touchStartTimerRef.current = null;
@@ -231,7 +231,7 @@ export default function useManualSched() {
     touchStartPositionRef.current = null;
     touchMovedRef.current = false;
     setDragging(false);
-  };
+  }, []);
 
   const MOVE_THRESHOLD = 10; // Minimum distance in pixels to consider a move
 
@@ -309,7 +309,7 @@ export default function useManualSched() {
     return () => {
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dragging]);
+  }, [dragging, handleTouchEnd, handleMouseUp]);
 
   return {
     dragging,

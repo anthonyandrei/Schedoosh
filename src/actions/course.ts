@@ -1,6 +1,6 @@
 "use server";
 
-import { classSchema, Course } from "../lib/definitions";
+import { Course, classSchema } from "../lib/definitions";
 
 export async function fetchCourse(courseCode: string, id: string) {
   const res = await fetch(

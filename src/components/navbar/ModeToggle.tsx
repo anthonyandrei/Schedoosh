@@ -12,7 +12,7 @@ import {
 import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 export function ModeToggle() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme } = useTheme();
 
   return (
     <DropdownMenu>

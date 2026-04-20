@@ -1,8 +1,6 @@
+import React from "react";
 import NavigationBar from "@/components/navbar/NavigationBar";
 import StoreProvider from "@/providers/StoreProvider";
-import React from "react";
-
-type Props = {};
 
 export default function DashboardLayout({
   children,
@@ -10,13 +8,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-      <StoreProvider>
-        <NavigationBar />
-        <div className="overflow-y-auto flex-1 flex flex-col items-stretch">
-          {children}
-        </div>
-      </StoreProvider>
-    </>
+    <StoreProvider>
+      <NavigationBar />
+      <div className="flex flex-1 flex-col items-stretch overflow-y-auto">
+        {children}
+      </div>
+    </StoreProvider>
   );
 }

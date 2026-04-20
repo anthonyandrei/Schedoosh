@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronLeft, ChevronRight, Eraser } from "lucide-react";
+import { FixedSizeList } from "react-window";
 import ManualHelp from "@/app/(dashboard)/manual/_components/ManualHelpDialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,8 +15,6 @@ import {
 import { UserSchedule } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { ChevronLeft, ChevronRight, Eraser } from "lucide-react";
-import { FixedSizeList } from "react-window";
 import CopyToManualButton from "../../app/(dashboard)/saved/_components/CopyToManualButton";
 import CourseColorsDialog from "./CourseColorsDialog";
 import DownloadScheduleButton from "./DownloadScheduleButton";
@@ -50,9 +50,9 @@ export default function ScheduleBar({
   const setManualSchedule = useGlobalStore((state) => state.setManualSchedule);
 
   return (
-    <Card className="flex flex-col lg:flex-row gap-4 p-4 px-6">
+    <Card className="flex flex-col gap-4 p-4 px-6 lg:flex-row">
       {!isManual ? (
-        <div className="flex flex-row gap-2 max-w-full lg:max-w-80 w-full">
+        <div className="flex w-full max-w-full flex-row gap-2 lg:max-w-80">
           <Button
             onClick={() => setActive(active - 1)}
             disabled={active <= 0}
@@ -107,9 +107,9 @@ export default function ScheduleBar({
           <ManualHelp />
         </div>
       )}
-      <div className="flex flex-col lg:flex-row gap-2 grow">{children}</div>
+      <div className="flex grow flex-col gap-2 lg:flex-row">{children}</div>
       {activeScheduleClasses && (
-        <div className="lg:ml-auto lg:flex gap-2 grid grid-cols-2 lg:flex-row">
+        <div className="grid grid-cols-2 gap-2 lg:ml-auto lg:flex lg:flex-row">
           <SaveButton
             activeSched={activeScheduleClasses}
             colors={colors}
@@ -134,7 +134,7 @@ export default function ScheduleBar({
               variant="outline"
               disabled={!activeScheduleClasses.length}
             >
-              <Eraser className="size-4 mr-2" />
+              <Eraser className="mr-2 size-4" />
               Clear
             </Button>
           )}

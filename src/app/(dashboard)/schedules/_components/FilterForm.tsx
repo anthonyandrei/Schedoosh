@@ -1,5 +1,9 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -18,10 +22,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Filter, FilterOptions, filterSchema } from "@/lib/definitions";
 import { DaysEnum, DaysEnumSchema, ModalityEnumSchema } from "@/lib/enums";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { useShallow } from "zustand/react/shallow";
 
 export const defaultGeneralFilters: FilterOptions = {
   enabled: true,
@@ -75,10 +75,10 @@ const FilterForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       <form
         noValidate
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full flex flex-col gap-8"
+        className="flex w-full flex-col gap-8"
       >
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="w-full grid grid-flow-col auto-cols-fr mb-4">
+          <TabsList className="mb-4 grid w-full auto-cols-fr grid-flow-col">
             <TabsTrigger value="general">General</TabsTrigger>
             {DaysEnumSchema.options.map((day) => (
               <TabsTrigger value={day} key={day}>
@@ -96,10 +96,10 @@ const FilterForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
                     render={({ field }) => (
                       <FormItem className="w-auto">
                         <FormControl>
-                          <Card className="p-4 justify-between flex flex-row items-center">
+                          <Card className="flex flex-row items-center justify-between p-4">
                             <div className="flex flex-col gap-1">
                               <span className="font-bold">Enable Filter</span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs">
                                 Enabling this will override the general settings
                                 for this day specifically.
                               </span>
@@ -120,7 +120,7 @@ const FilterForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
                     )}
                   />
                 )}
-                <div className="grid grid-cols-2 gap-8 w-full">
+                <div className="grid w-full grid-cols-2 gap-8">
                   <FormField
                     control={form.control}
                     name={day ? `specific.${day}.start` : "general.start"}
@@ -229,7 +229,7 @@ const FilterForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
                             <ToggleGroupItem
                               key={modality}
                               value={modality}
-                              className="border w-full text-nowrap"
+                              className="w-full text-nowrap border"
                             >
                               {modality}
                             </ToggleGroupItem>
@@ -262,7 +262,7 @@ const FilterForm = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
                               <ToggleGroupItem
                                 key={day}
                                 value={day}
-                                className="border w-full"
+                                className="w-full border"
                               >
                                 {day}
                               </ToggleGroupItem>

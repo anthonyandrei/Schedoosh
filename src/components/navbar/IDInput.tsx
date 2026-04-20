@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { IdCard } from "lucide-react";
+import { ReactNode } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,12 +31,6 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { IdCard } from "lucide-react";
-import { ReactNode } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useShallow } from "zustand/react/shallow";
 import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 const FormSchema = z.object({
@@ -71,7 +71,7 @@ const IDInput = ({ children }: IDInputProps) => {
         {children ?? (
           <ResponsiveButton
             icon={IdCard}
-            className={!id ? "border-primary animate-pulse" : ""}
+            className={!id ? "animate-pulse border-primary" : ""}
           >
             Set ID No.
           </ResponsiveButton>

@@ -10,7 +10,9 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-
+import { Eraser, FilterIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -25,9 +27,6 @@ import {
 import useBetterMediaQuery from "@/hooks/useBetterMediaQuery";
 import { getFacetedUniqueValues } from "@/lib/table-functions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { Eraser, FilterIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useShallow } from "zustand/react/shallow";
 import DialogWrapper from "../wrappers/GenericDialog";
 import AddCustomClass from "./AddCustomClass";
 import { FilterBar } from "./FilterBar";
@@ -124,8 +123,8 @@ export function CourseDataTable<TData, TValue>({
   const isMobile = useBetterMediaQuery("(max-width: 720px)");
 
   return (
-    <div className="flex shrink-0 grow flex-col gap-2 min-w-0 min-h-0 max-h-[600px] lg:max-h-max">
-      <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-2">
+    <div className="flex max-h-[600px] min-h-0 min-w-0 shrink-0 grow flex-col gap-2 lg:max-h-max">
+      <div className="flex flex-col items-stretch justify-between gap-2 lg:flex-row lg:items-center">
         <Input
           placeholder="Search by code..."
           value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
@@ -142,7 +141,7 @@ export function CourseDataTable<TData, TValue>({
               variant="outline"
               onClick={() => table.toggleAllRowsSelected(false)}
             >
-              <Eraser className="size-4 mr-2" /> Deselect All
+              <Eraser className="mr-2 size-4" /> Deselect All
             </Button>
           )}
           <ViewColumnsDropdown table={table} />
@@ -152,7 +151,7 @@ export function CourseDataTable<TData, TValue>({
         <DialogWrapper
           trigger={
             <Button variant="outline" size="sm" className="shrink-0">
-              <FilterIcon className="size-4 mr-2" /> Open Filters
+              <FilterIcon className="mr-2 size-4" /> Open Filters
             </Button>
           }
           title="Filters"
@@ -167,7 +166,7 @@ export function CourseDataTable<TData, TValue>({
           <FilterBar table={table} />
         </div>
       )}
-      <ScrollArea className="rounded-md border overflow-auto" type="scroll">
+      <ScrollArea className="overflow-auto rounded-md border" type="scroll">
         <Table className="overflow-auto">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -225,7 +224,7 @@ export function CourseDataTable<TData, TValue>({
         <ScrollBar orientation="vertical" />
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-      <div className="text-sm text-muted-foreground">
+      <div className="text-muted-foreground text-sm">
         {`${Object.keys(rowSelection).length} out of ${
           data.length
         } rows selected. ${

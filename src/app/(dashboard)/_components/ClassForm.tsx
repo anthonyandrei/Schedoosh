@@ -1,3 +1,7 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, CheckCheck, Plus, Trash2 } from "lucide-react";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 import { FormSelectField } from "@/components/form/form-select-field";
 import { FormTextField } from "@/components/form/form-text-field";
 import { Button } from "@/components/ui/button";
@@ -8,10 +12,6 @@ import { Toggle } from "@/components/ui/toggle";
 import { Class } from "@/lib/definitions";
 import { ModalityEnumSchema } from "@/lib/enums";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, CheckCheck, Plus, Trash2 } from "lucide-react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 
 interface ClassFormProps {
   onSubmit: (data: Class) => void;
@@ -128,7 +128,7 @@ export default function ClassForm({
   return (
     <Form {...form}>
       <form
-        className="flex flex-col gap-4 min-h-0"
+        className="flex min-h-0 flex-col gap-4"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="grid grid-cols-2 gap-4">
@@ -176,11 +176,11 @@ export default function ClassForm({
           formKey="remarks"
           placeholder="This is a custom class."
         />
-        <h3 className="text-sm font-semibold">Schedules</h3>
+        <h3 className="font-semibold text-sm">Schedules</h3>
         <ScrollArea className="h-48">
-          <div className="flex flex-col gap-4 min-h-0">
+          <div className="flex min-h-0 flex-col gap-4">
             {schedules.fields.map((field, i) => (
-              <div key={field.id} className="flex flex-row gap-4 items-start">
+              <div key={field.id} className="flex flex-row items-start gap-4">
                 <FormSelectField
                   form={form}
                   formKey={`schedules.${i}.day`}
@@ -195,7 +195,7 @@ export default function ClassForm({
                   ]}
                   className="w-32"
                 />
-                <div className="inline-flex gap-2 items-start">
+                <div className="inline-flex items-start gap-2">
                   <FormTextField
                     form={form}
                     formKey={`schedules.${i}.start`}
@@ -219,7 +219,7 @@ export default function ClassForm({
                           onPressedChange={field.onChange}
                         >
                           <Check
-                            className={`size-4 mr-2 ${
+                            className={`mr-2 size-4 ${
                               field.value ? "visible" : "opacity-10"
                             }`}
                           />
@@ -254,7 +254,7 @@ export default function ClassForm({
                 type="button"
                 onClick={() => handleAppendSchedule()}
               >
-                <Plus className="size-4 mr-2" />
+                <Plus className="mr-2 size-4" />
                 Add Schedule
               </Button>
             )}
@@ -262,7 +262,7 @@ export default function ClassForm({
         </ScrollArea>
         <DialogFooter>
           <Button type="submit" size="sm">
-            <CheckCheck className="size-4 mr-2" />
+            <CheckCheck className="mr-2 size-4" />
             Submit
           </Button>
         </DialogFooter>

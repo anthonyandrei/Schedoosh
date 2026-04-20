@@ -1,3 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Edit } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useShallow } from "zustand/react/shallow";
 import {
   Form,
   FormControl,
@@ -10,12 +16,6 @@ import { Input } from "@/components/ui/input";
 import DialogWrapper from "@/components/wrappers/GenericDialog";
 import { UserSchedule } from "@/lib/definitions";
 import { useGlobalStore } from "@/stores/useGlobalStore";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useShallow } from "zustand/react/shallow";
 import ResponsiveButton from "../wrappers/ResponsiveButton";
 
 type RenameButtonProps = {

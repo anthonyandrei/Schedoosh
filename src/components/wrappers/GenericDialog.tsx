@@ -1,3 +1,4 @@
+import { ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,7 +21,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useBetterMediaQuery from "@/hooks/useBetterMediaQuery";
 import { cn } from "@/lib/utils";
-import { ReactNode, useEffect, useState } from "react";
 
 interface DialogWrapperProps {
   open?: boolean;
@@ -99,27 +99,24 @@ export default function DialogWrapper({
             </DrawerHeader>
           )}
           {children && (
-            <div className="grow flex min-h-0 px-4">
+            <div className="flex min-h-0 grow px-4">
               <ScrollArea className="w-full [&>*]:p-1">{children}</ScrollArea>
             </div>
           )}
 
           {(footer || onSubmit) && (
             <DrawerFooter className="p-4 pt-0">
-              {footer || (
-                <>
-                  {onSubmit && (
-                    <Button
-                      variant={submitVariant}
-                      onClick={handleSubmit}
-                      size="sm"
-                      type="button"
-                    >
-                      {submitText}
-                    </Button>
-                  )}
-                </>
-              )}
+              {footer ||
+                (onSubmit && (
+                  <Button
+                    variant={submitVariant}
+                    onClick={handleSubmit}
+                    size="sm"
+                    type="button"
+                  >
+                    {submitText}
+                  </Button>
+                ))}
             </DrawerFooter>
           )}
         </DrawerContent>
@@ -132,7 +129,7 @@ export default function DialogWrapper({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
         className={cn(
-          "flex flex-col max-h-[80vh] gap-2",
+          "flex max-h-[80vh] flex-col gap-2",
           isWide && "max-w-[600px]",
           className
         )}
@@ -151,27 +148,24 @@ export default function DialogWrapper({
           </DialogHeader>
         )}
         {children && (
-          <div className="grow flex min-h-0">
+          <div className="flex min-h-0 grow">
             <ScrollArea className="w-full [&>*]:p-1">{children}</ScrollArea>
           </div>
         )}
 
         {(footer || onSubmit) && (
           <DialogFooter className="p-1">
-            {footer || (
-              <>
-                {onSubmit && (
-                  <Button
-                    variant={submitVariant}
-                    onClick={handleSubmit}
-                    size="sm"
-                    type="button"
-                  >
-                    {submitText}
-                  </Button>
-                )}
-              </>
-            )}
+            {footer ||
+              (onSubmit && (
+                <Button
+                  variant={submitVariant}
+                  onClick={handleSubmit}
+                  size="sm"
+                  type="button"
+                >
+                  {submitText}
+                </Button>
+              ))}
           </DialogFooter>
         )}
       </DialogContent>
