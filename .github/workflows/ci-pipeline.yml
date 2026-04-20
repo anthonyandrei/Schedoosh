@@ -14,8 +14,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
@@ -27,10 +25,7 @@ jobs:
         run: pnpm install
 
       - name: Lint Code
-        run: pnpm lint
-
-      - name: Check Code Formatting
-        run: pnpm dlx prettier --check ./src
+        run: pnpm biome ci --error-on-warnings --reporter=github
 
       - name: Build Project
         run: pnpm build
