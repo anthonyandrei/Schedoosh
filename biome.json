@@ -13,7 +13,10 @@
     "expand": "auto"
   },
   "files": {
-    "includes": ["src/**/*.{ts,tsx,js,jsx,json}"]
+    "includes": [
+      "src/**/*.{ts,tsx,js,jsx,json}",
+      "e2e/**/*.{ts,tsx,js,jsx,json}"
+    ]
   },
   "linter": {
     "enabled": true,

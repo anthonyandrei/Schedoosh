@@ -45,14 +45,14 @@ Schedaddle/
 **Security flag:** `none`  
 **Does NOT cover:** Testing against external live university URLs (all tests use local Next.js server).
 
-- [ ] **Step 1: Install `@playwright/test` and Chromium browser binary**
+- [x] **Step 1: Install `@playwright/test` and Chromium browser binary**
 
 ```bash
 pnpm add -D @playwright/test
 pnpm exec playwright install chromium
 ```
 
-- [ ] **Step 2: Add test scripts to `package.json`**
+- [x] **Step 2: Add test scripts to `package.json`**
 
 In `package.json` `scripts`:
 ```json
@@ -61,7 +61,7 @@ In `package.json` `scripts`:
 "test:e2e:headed": "playwright test --headed"
 ```
 
-- [ ] **Step 3: Create `playwright.config.ts`**
+- [x] **Step 3: Create `playwright.config.ts`**
 
 ```typescript
 import { defineConfig, devices } from "@playwright/test";
@@ -93,7 +93,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 4: Verify Playwright installation**
+- [x] **Step 4: Verify Playwright installation**
 
 Run: `pnpm exec playwright --version`  
 Expected: Prints `@playwright/test` version without errors.
@@ -109,7 +109,7 @@ Expected: Prints `@playwright/test` version without errors.
 **Security flag:** `none`  
 **Does NOT cover:** Non-standard custom store schemas outside `useGlobalStore`.
 
-- [ ] **Step 1: Create `e2e/fixtures/mock-courses.ts`**
+- [x] **Step 1: Create `e2e/fixtures/mock-courses.ts`**
 
 ```typescript
 import { Course } from "@/lib/definitions";
@@ -206,7 +206,7 @@ export const MOCK_GEETHIC: Course = {
 };
 ```
 
-- [ ] **Step 2: Create `e2e/fixtures/state-seeder.ts`**
+- [x] **Step 2: Create `e2e/fixtures/state-seeder.ts`**
 
 ```typescript
 import { Page } from "@playwright/test";
@@ -242,7 +242,7 @@ export async function seedStoreState(page: Page, options: SeedStateOptions) {
 }
 ```
 
-- [ ] **Step 3: Run Biome check to verify clean syntax**
+- [x] **Step 3: Run Biome check to verify clean syntax**
 
 Run: `pnpm biome check e2e/fixtures/`  
 Expected: PASS with 0 errors.
