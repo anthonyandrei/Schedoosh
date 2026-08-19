@@ -43,7 +43,7 @@ export default function ClassForm({
         }
       ),
     course: z.string(),
-    section: z.string(),
+    section: z.string().min(1, "Section is required."),
     professor: z.string(),
     schedules: z
       .array(
@@ -51,17 +51,18 @@ export default function ClassForm({
           .object({
             day: z.enum(["M", "T", "W", "H", "F", "S", "U"]),
             start: z.coerce
-              .number({ message: "Invalid Input" })
+              .number({ message: "Start time is required." })
               .min(700, "Lowest is 700.")
               .max(2400, "Highest is 2400."),
             end: z.coerce
-              .number({ message: "Invalid Input" })
+              .number({ message: "End time is required." })
               .min(700, "Lowest is 700.")
               .max(2400, "Highest is 2400."),
             date: z.string(),
             isOnline: z.boolean(),
             room: z.string(),
           })
+
           .refine((schema) => schema.start < schema.end, {
             message: "Start can't be greater than or equal to end time.",
             path: ["start"],

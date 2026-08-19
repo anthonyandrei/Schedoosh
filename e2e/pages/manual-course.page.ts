@@ -1,7 +1,9 @@
 import { type Locator, type Page } from "@playwright/test";
+import { seedStoreState } from "../fixtures/state-seeder";
 import { BasePage } from "./base.page";
 
 export class ManualCoursePage extends BasePage {
+  readonly dialog: Locator;
   readonly courseCodeInput: Locator;
   readonly sectionInput: Locator;
   readonly professorInput: Locator;
@@ -9,16 +11,40 @@ export class ManualCoursePage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.courseCodeInput = this.page.getByLabel(/course code|^code$/i);
-    this.sectionInput = this.page.getByLabel(/section/i);
-    this.professorInput = this.page.getByLabel(/professor/i);
-    this.submitButton = this.page.getByRole("button", {
-      name: /submit|add class|save/i,
+    this.dialog = this.page.getByRole("dialog");
+    this.courseCodeInput = this.dialog.getByLabel(/^code$/i);
+    this.sectionInput = this.dialog.getByLabel(/section/i);
+    this.professorInput = this.dialog.getByLabel(/professor/i);
+    this.submitButton = this.dialog.getByRole("button", {
+      name: /^submit$/i,
     });
   }
 
   async gotoManual() {
-    await this.goto("/manual");
+    await this.goto("/");
+    await seedStoreState(this.page, {
+      courses: [
+        {
+          courseCode: "CUSTOM101",
+          color: "#3b82f6",
+          isCustom: true,
+          isSelected: true,
+          lastFetched: new Date(),
+          classes: [],
+        },
+      ],
+      sessionCookie: "DEMO",
+      isAuthenticated: true,
+    });
+    await this.goto("/");
+    const addClassButton = this.page.getByRole("button", {
+      name: /^add class$/i,
+    });
+    await addClassButton.waitFor({ state: "visible", timeout: 10000 });
+    await addClassButton.click();
+    await this.page
+      .getByRole("dialog")
+      .waitFor({ state: "visible", timeout: 10000 });
   }
 
   async fillClassDetails(

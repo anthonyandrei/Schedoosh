@@ -48,26 +48,25 @@ export function FormTextField<T extends FieldValues>({
             {label && <FormLabel>{label}</FormLabel>}
 
             <FormControl>
-              <div className="relative">
-                <Input
-                  {...field}
-                  value={field.value ?? ""}
-                  type={inputType}
-                  disabled={disabled || form.formState.isSubmitting}
-                  placeholder={placeholder}
-                  className={className}
-                  onChange={(e) => {
-                    let value: string | number = e.target.value;
-                    if (inputType === "number") {
-                      value =
-                        e.target.value === "" ? "" : parseFloat(e.target.value);
-                    }
-                    field.onChange(value);
-                    onChange?.(value);
-                  }}
-                />
-              </div>
+              <Input
+                {...field}
+                value={field.value ?? ""}
+                type={inputType}
+                disabled={disabled || form.formState.isSubmitting}
+                placeholder={placeholder}
+                className={className}
+                onChange={(e) => {
+                  let value: string | number = e.target.value;
+                  if (inputType === "number") {
+                    value =
+                      e.target.value === "" ? "" : parseFloat(e.target.value);
+                  }
+                  field.onChange(value);
+                  onChange?.(value);
+                }}
+              />
             </FormControl>
+
             {description && <FormDescription>{description}</FormDescription>}
             <FormMessage />
           </FormItem>
