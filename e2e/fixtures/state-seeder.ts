@@ -5,19 +5,47 @@ export interface SeedStateOptions {
   courses?: Course[];
   sessionCookie?: string;
   isAuthenticated?: boolean;
+  selectedRows?: Record<string, Record<string, boolean>>;
+  schedules?: unknown[];
+  filter?: unknown;
 }
 
 export async function seedStoreState(page: Page, options: SeedStateOptions) {
   await page.evaluate(
-    async ({ courses, sessionCookie, isAuthenticated }) => {
+    async ({
+      courses,
+      sessionCookie,
+      isAuthenticated,
+      selectedRows,
+      schedules,
+      filter,
+    }) => {
       const currentState = localStorage.getItem("schedaddle-storage");
       const parsed = currentState
         ? JSON.parse(currentState)
         : { state: {}, version: 4 };
 
+      const computedSelectedRows: Record<
+        string,
+        Record<string, boolean>
+      > = selectedRows ?? {};
+      if (!selectedRows && courses) {
+        courses.forEach((c) => {
+          computedSelectedRows[c.courseCode] = {};
+          c.classes.forEach((_, idx) => {
+            computedSelectedRows[c.courseCode][idx.toString()] = true;
+          });
+        });
+      }
+
       parsed.state = {
         ...parsed.state,
         ...(courses ? { courses } : {}),
+        ...(courses || selectedRows
+          ? { selectedRows: computedSelectedRows }
+          : {}),
+        ...(schedules ? { schedules } : {}),
+        ...(filter ? { filter } : {}),
         ...(sessionCookie !== undefined ? { sessionCookie } : {}),
         ...(isAuthenticated !== undefined ? { isAuthenticated } : {}),
       };
@@ -60,6 +88,9 @@ export async function seedStoreState(page: Page, options: SeedStateOptions) {
       courses: options.courses,
       sessionCookie: options.sessionCookie ?? "MOCK_SESSION",
       isAuthenticated: options.isAuthenticated ?? true,
+      selectedRows: options.selectedRows,
+      schedules: options.schedules,
+      filter: options.filter,
     }
   );
 }

@@ -29,7 +29,9 @@ export default function RootLayout({
           inter.variable
         )}
       >
-        <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID || ""}>
+        <GoogleOAuthProvider
+          clientId={process.env.GOOGLE_CLIENT_ID || "mock-google-client-id"}
+        >
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
