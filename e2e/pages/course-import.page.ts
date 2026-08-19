@@ -16,10 +16,8 @@ export class CourseImportPage extends BasePage {
   }
 
   async searchAndAddCourse(courseCode: string) {
-    if (await this.courseInput.isVisible()) {
-      await this.courseInput.fill(courseCode);
-      await this.courseInput.press("Enter");
-    }
+    await this.courseInput.fill(courseCode);
+    await this.courseInput.press("Enter");
   }
 
   async expectCourseInList(courseCode: string) {

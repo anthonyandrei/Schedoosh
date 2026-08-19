@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChevronDown,
   Import,
-  KeyRound,
   ListPlus,
   LoaderCircle,
   Sparkles,
@@ -15,7 +14,6 @@ import { toast } from "sonner";
 import * as z from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { fetchCourse } from "@/actions/course";
-import ArchersHubAuthDialog from "@/components/navbar/ArchersHubAuthDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -210,19 +208,6 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
       Icon: SquarePen,
     },
   ];
-
-  if (!isAuthenticated && !sessionCookie) {
-    return (
-      <ArchersHubAuthDialog>
-        <Button
-          variant="outline"
-          className="inline-flex w-full animate-pulse items-center border-amber-500 text-amber-600 dark:text-amber-400"
-        >
-          <KeyRound className="mr-2 size-4" /> Connect ArchersHub Session
-        </Button>
-      </ArchersHubAuthDialog>
-    );
-  }
 
   return (
     <Form {...form}>

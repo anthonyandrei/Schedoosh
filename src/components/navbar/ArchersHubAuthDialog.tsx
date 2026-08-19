@@ -148,6 +148,7 @@ export default function ArchersHubAuthDialog({
       <DialogTrigger asChild>
         {children ?? (
           <ResponsiveButton
+            aria-label={isDemoMode ? "Demo Mode" : "ArchersHub"}
             icon={isDemoMode ? Sparkles : KeyRound}
             className={
               isDemoMode
