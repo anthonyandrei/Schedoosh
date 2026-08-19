@@ -433,7 +433,7 @@ Expected: PASS with 0 errors.
 **Security flag:** `none`  
 **Does NOT cover:** Real live network responses from DLSU servers.
 
-- [ ] **Step 1: Write `e2e/specs/01-course-import.spec.ts`**
+- [x] **Step 1: Write `e2e/specs/01-course-import.spec.ts`**
 
 ```typescript
 import { test, expect } from "@playwright/test";
@@ -478,7 +478,7 @@ test.describe("Course Search and Import Flow", () => {
 });
 ```
 
-- [ ] **Step 2: Run test suite**
+- [x] **Step 2: Run test suite**
 
 Run: `pnpm exec playwright test e2e/specs/01-course-import.spec.ts`  
 Expected: PASS (3 tests passed).
@@ -493,7 +493,7 @@ Expected: PASS (3 tests passed).
 **Security flag:** `none`  
 **Does NOT cover:** Automatic syllabus scraping for custom classes.
 
-- [ ] **Step 1: Write `e2e/specs/02-manual-courses.spec.ts`**
+- [x] **Step 1: Write `e2e/specs/02-manual-courses.spec.ts`**
 
 ```typescript
 import { test, expect } from "@playwright/test";
@@ -520,7 +520,7 @@ test.describe("Manual Course Creation Flow", () => {
 });
 ```
 
-- [ ] **Step 2: Run test suite**
+- [x] **Step 2: Run test suite**
 
 Run: `pnpm exec playwright test e2e/specs/02-manual-courses.spec.ts`  
 Expected: PASS (2 tests passed).
@@ -535,7 +535,7 @@ Expected: PASS (2 tests passed).
 **Security flag:** `none`  
 **Does NOT cover:** Algorithmic performance profiling in Playwright.
 
-- [ ] **Step 1: Write `e2e/specs/03-schedule-generation.spec.ts`**
+- [x] **Step 1: Write `e2e/specs/03-schedule-generation.spec.ts`**
 
 ```typescript
 import { test, expect } from "@playwright/test";
@@ -558,7 +558,7 @@ test.describe("Schedule Generation and Filter Flow", () => {
 });
 ```
 
-- [ ] **Step 2: Run test suite**
+- [x] **Step 2: Run test suite**
 
 Run: `pnpm exec playwright test e2e/specs/03-schedule-generation.spec.ts`  
 Expected: PASS (1 test passed).
@@ -573,7 +573,7 @@ Expected: PASS (1 test passed).
 **Security flag:** `none`  
 **Does NOT cover:** Server-side database backup syncing.
 
-- [ ] **Step 1: Write `e2e/specs/04-persistence-saved.spec.ts`**
+- [x] **Step 1: Write `e2e/specs/04-persistence-saved.spec.ts`**
 
 ```typescript
 import { test, expect } from "@playwright/test";
@@ -605,7 +605,7 @@ test.describe("Persistence and Saved Schedules Flow", () => {
 });
 ```
 
-- [ ] **Step 2: Run test suite**
+- [x] **Step 2: Run test suite**
 
 Run: `pnpm exec playwright test e2e/specs/04-persistence-saved.spec.ts`  
 Expected: PASS (2 tests passed).
@@ -620,7 +620,7 @@ Expected: PASS (2 tests passed).
 **Security flag:** `none`  
 **Does NOT cover:** Real Google OAuth login flows.
 
-- [ ] **Step 1: Write `e2e/specs/05-session-and-exports.spec.ts`**
+- [x] **Step 1: Write `e2e/specs/05-session-and-exports.spec.ts`**
 
 ```typescript
 import { test, expect } from "@playwright/test";
@@ -646,7 +646,7 @@ test.describe("Session Management and Export Triggers", () => {
 });
 ```
 
-- [ ] **Step 2: Run test suite**
+- [x] **Step 2: Run test suite**
 
 Run: `pnpm exec playwright test e2e/specs/05-session-and-exports.spec.ts`  
 Expected: PASS (2 tests passed).
@@ -662,17 +662,17 @@ Expected: PASS (2 tests passed).
 
 **Security flag:** `none`
 
-- [ ] **Step 1: Run full Playwright test suite**
+- [x] **Step 1: Run full Playwright test suite**
 
 Run: `pnpm test:e2e`  
 Expected: All tests pass cleanly in headless Chromium.
 
-- [ ] **Step 2: Run Bun unit tests**
+- [x] **Step 2: Run Bun unit tests**
 
 Run: `bun test`  
 Expected: 10 pass, 0 fail.
 
-- [ ] **Step 3: Run Biome code check**
+- [x] **Step 3: Run Biome code check**
 
 Run: `pnpm lint`  
 Expected: Checked files with zero lint/format errors.
