@@ -12,7 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import SchedaddleLogo from "../SchedaddleLogo";
+import SchedooshLogo from "../SchedooshLogo";
 import {
   Sheet,
   SheetClose,
@@ -80,13 +80,13 @@ export default function NavigationBar() {
         className="flex items-center gap-2 font-extrabold text-lg tracking-tight"
       >
         <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-2 pl-3">
-          <SchedaddleLogo
+          <SchedooshLogo
             className="text-accent-foreground"
             width={24}
             height={24}
           />
         </div>
-        Schedaddle
+        Schedoosh
       </Link>
       <div className="absolute left-1/2 hidden -translate-x-1/2 gap-2 xl:flex">
         {navigationItems.map((item) => (
@@ -153,13 +153,13 @@ function NavigationBarMobile({ children }: NavigationBarMobile) {
               className="flex items-center gap-2 font-extrabold text-lg tracking-tight"
             >
               <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-2 pl-3">
-                <SchedaddleLogo
+                <SchedooshLogo
                   className="text-accent-foreground"
                   width={24}
                   height={24}
                 />
               </div>
-              Schedaddle
+              Schedoosh
             </Link>
           </SheetTitle>
         </SheetHeader>

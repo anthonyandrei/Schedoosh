@@ -76,7 +76,7 @@ export default function useToImage({
 
     const link = document.createElement("a");
 
-    link.download = "Schedaddle.png";
+    link.download = "Schedoosh.png";
     link.href = dataUrl;
     link.click();
     link.remove();

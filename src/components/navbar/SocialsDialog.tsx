@@ -11,11 +11,11 @@ export default function SocialsDialog() {
       title="Socials"
       description="Here are my socials in case you want to reach out to me! I am always open to feedback and suggestions."
     >
-      <div className="flex flex-row items-center justify-center">
+      <div className="flex flex-row items-center justify-center gap-2">
         <Button asChild variant="ghost">
           <Link
             target="_blank"
-            href="https://github.com/CyberEzpertz/Schedaddle/issues"
+            href="https://github.com/anthonyandrei/Schedoosh"
           >
             GitHub{" "}
             <SquareArrowOutUpRight className="ml-2 size-4" strokeWidth={2.5} />
@@ -24,9 +24,9 @@ export default function SocialsDialog() {
         <Button asChild variant="ghost">
           <Link
             target="_blank"
-            href="https://www.reddit.com/user/Cyberezpertz/"
+            href="https://github.com/anthonyandrei/Schedoosh/issues"
           >
-            Reddit{" "}
+            Issues & Feedback{" "}
             <SquareArrowOutUpRight className="ml-2 size-4" strokeWidth={2.5} />
           </Link>
         </Button>

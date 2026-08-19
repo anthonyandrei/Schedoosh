@@ -141,7 +141,7 @@ export function parseTimeRange(
 }
 
 /**
- * Normalizes modality strings into Schedaddle's ModalityEnum
+ * Normalizes modality strings into Schedoosh's ModalityEnum
  */
 export function normalizeModality(rawModality?: string): ModalityEnum {
   if (!rawModality || typeof rawModality !== "string") {
@@ -208,7 +208,7 @@ export function isOnlineSchedule(
 }
 
 /**
- * Parses raw meeting / schedule items into Schedaddle Schedule objects
+ * Parses raw meeting / schedule items into Schedoosh Schedule objects
  */
 export function parseRawMeetings(
   meetings?: RawArchersHubMeeting[],
@@ -291,7 +291,7 @@ export function parseRawMeetings(
 }
 
 /**
- * Normalizes an individual raw section into a Schedaddle Class object
+ * Normalizes an individual raw section into a Schedoosh Class object
  */
 export function normalizeArchersHubSection(
   raw: RawArchersHubSection,

@@ -3,7 +3,7 @@ name: Bug report
 about: Create a report to help the site improve
 title: ''
 labels: bug
-assignees: CyberEzpertz
+assignees: anthonyandrei
 
 ---
 

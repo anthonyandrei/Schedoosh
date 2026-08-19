@@ -22,7 +22,7 @@ export default function ExportButton({ classes, ...props }: ExportButtonProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "schedaddle_schedule.ics";
+    a.download = "schedoosh_schedule.ics";
     a.click();
     URL.revokeObjectURL(url);
   };

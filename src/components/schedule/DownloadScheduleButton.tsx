@@ -37,7 +37,7 @@ import useToImage from "@/hooks/useToImage";
 import { Class } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { cn } from "@/lib/utils";
-import SchedaddleLogo from "../SchedaddleLogo";
+import SchedooshLogo from "../SchedooshLogo";
 import Calendar from "./Calendar";
 import ScheduleOverview from "./ScheduleOverview";
 
@@ -419,7 +419,7 @@ function Wallpaper({
 
   const bgImageUrl =
     imageUrl ??
-    (isMobile ? "/SchedaddleBG.Mobile.png" : "/SchedaddleBG.Desktop.png");
+    (isMobile ? "/SchedooshBG.Mobile.png" : "/SchedooshBG.Desktop.png");
 
   return (
     <div
@@ -471,7 +471,7 @@ function Wallpaper({
               "right-12 bottom-12"
             )}
           >
-            <SchedaddleLogo
+            <SchedooshLogo
               width={32}
               height={32}
               className="text-accent-foreground"

@@ -12,8 +12,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Schedaddle",
-  description: "Schedaddle schedoodle, your schedule is now a doddle!",
+  title: "Schedoosh",
+  description: "Schedoosh: Build your ideal schedule, in a snap. Schedoosh!",
 };
 
 export default function RootLayout({
@@ -37,11 +37,13 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
-            <Script
-              async
-              src="https://cloud.umami.is/script.js"
-              data-website-id="2fa1a3f5-30c9-4275-84f5-dfc70decaed9"
-            />
+            {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
+              <Script
+                async
+                src="https://cloud.umami.is/script.js"
+                data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+              />
+            )}
             <SpeedInsights />
             <Analytics />
             <Toaster

@@ -1,12 +1,13 @@
 
-# Schedaddle
+# Schedoosh
 
-**Schedaddle** is a powerful schedule-making tool designed to help students build their ideal class schedules with ease and flexibility. Import courses, group them, filter by time and day, and generate all possible combinations that fit your preferences.
+**Schedoosh** is a powerful schedule-making tool designed to help students build their ideal class schedules with ease and flexibility. Build your ideal schedule, in a snap. Schedoosh!
 
 
 ## 🔗 Links
 
-- 🔗 [Live Site](https://schedaddle.vercel.app/)
+- 🔗 [Live Site](https://schedoosh.vercel.app/)
+- 📦 [GitHub Repository](https://github.com/anthonyandrei/Schedoosh)
 
 
 ## 🚀 Features
@@ -48,13 +49,15 @@ Your **ArchersHub session token** is stored *strictly* on your device's local st
 
 ## ❗ Bugs & Feedback
 
-Found a bug or have a suggestion? [Open an Issue](https://github.com/CyberEzpertz/Schedaddle/issues) or message me directly.
+Found a bug or have a suggestion? [Open an Issue](https://github.com/anthonyandrei/Schedoosh/issues).
 
 ## 🙏 Acknowledgments
 
-Inspired by [**AralTools**](https://github.com/tudlang/araltools) by u/YivanGamer — huge thanks for the inspiration. Also, special thanks to early testers for their feedback!
+- Forked from [**Schedaddle**](https://github.com/CyberEzpertz/Schedaddle) by [CyberEzpertz](https://github.com/CyberEzpertz).
+- Originally inspired by [**AralTools**](https://github.com/tudlang/araltools) by u/YivanGamer.
+- Special thanks to early testers and contributors for their feedback!
 
 ## 📄 License
 
-Licensed under the **GNU General Public License (GPL)**.  
+Licensed under the **GNU General Public License v3.0 (GPLv3)**.  
 See the [LICENSE](LICENSE) file for more info.

@@ -228,9 +228,9 @@ export default function ArchersHubAuthDialog({
                   </Button>
                 </div>
                 <p className="text-amber-800/90 text-xs dark:text-amber-300/90">
-                  Schedaddle is generating simulated course schedules. Paste
-                  your real ArchersHub session cookie below to fetch live data,
-                  or click <strong>Exit Demo Mode</strong> to disconnect.
+                  Schedoosh is generating simulated course schedules. Paste your
+                  real ArchersHub session cookie below to fetch live data, or
+                  click <strong>Exit Demo Mode</strong> to disconnect.
                 </p>
               </div>
             )}

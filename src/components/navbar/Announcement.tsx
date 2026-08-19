@@ -23,18 +23,18 @@ export default function Announcement() {
 
   const title = "The ArchersHub Migration Update!";
   const patchDate = "May 2025 (ArchersHub Update)";
-  const description = `Schedaddle has migrated from MLS to ArchersHub! Check out what's new:\nPatch Date: ${patchDate}`;
+  const description = `Schedoosh has migrated from MLS to ArchersHub! Check out what's new:\nPatch Date: ${patchDate}`;
 
   const updates = [
     {
       title: "ArchersHub Course Integration",
       description:
-        "Schedaddle now fetches courses directly from ArchersHub! Connect your session in seconds using the 1-click DevTools console copy snippet.",
+        "Schedoosh now fetches courses directly from ArchersHub! Connect your session in seconds using the 1-click DevTools console copy snippet.",
     },
     {
       title: "Self-Contained & Faster",
       description:
-        "Course scraping and parsing now run directly within Schedaddle with zero external backend dependencies and local-first session security.",
+        "Course scraping and parsing now run directly within Schedoosh with zero external backend dependencies and local-first session security.",
     },
     {
       title: "Zero Data Loss & Smart Manual",

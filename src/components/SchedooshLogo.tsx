@@ -1,8 +1,8 @@
 import * as React from "react";
 
-interface SchedaddleLogoProps extends React.SVGProps<SVGSVGElement> {}
+interface SchedooshLogoProps extends React.SVGProps<SVGSVGElement> {}
 
-const SchedaddleLogo = (props: SchedaddleLogoProps) => (
+const SchedooshLogo = (props: SchedooshLogoProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     id="Layer_2"
@@ -29,4 +29,4 @@ const SchedaddleLogo = (props: SchedaddleLogoProps) => (
     </g>
   </svg>
 );
-export default SchedaddleLogo;
+export default SchedooshLogo;
