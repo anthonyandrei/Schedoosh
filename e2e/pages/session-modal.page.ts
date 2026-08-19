@@ -12,32 +12,48 @@ export class SessionModalPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.connectButton = this.page.getByRole("button", {
-      name: /archershub|demo mode/i,
+      name: /connect archershub session|archershub|demo mode/i,
     });
-    this.modal = this.page.getByRole("dialog");
-    this.tokenInput = this.page.getByPlaceholder(/paste.*cookie|session/i);
-    this.connectSubmitButton = this.page.getByRole("button", {
-      name: /^connect session$|^connect$/i,
-    });
-    this.demoModeButton = this.page.getByRole("button", {
-      name: /try demo mode/i,
-    });
-    this.copySnippetButton = this.page.getByRole("button", {
-      name: /copy snippet/i,
-    });
+    this.modal = this.page
+      .getByRole("dialog")
+      .filter({ hasText: /archershub session/i });
+    this.tokenInput = this.page
+      .getByPlaceholder(/paste.*cookie|session/i)
+      .first();
+    this.connectSubmitButton = this.page
+      .getByRole("button", {
+        name: /^connect session$|^connect$/i,
+      })
+      .first();
+    this.demoModeButton = this.page
+      .getByRole("button", {
+        name: /try demo mode/i,
+      })
+      .first();
+    this.copySnippetButton = this.page
+      .getByRole("button", {
+        name: /copy snippet/i,
+      })
+      .first();
   }
 
   async open() {
-    if (!(await this.modal.isVisible())) {
+    await this.dismissAnnouncement();
+    if (
+      !(await this.modal
+        .first()
+        .isVisible()
+        .catch(() => false))
+    ) {
       await this.connectButton.first().click();
     }
-    await expect(this.modal).toBeVisible();
+    await expect(this.modal.first()).toBeVisible();
   }
 
   async activateDemoMode() {
     await this.open();
     await this.demoModeButton.click();
-    await expect(this.modal).toBeHidden();
+    await expect(this.modal.first()).toBeHidden();
     await this.expectToast(/demo mode activated/i);
   }
 
@@ -45,7 +61,7 @@ export class SessionModalPage extends BasePage {
     await this.open();
     await this.tokenInput.fill(token);
     await this.connectSubmitButton.click();
-    await expect(this.modal).toBeHidden();
+    await expect(this.modal.first()).toBeHidden();
     await this.expectToast(/connected to archershub/i);
   }
 }
