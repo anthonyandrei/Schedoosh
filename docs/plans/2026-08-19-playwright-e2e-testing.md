@@ -262,7 +262,7 @@ Expected: PASS with 0 errors.
 **Security flag:** `none`  
 **Does NOT cover:** Real external third-party OAuth popups.
 
-- [ ] **Step 1: Create `e2e/pages/base.page.ts`**
+- [x] **Step 1: Create `e2e/pages/base.page.ts`**
 
 ```typescript
 import { Page, expect } from "@playwright/test";
@@ -286,7 +286,7 @@ export class BasePage {
 }
 ```
 
-- [ ] **Step 2: Create `e2e/pages/session-modal.page.ts`**
+- [x] **Step 2: Create `e2e/pages/session-modal.page.ts`**
 
 ```typescript
 import { Page, expect } from "@playwright/test";
@@ -322,7 +322,7 @@ export class SessionModalPage extends BasePage {
 }
 ```
 
-- [ ] **Step 3: Create `e2e/pages/course-import.page.ts`**
+- [x] **Step 3: Create `e2e/pages/course-import.page.ts`**
 
 ```typescript
 import { Page, expect } from "@playwright/test";
@@ -345,7 +345,7 @@ export class CourseImportPage extends BasePage {
 }
 ```
 
-- [ ] **Step 4: Create `e2e/pages/manual-course.page.ts`**
+- [x] **Step 4: Create `e2e/pages/manual-course.page.ts`**
 
 ```typescript
 import { Page, expect } from "@playwright/test";
@@ -373,7 +373,7 @@ export class ManualCoursePage extends BasePage {
 }
 ```
 
-- [ ] **Step 5: Create `e2e/pages/schedule-view.page.ts`**
+- [x] **Step 5: Create `e2e/pages/schedule-view.page.ts`**
 
 ```typescript
 import { Page, expect } from "@playwright/test";
@@ -400,7 +400,7 @@ export class ScheduleViewPage extends BasePage {
 }
 ```
 
-- [ ] **Step 6: Create `e2e/pages/saved-schedules.page.ts`**
+- [x] **Step 6: Create `e2e/pages/saved-schedules.page.ts`**
 
 ```typescript
 import { Page, expect } from "@playwright/test";
@@ -418,7 +418,7 @@ export class SavedSchedulesPage extends BasePage {
 }
 ```
 
-- [ ] **Step 7: Run Biome check on pages**
+- [x] **Step 7: Run Biome check on pages**
 
 Run: `pnpm biome check e2e/pages/`  
 Expected: PASS with 0 errors.
