@@ -22,8 +22,8 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import Announcement from "./Announcement";
+import ArchersHubAuthDialog from "./ArchersHubAuthDialog";
 import HelpDialog from "./HelpDialog";
-import IDInput from "./IDInput";
 import { ModeToggle } from "./ModeToggle";
 import SocialsDialog from "./SocialsDialog";
 
@@ -113,7 +113,7 @@ export default function NavigationBar() {
       <div className="hidden flex-row gap-2 xl:flex">
         <Announcement />
         <SocialsDialog />
-        <IDInput />
+        <ArchersHubAuthDialog />
         <ModeToggle />
         <HelpDialog />
       </div>
@@ -181,7 +181,7 @@ function NavigationBarMobile({ children }: NavigationBarMobile) {
           <div className="flex flex-col gap-2">
             <Announcement />
             <SocialsDialog />
-            <IDInput />
+            <ArchersHubAuthDialog />
             <ModeToggle />
             <HelpDialog />
           </div>

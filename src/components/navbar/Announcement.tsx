@@ -21,30 +21,30 @@ export default function Announcement() {
     }))
   );
 
-  const title = "The Calendar & Manual Update!";
-  const patchDate = "April 19, 2025 (Part 3)";
-  const description = `I've added a lot of things! Check them out!\nPatch Date: ${patchDate}`;
+  const title = "The ArchersHub Migration Update!";
+  const patchDate = "May 2025 (ArchersHub Update)";
+  const description = `Schedaddle has migrated from MLS to ArchersHub! Check out what's new:\nPatch Date: ${patchDate}`;
 
   const updates = [
     {
-      title: "New Smart Manual Mode",
+      title: "ArchersHub Course Integration",
       description:
-        "A new mode has been added! Check it out in the Smart Manual tab. tl;dr: Google Calendar, but for your classes.",
+        "Schedaddle now fetches courses directly from ArchersHub! Connect your session in seconds using the 1-click DevTools console copy snippet.",
     },
     {
-      title: "Better UI and Image Design",
+      title: "Self-Contained & Faster",
       description:
-        "UI has been improved, along with the design of the Image Downloads. Check it out in Schedules & Saved!",
+        "Course scraping and parsing now run directly within Schedaddle with zero external backend dependencies and local-first session security.",
     },
     {
-      title: "(Fixed) Export to Google Calendar or as .ics file",
+      title: "Zero Data Loss & Smart Manual",
       description:
-        "You can now export your schedule to Google Calendar or as an .ics file! Click the 'Export' button near the download button. Thanks for the suggestion @Ed*****oded! (Note: You can only use your DLSU email for this!)",
+        "All your existing saved schedules and custom courses have been seamlessly preserved across store version upgrades.",
     },
     {
       title: "Call for suggestions",
       description:
-        "If you have any more suggestions, please let me know! You can do so through Reddit DM or on GitHub. I will try to implement them as soon as possible.",
+        "If you have any feedback or suggestions, please let us know on GitHub or Reddit DM. Happy scheduling!",
     },
   ];
 

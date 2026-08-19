@@ -321,7 +321,7 @@ export default function CourseGrid() {
         <MousePointerClick strokeWidth={1} size={80} />
         <span className="flex flex-col gap-1">
           <span className="font-bold text-xl">No courses yet...</span>
-          <span className="w-80">{`Add courses on the left. Don't forget to set your ID at the top right too!`}</span>
+          <span className="w-80">{`Add courses on the left. Don't forget to connect ArchersHub at the top right too!`}</span>
         </span>
       </Card>
     );

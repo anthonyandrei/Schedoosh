@@ -1,54 +1,128 @@
 "use server";
 
-import { Course, classSchema } from "../lib/definitions";
+import {
+  clearCourseCache,
+  scrapeCourseFromArchersHub,
+  scrapeMultipleCoursesFromArchersHub,
+} from "../lib/archershub/scraper";
+import {
+  ArchersHubAuthError,
+  ArchersHubCourseNotFoundError,
+  ArchersHubRateLimitError,
+} from "../lib/archershub/types";
+import { Course } from "../lib/definitions";
 
-export async function fetchCourse(courseCode: string, id: string) {
-  const res = await fetch(
-    `${process.env.COURSE_API}/api/courses?id=${id}&courses=${courseCode}`
-  );
-
-  if (!res.ok) {
-    return { data: undefined, error: "Something went wrong while fetching." };
-  }
-
-  const isCached = res.headers.get("data-source") === "cache";
-  const parsed = (await res.json())[0];
-  const parsedData = classSchema.array().parse(parsed);
-
-  const newCourse: Course = {
-    courseCode: courseCode,
-    classes: parsedData,
-    lastFetched: new Date(),
-    isCustom: false,
+export interface FetchCourseResult {
+  data?: {
+    newCourse: Course;
+    isCached: boolean;
   };
-
-  return { data: { newCourse, isCached }, error: undefined };
+  error?: string;
+  authExpired?: boolean;
 }
 
-export async function fetchMultipleCourses(courses: Course[], id: string) {
+export interface FetchMultipleCoursesResult {
+  data?: Course[];
+  error?: string;
+  authExpired?: boolean;
+}
+
+export async function fetchCourse(
+  courseCode: string,
+  sessionCookie: string,
+  options?: { mock?: boolean }
+): Promise<FetchCourseResult> {
+  try {
+    const { course, isCached } = await scrapeCourseFromArchersHub(
+      courseCode,
+      sessionCookie,
+      options
+    );
+
+    return {
+      data: {
+        newCourse: course,
+        isCached: !!isCached,
+      },
+    };
+  } catch (error) {
+    if (error instanceof ArchersHubAuthError) {
+      return {
+        error: error.message,
+        authExpired: true,
+      };
+    }
+
+    if (error instanceof ArchersHubCourseNotFoundError) {
+      return {
+        error: error.message,
+      };
+    }
+
+    if (error instanceof ArchersHubRateLimitError) {
+      return {
+        error: error.message,
+      };
+    }
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Something went wrong while fetching course.";
+    return {
+      error: message,
+    };
+  }
+}
+
+export async function fetchMultipleCourses(
+  courses: Course[],
+  sessionCookie: string,
+  options?: { mock?: boolean }
+): Promise<FetchMultipleCoursesResult> {
   const courseCodes = courses.map((course) => course.courseCode);
 
-  const res = await fetch(
-    `${process.env.COURSE_API}/api/courses?id=${id}&courses=${courseCodes.join(
-      "&courses="
-    )}`
-  );
+  try {
+    const { courses: fetchedCourses } =
+      await scrapeMultipleCoursesFromArchersHub(
+        courseCodes,
+        sessionCookie,
+        options
+      );
 
-  if (!res.ok) {
-    return { error: "Something went wrong while fetching." };
-  }
+    const updatedCourses = courses.map((original) => {
+      const updated = fetchedCourses.find(
+        (f) => f.courseCode.toUpperCase() === original.courseCode.toUpperCase()
+      );
+      if (updated && updated.classes.length > 0) {
+        return updated;
+      }
+      return {
+        ...original,
+        lastFetched: new Date(),
+      };
+    });
 
-  const parsed = await res.json();
+    return { data: updatedCourses };
+  } catch (error) {
+    if (error instanceof ArchersHubAuthError) {
+      return {
+        error: error.message,
+        authExpired: true,
+      };
+    }
 
-  const parsedData = classSchema.array().array().parse(parsed);
-
-  const updatedCourses = parsedData.map((classes, i) => {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Something went wrong while updating courses.";
     return {
-      ...courses[i],
-      classes: classes.length ? classes : courses[i].classes,
-      lastFetched: new Date(),
+      error: message,
     };
-  });
+  }
+}
 
-  return { data: updatedCourses };
+export async function clearCourseCacheAction(): Promise<{ success: boolean }> {
+  clearCourseCache();
+  return { success: true };
 }

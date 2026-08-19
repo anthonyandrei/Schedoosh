@@ -29,14 +29,14 @@ export function StepCard({ step, description, title }: StepCardProps) {
 export default function HelpDialog() {
   const steps = [
     {
-      title: "Enter ID",
+      title: "Connect ArchersHub",
       description:
-        "Click the ID Button on the top-right corner of the site and enter your ID number.",
+        "Click the ArchersHub button on the top-right corner to connect your session token using the 1-click DevTools console helper.",
     },
     {
       title: "Add Courses",
       description:
-        "Once done, go to the 'Courses' tab and type your course on the top left. After, click 'Add course'. Repeat for desired courses",
+        "Go to the 'Courses' tab, type your course code (e.g., CCPROG1), and click 'Add Course'. Repeat for all your desired courses.",
     },
     {
       title: "Select Classes",

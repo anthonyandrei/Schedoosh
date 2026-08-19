@@ -1,0 +1,119 @@
+{
+  "success": true,
+  "term": "AY 2024-2025 Term 2",
+  "offerings": [
+    {
+      "course_code": "CCPROG1",
+      "section": "S11",
+      "class_number": 1024,
+      "professor": "DELA CRUZ, JUAN",
+      "enrolled": 38,
+      "capacity": 40,
+      "modality": "HYBRID",
+      "restriction": "Open to CCS only",
+      "remarks": "Lecture + Lab components",
+      "schedules": [
+        {
+          "day": "M",
+          "start_time": "09:00",
+          "end_time": "10:30",
+          "room": "LS210",
+          "date_range": "Jan 6 - Apr 12, 2025",
+          "is_online": false,
+          "type": "LEC"
+        },
+        {
+          "day": "W",
+          "start_time": "09:00",
+          "end_time": "12:00",
+          "room": "G304B",
+          "date_range": "Jan 6 - Apr 12, 2025",
+          "is_online": false,
+          "type": "LAB"
+        }
+      ]
+    },
+    {
+      "course_code": "CCPROG1",
+      "section": "S12",
+      "class_number": 1025,
+      "professor": "SANTOS, MARIA",
+      "enrolled": 40,
+      "capacity": 40,
+      "modality": "F2F",
+      "restriction": "Open to CCS only",
+      "remarks": "Regular section",
+      "schedules": [
+        {
+          "day": "T",
+          "start_time": "1300",
+          "end_time": "1430",
+          "room": "GK301",
+          "date_range": "Jan 6 - Apr 12, 2025",
+          "is_online": false,
+          "type": "LEC"
+        },
+        {
+          "day": "F",
+          "start_time": "1300",
+          "end_time": "1600",
+          "room": "V202",
+          "date_range": "Jan 6 - Apr 12, 2025",
+          "is_online": false,
+          "type": "LAB"
+        }
+      ]
+    },
+    {
+      "course_code": "GEETHIC",
+      "section": "Z01",
+      "class_number": 2048,
+      "professor": "REYES, JOSE",
+      "enrolled": 45,
+      "capacity": 45,
+      "modality": "ONLINE",
+      "restriction": "Open to all colleges",
+      "remarks": "Fully Asynchronous with bi-weekly check-in",
+      "schedules": [
+        {
+          "day": "TH",
+          "start_time": "11:00 AM",
+          "end_time": "12:30 PM",
+          "room": "CANVAS-ONLINE",
+          "date_range": "Jan 6 - Apr 12, 2025",
+          "is_online": true,
+          "type": "LEC"
+        }
+      ]
+    },
+    {
+      "course_code": "CSINTSY",
+      "section": "S15",
+      "class_number": 3096,
+      "professor": "TAN, JOCELYN",
+      "enrolled": 30,
+      "capacity": 35,
+      "modality": "HYBRID",
+      "restriction": "CS Majors only",
+      "remarks": "Midterms in-person, project online",
+      "schedules": [
+        {
+          "day": "M",
+          "start_time": "1415",
+          "end_time": "1545",
+          "room": "Y503",
+          "date_range": "Jan 6 - Apr 12, 2025",
+          "is_online": false
+        },
+        {
+          "day": "TH",
+          "start_time": "1415",
+          "end_time": "1545",
+          "room": "ZOOM",
+          "date_range": "Jan 6 - Apr 12, 2025",
+          "is_online": true
+        }
+      ]
+    }
+  ]
+}

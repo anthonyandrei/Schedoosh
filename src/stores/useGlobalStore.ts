@@ -4,10 +4,10 @@ import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 import { Class, Course, Schedule, UserSchedule } from "@/lib/definitions";
 import { hasOwnProp } from "@/lib/utils";
 import { CourseSlice, createCourseSlice } from "./courseSlice";
-import { createIdSlice, IdSlice } from "./idSlice";
 import { createManualSlice, ManualSlice } from "./manualSlice";
 import { createMiscSlice, MiscSlice } from "./miscSlice";
 import { createScheduleSlice, ScheduleSlice } from "./scheduleSlice";
+import { createSessionSlice, SessionSlice } from "./sessionSlice";
 import { createTableSlice, TableSlice } from "./tableSlice";
 
 // Custom Storage to interface with IndexedDB
@@ -26,7 +26,7 @@ const storage: StateStorage = {
 // Collection of all the states stored in the store
 interface GlobalStates
   extends CourseSlice,
-    IdSlice,
+    SessionSlice,
     TableSlice,
     ScheduleSlice,
     MiscSlice,
@@ -47,7 +47,7 @@ export const useGlobalStore = create<GlobalStates>()(
   persist(
     (...a) => ({
       ...createCourseSlice(...a),
-      ...createIdSlice(...a),
+      ...createSessionSlice(...a),
       ...createTableSlice(...a),
       ...createScheduleSlice(...a),
       ...createMiscSlice(...a),
@@ -62,7 +62,7 @@ export const useGlobalStore = create<GlobalStates>()(
           state.setHasHydrated(true);
         };
       },
-      version: 3,
+      version: 4,
       migrate: (persistedState, version) => {
         if (!persistedState) return persistedState;
 
@@ -138,6 +138,27 @@ export const useGlobalStore = create<GlobalStates>()(
 
         if (version < 3 && hasOwnProp(persistedState, "schedules")) {
           persistedState.schedules = [];
+        }
+
+        if (version < 4) {
+          const state = persistedState as Record<string, unknown>;
+          if (hasOwnProp(state, "id") && typeof state.id === "string") {
+            state.idNumber = state.id;
+          } else if (!hasOwnProp(state, "idNumber")) {
+            state.idNumber = "";
+          }
+          if (!hasOwnProp(state, "sessionCookie")) {
+            state.sessionCookie = "";
+          }
+          if (!hasOwnProp(state, "isAuthenticated")) {
+            state.isAuthenticated = false;
+          }
+          if (!hasOwnProp(state, "lastAuthenticated")) {
+            state.lastAuthenticated = null;
+          }
+          if (!hasOwnProp(state, "isSessionModalOpen")) {
+            state.isSessionModalOpen = false;
+          }
         }
 
         return persistedState;

@@ -12,7 +12,7 @@
 ## 🚀 Features
 
 - **📥 Easy Course Import**  
-  Add classes directly from **MLS** using your ID number, or manually enter your own custom courses.
+  Add classes directly from **ArchersHub** using your session token (with our 1-click DevTools console snippet), or manually enter your own custom courses.
 
 - **🧩 Course Grouping**  
   Want only 2 GEs but have many options (e.g., GESPORT, GETEAMS, GEETHIC)? Group them and set how many you want to pick!
@@ -42,9 +42,9 @@
 - **Zod** – Schema validation
 - **shadcn/ui** – Accessible, reusable UI components
 
-## 🔐 ID Number Privacy
+## 🔐 ArchersHub Session & Data Privacy
 
-Your **ID number** is used *only* to fetch data from MLS. It is never uploaded and is stored locally on your device for convenience.
+Your **ArchersHub session token** is stored *strictly* on your device's local storage (IndexedDB) and is used solely to authenticate course searches against ArchersHub. It is never uploaded to external databases or shared with third parties.
 
 ## ❗ Bugs & Feedback
 

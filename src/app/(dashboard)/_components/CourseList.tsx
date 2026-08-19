@@ -111,17 +111,26 @@ export default function CourseList({
   activeCourse,
   setActiveCourse,
 }: CourseListProps) {
-  const { courses, setCourses, id, resetSelectedRows, resetColumnFilters } =
-    useGlobalStore(
-      useShallow((state) => ({
-        courses: state.courses,
-        setCourses: state.setCourses,
-        removeCourse: state.removeCourse,
-        id: state.id,
-        resetSelectedRows: state.resetSelectedRows,
-        resetColumnFilters: state.resetColumnFilters,
-      }))
-    );
+  const {
+    courses,
+    setCourses,
+    sessionCookie,
+    isAuthenticated,
+    setSessionModalOpen,
+    resetSelectedRows,
+    resetColumnFilters,
+  } = useGlobalStore(
+    useShallow((state) => ({
+      courses: state.courses,
+      setCourses: state.setCourses,
+      removeCourse: state.removeCourse,
+      sessionCookie: state.sessionCookie,
+      isAuthenticated: state.isAuthenticated,
+      setSessionModalOpen: state.setSessionModalOpen,
+      resetSelectedRows: state.resetSelectedRows,
+      resetColumnFilters: state.resetColumnFilters,
+    }))
+  );
 
   const [isFetching, setIsFetching] = useState(false);
   const [open, setOpen] = useState(false);
@@ -134,40 +143,49 @@ export default function CourseList({
   );
 
   const handleUpdate = async () => {
-    if (!id) {
-      toast.error("You haven't set your ID yet!", {
-        description: "Set your ID on the button at the top right corner.",
+    if (!isAuthenticated && !sessionCookie) {
+      toast.error("You haven't connected ArchersHub yet!", {
+        description:
+          "Connect your ArchersHub session using the button at the top right.",
       });
-
+      setSessionModalOpen(true);
       return;
     }
 
     setIsFetching(true);
     try {
-      const { data } = await fetchMultipleCourses(
+      const { data, error, authExpired } = await fetchMultipleCourses(
         courses.filter((course) => !course.isCustom),
-        id
+        sessionCookie
       );
 
-      if (!data) {
-        toast.error("Something went wrong while fetching...", {
+      if (authExpired) {
+        toast.error("ArchersHub Session Expired", {
+          description:
+            "Please reconnect your session cookie to update courses.",
+        });
+        setSessionModalOpen(true);
+        return;
+      }
+
+      if (!data || error) {
+        toast.error(error || "Something went wrong while fetching...", {
           description:
             "The server is facing some issues right now, try again in a bit.",
         });
-
         return;
       }
 
       if (data.some((course) => course.classes.length === 0)) {
         toast.error("Oops... Some of the courses don't have any classes.", {
           description:
-            "MLS may be down right now or something is terribly wrong.",
+            "ArchersHub may be updating or some courses have no scheduled classes yet.",
         });
       } else {
         setCourses([...data, ...courses.filter((course) => course.isCustom)]);
 
         toast.success("Successfully updated all courses!", {
-          description: "The courses should now display updated data.",
+          description: "Your courses now display updated ArchersHub data.",
         });
       }
     } catch (_error) {

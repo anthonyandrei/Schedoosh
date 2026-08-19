@@ -2,10 +2,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ChevronDown,
-  IdCard,
   Import,
+  KeyRound,
   ListPlus,
   LoaderCircle,
+  Sparkles,
   SquarePen,
 } from "lucide-react";
 import { useState } from "react";
@@ -14,7 +15,8 @@ import { toast } from "sonner";
 import * as z from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { fetchCourse } from "@/actions/course";
-import IDInput from "@/components/navbar/IDInput";
+import ArchersHubAuthDialog from "@/components/navbar/ArchersHubAuthDialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -29,7 +31,11 @@ import Dropdown, { DropdownItem } from "@/components/wrappers/Dropdown";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 
 const formSchema = z.object({
-  courseCode: z.string().length(7, "Length should be 7!"),
+  courseCode: z
+    .string()
+    .trim()
+    .min(3, "Course code must be at least 3 characters!")
+    .max(12, "Course code must be at most 12 characters!"),
 });
 
 interface CourseInputProps {
@@ -37,13 +43,25 @@ interface CourseInputProps {
 }
 
 const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
-  const { id, addCourse, courses } = useGlobalStore(
+  const {
+    sessionCookie,
+    isAuthenticated,
+    setSessionModalOpen,
+    addCourse,
+    courses,
+  } = useGlobalStore(
     useShallow((state) => ({
-      id: state.id,
+      sessionCookie: state.sessionCookie,
+      isAuthenticated: state.isAuthenticated,
+      setSessionModalOpen: state.setSessionModalOpen,
       addCourse: state.addCourse,
       courses: state.courses,
     }))
   );
+  const isDemoMode =
+    isAuthenticated &&
+    (sessionCookie === "MOCK_SESSION" || sessionCookie === "DEMO");
+
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,11 +71,12 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
   });
 
   const handleFetch = async (courseCode: string) => {
-    if (!id) {
-      toast.error("You haven't set your ID number yet.", {
-        description: "Set your ID on the button at the top right corner.",
+    if (!isAuthenticated && !sessionCookie) {
+      toast.error("You haven't connected ArchersHub yet.", {
+        description:
+          "Connect your ArchersHub session using the button on the top right or below.",
       });
-
+      setSessionModalOpen(true);
       return;
     }
 
@@ -66,19 +85,29 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
         description:
           "You've already added that course. To update it, click the course list settings button.",
       });
-
       return;
     }
 
     try {
-      const { data, error } = await fetchCourse(courseCode, id);
+      const { data, error, authExpired } = await fetchCourse(
+        courseCode,
+        sessionCookie
+      );
+
+      if (authExpired) {
+        toast.error("ArchersHub Session Expired", {
+          description:
+            "Please reconnect your session cookie or activate Demo Mode to fetch courses.",
+        });
+        setSessionModalOpen(true);
+        return;
+      }
 
       if (!data || error) {
-        toast.error("Something went wrong while fetching...", {
+        toast.error(error || "Something went wrong while fetching...", {
           description:
-            "The server is facing some issues right now, try again in a bit.",
+            "Please check the course code, try Demo Mode, or add as a custom course.",
         });
-
         return;
       }
 
@@ -87,48 +116,57 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
       if (newCourse.classes.length === 0) {
         toast.warning("No classes found...", {
           description:
-            "No classes were found for that course, maybe no classes have been scheduled yet.",
+            "No classes were found for that course, maybe no classes have been scheduled yet on ArchersHub.",
         });
-
         return;
       }
 
       if (isCached) {
-        toast.warning(`The server is having some issues...`, {
-          description:
-            "But don't worry, your course was still added. It might be an older version though, try updating it later.",
-        });
+        toast.info(
+          isDemoMode
+            ? `Loaded simulated ${courseCode} from cache`
+            : `Loaded ${courseCode} from cache`,
+          {
+            description: "Course was added using recent cache.",
+          }
+        );
       } else {
-        toast.success(`Course ${courseCode} added successfully!`);
+        toast.success(
+          isDemoMode
+            ? `Simulated course ${courseCode} added (Demo Mode)`
+            : `Course ${courseCode} added successfully from ArchersHub!`
+        );
       }
 
       setActiveCourse(courses.length);
       addCourse(newCourse);
+      form.reset();
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message.includes("unexpected response")) {
+        if (
+          error.message.includes("unexpected response") ||
+          error.message.includes("429")
+        ) {
           toast.warning("Slow down!", {
             description:
-              "You're doing too many requests too quickly. Please wait a bit before adding more. This is to prevent spamming the server.",
+              "You're making too many requests too quickly. Please wait a bit before adding more.",
           });
         } else if (error.message.includes("fetch failed")) {
           toast.error("Something went wrong while fetching...", {
             description:
-              "The server may be facing some issues right now, try again in a bit.",
+              "ArchersHub or the server may be facing issues right now, try again in a bit.",
           });
         } else {
           toast.error("Something unexpected happened...", {
-            description:
-              "An unexpected error occurred. Please try again later or contact the developer.",
+            description: error.message || "An unexpected error occurred.",
           });
         }
       }
     }
   };
 
-  const addMLSCourse = async (values: z.infer<typeof formSchema>) => {
+  const addArchersHubCourse = async (values: z.infer<typeof formSchema>) => {
     setIsFetching(true);
-
     try {
       await handleFetch(values.courseCode.toUpperCase());
     } catch (_error) {
@@ -142,28 +180,29 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
   };
 
   const addCustomCourse = (values: z.infer<typeof formSchema>) => {
-    if (courses.some((course) => course.courseCode === values.courseCode)) {
+    const code = values.courseCode.toUpperCase();
+    if (courses.some((course) => course.courseCode === code)) {
       toast.error("Duplicate Course Code Detected", {
         description:
           "You've already added that course. To update it, click the course settings button.",
       });
-
       return;
     }
 
     addCourse({
-      courseCode: values.courseCode,
+      courseCode: code,
       classes: [],
       lastFetched: new Date(),
       isCustom: true,
     });
+    form.reset();
   };
 
   const dropdownItems: DropdownItem[] = [
     {
-      name: "Add from MLS",
+      name: "Add from ArchersHub",
       Icon: Import,
-      onClick: () => form.handleSubmit(addMLSCourse)(),
+      onClick: () => form.handleSubmit(addArchersHubCourse)(),
     },
     {
       name: "Add as Custom Course",
@@ -172,16 +211,16 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
     },
   ];
 
-  if (!id) {
+  if (!isAuthenticated && !sessionCookie) {
     return (
-      <IDInput>
+      <ArchersHubAuthDialog>
         <Button
           variant="outline"
-          className="inline-flex w-full animate-pulse items-center border-primary"
+          className="inline-flex w-full animate-pulse items-center border-amber-500 text-amber-600 dark:text-amber-400"
         >
-          <IdCard className="mr-2 size-4" /> Set ID Number
+          <KeyRound className="mr-2 size-4" /> Connect ArchersHub Session
         </Button>
-      </IDInput>
+      </ArchersHubAuthDialog>
     );
   }
 
@@ -189,7 +228,7 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
     <Form {...form}>
       <form
         noValidate
-        onSubmit={form.handleSubmit(addMLSCourse)}
+        onSubmit={form.handleSubmit(addArchersHubCourse)}
         className="space-y-4"
       >
         <FormField
@@ -197,9 +236,19 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
           name="courseCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Course Code</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Course Code</FormLabel>
+                {isDemoMode && (
+                  <Badge
+                    variant="secondary"
+                    className="gap-1 border-amber-500/30 bg-amber-100 px-1.5 py-0 font-medium text-[10px] text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                  >
+                    <Sparkles className="size-2.5 text-amber-500" /> Demo Mode
+                  </Badge>
+                )}
+              </div>
               <FormControl>
-                <Input placeholder="GE12345" {...field} />
+                <Input placeholder="CCPROG1" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

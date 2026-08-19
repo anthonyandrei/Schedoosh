@@ -24,7 +24,7 @@ export default function AddCustomClass({ courseCode }: AddCustomClassProps) {
       open={open}
       setOpen={setOpen}
       title="Add Custom Class"
-      description="For classes/schedules that aren't found in MLS."
+      description="For classes/schedules that aren't found in ArchersHub."
       trigger={
         <Button variant="outline" size="sm">
           <Plus className="mr-2 size-4" />
