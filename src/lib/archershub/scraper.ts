@@ -339,9 +339,27 @@ export async function scrapeCourseFromArchersHub(
 
           const schedules: Schedule[] = schedParts.map((part) => {
             const inner = part.replace(/^\[/, "").replace(/\]$/, "").trim();
-            const colonParts = inner.split(":");
-            const timeInfo = colonParts[0].trim();
-            const roomInfo = colonParts.length > 1 ? colonParts[1].trim() : "";
+            // The separator between time info and room info is "  :" (padded colon),
+            // NOT bare ":" which appears inside times like "07:30 AM".
+            // Use lastIndexOf to find the room separator, not split.
+            const lastSepIdx = inner.lastIndexOf("  :");
+            let timeInfo: string;
+            let roomInfo: string;
+            if (lastSepIdx !== -1) {
+              timeInfo = inner.substring(0, lastSepIdx).trim();
+              roomInfo = inner.substring(lastSepIdx + 3).trim();
+            } else {
+              // Fallback: try single-space-padded " : "
+              const fallbackIdx = inner.lastIndexOf(" : ");
+              if (fallbackIdx !== -1) {
+                timeInfo = inner.substring(0, fallbackIdx).trim();
+                roomInfo = inner.substring(fallbackIdx + 3).trim();
+              } else {
+                // No room separator at all — entire string is time info
+                timeInfo = inner;
+                roomInfo = "";
+              }
+            }
 
             const timeParts = timeInfo.split(" - ").map((s) => s.trim());
             const dayStr = timeParts[0];
@@ -370,7 +388,10 @@ export async function scrapeCourseFromArchersHub(
               day,
               start,
               end,
-              date: "TBA",
+              date:
+                row.START_DATE && row.END_DATE
+                  ? `${row.START_DATE} - ${row.END_DATE}`
+                  : "TBA",
               isOnline,
               room,
             };

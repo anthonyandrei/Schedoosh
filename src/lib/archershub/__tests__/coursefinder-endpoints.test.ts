@@ -128,13 +128,29 @@ test("scrapeCourseFromArchersHub parses the real GetCFData payload into Course/C
     const s20g = result.course.classes.find((c) => c.section === "S20G");
     assert.ok(s20g, "section S20G must be present");
     assert.equal(s20g!.professor, "Louis Lu");
+    assert.equal(s20g!.modality, "HYBRID");
     assert.equal(s20g!.schedules.length, 2);
+    assert.equal(s20g!.schedules[0].day, "F");
+    assert.equal(s20g!.schedules[0].start, 915);
+    assert.equal(s20g!.schedules[0].end, 1045);
+    assert.equal(s20g!.schedules[0].room, "G302A");
+    assert.equal(s20g!.schedules[0].isOnline, false);
+    assert.equal(s20g!.schedules[0].date, "07/10/2026 - 12/09/2026");
+    assert.equal(s20g!.schedules[1].day, "T");
+    assert.equal(s20g!.schedules[1].start, 915);
+    assert.equal(s20g!.schedules[1].end, 1045);
+    assert.equal(s20g!.schedules[1].room, "Online");
+    assert.equal(s20g!.schedules[1].isOnline, true);
+    assert.equal(s20g!.schedules[1].date, "07/10/2026 - 12/09/2026");
 
     const s48b = result.course.classes.find((c) => c.section === "S48B");
     assert.ok(s48b, "section S48B must be present");
     assert.equal(s48b!.enrolled, 30);
     assert.equal(s48b!.enrollCap, 40);
     assert.equal(s48b!.schedules.length, 3);
+    assert.equal(s48b!.schedules[0].start, 730);
+    assert.equal(s48b!.schedules[0].end, 900);
+    assert.equal(s48b!.schedules[0].room, "G302A");
     // MAIN_TEACHER was "" in the live payload for this section; the
     // parser must not crash or fabricate a name.
     assert.equal(typeof s48b!.professor, "string");
@@ -145,6 +161,10 @@ test("scrapeCourseFromArchersHub parses the real GetCFData payload into Course/C
     // "[ MONDAY - 07:30 AM - 09:00 AM   ]" — must not throw, must fall
     // back to a placeholder room rather than crash the parse.
     assert.equal(s45!.schedules.length, 4);
+    assert.equal(s45!.schedules[0].day, "M");
+    assert.equal(s45!.schedules[0].start, 730);
+    assert.equal(s45!.schedules[0].end, 900);
+    assert.equal(s45!.schedules[0].room, "TBA");
     for (const sched of s45!.schedules) {
       assert.equal(typeof sched.room, "string");
       assert.ok(sched.room.length > 0);

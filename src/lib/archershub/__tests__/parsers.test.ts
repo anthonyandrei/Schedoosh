@@ -307,6 +307,14 @@ test("analyzeSessionCookie identifies affinity-only cookies and distinguishes au
   assert.equal(analysisFull.isAffinityOnly, false);
   assert.equal(analysisFull.hasAuthToken, true);
 
+  // Cookie string with __Secure-SID
+  const secureSidCookie =
+    "ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a; __Secure-SID=3huocv4ar3zyymsvzfphqhs2";
+  const analysisSecureSid = analyzeSessionCookie(secureSidCookie);
+  assert.equal(analysisSecureSid.isValid, true);
+  assert.equal(analysisSecureSid.isAffinityOnly, false);
+  assert.equal(analysisSecureSid.hasAuthToken, true);
+
   // Raw token string
   const analysisRaw = analyzeSessionCookie(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"

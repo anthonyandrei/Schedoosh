@@ -215,14 +215,28 @@ export async function validateArchersHubSession(
       };
     }
 
+    // Check logged-in markers FIRST — the authenticated dashboard page
+    // contains CSS class "student-login" on <body> and "StudentLogin"
+    // references that would false-positive the login page check.
+    const isLoggedIn =
+      body.includes('id="IsLoggedIn"') ||
+      body.includes('id="userID"') ||
+      body.includes('id="hdnStudId"');
+
+    if (isLoggedIn) {
+      return {
+        success: true,
+      };
+    }
+
+    // Only check for login page AFTER confirming no logged-in markers
     const isLoginPage =
       (response.redirected &&
         (response.url.includes("/Login") ||
-          response.url.includes("/StudentLogin") ||
           response.url.includes("/Account/Login"))) ||
       body.includes("<title>Login</title>") ||
-      body.includes("student-login") ||
-      body.includes("StudentLogin");
+      body.includes('id="loginForm"') ||
+      body.includes('name="loginForm"');
 
     if (isLoginPage) {
       if (analysis.isAffinityOnly) {
@@ -239,17 +253,6 @@ export async function validateArchersHubSession(
         success: false,
         error:
           "Your ArchersHub session appears to be expired or you are not logged in. Please log in to archershub.dlsu.edu.ph, navigate to Course Finder or Enlistment, then copy the Cookie header from the DevTools Network Tab.",
-      };
-    }
-
-    const isLoggedIn =
-      body.includes('id="IsLoggedIn"') ||
-      body.includes('id="userID"') ||
-      body.includes('id="hdnStudId"');
-
-    if (isLoggedIn) {
-      return {
-        success: true,
       };
     }
 

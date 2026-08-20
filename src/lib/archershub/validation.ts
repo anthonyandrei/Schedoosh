@@ -40,6 +40,9 @@ const AUTH_KEY_PATTERNS = [
   "jwt",
   "bearer",
   "sessionid",
+  "__secure-sid",
+  "__secure-",
+  "requestverificationtoken",
 ];
 
 /**
