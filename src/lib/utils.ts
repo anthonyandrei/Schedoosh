@@ -292,3 +292,66 @@ export function calculateHeight(params: {
 
   return (totalMinutes / 60) * cellSizePx;
 }
+
+/**
+ * Generates an ArcherEye professor profile URL from raw instructor strings.
+ * ArcherEye uses a last-name-first slug format (e.g. `/professor/lastname-firstname`).
+ *
+ * Returns null if the instructor is empty, unassigned, or a sentinel placeholder (TBA, STAFF, etc.).
+ */
+export function getArcherEyeUrl(
+  professor: string | null | undefined
+): string | null {
+  if (!professor) return null;
+
+  const trimmed = professor.trim();
+  if (!trimmed || /^(tba|tbd|staff|faculty|n\/a|-)$/i.test(trimmed)) {
+    return null;
+  }
+
+  const normalized = trimmed.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  let lastName = "";
+  let firstName = "";
+
+  if (normalized.includes(",")) {
+    const parts = normalized.split(",").map((p) => p.trim());
+    lastName = parts[0] || "";
+    firstName = (parts[1] || "")
+      .replace(/(?:^|\s+)[a-zA-Z]\.?(?=\s+|$)/g, " ")
+      .trim();
+  } else {
+    const words = normalized.split(/\s+/).filter(Boolean);
+    if (words.length < 2) {
+      return null;
+    }
+    lastName = words[words.length - 1];
+    firstName = words
+      .slice(0, -1)
+      .join(" ")
+      .replace(/(?:^|\s+)[a-zA-Z]\.?(?=\s+|$)/g, " ")
+      .trim();
+  }
+
+  const cleanLast = lastName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  const cleanFirst = firstName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (!cleanLast || !cleanFirst) {
+    return null;
+  }
+
+  return `https://archer-eye.com/professor/${cleanLast}-${cleanFirst}`;
+}

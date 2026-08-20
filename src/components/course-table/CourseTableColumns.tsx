@@ -5,7 +5,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Class, Schedule } from "@/lib/definitions";
-import { formatTime, toProperCase } from "@/lib/utils";
+import { formatTime, getArcherEyeUrl, toProperCase } from "@/lib/utils";
 import TooltipWrapper from "../wrappers/TooltipWrapper";
 import RowSettings from "./RowSettings";
 import { SortableHeader } from "./SortableHeader";
@@ -72,25 +72,24 @@ export const columns: ColumnDef<Class>[] = [
     ),
     filterFn: "arrIncludesSome",
     cell: ({ row, cell }) => {
-      if (!row.original.professor) return "-";
-      const [lastName, firstName] = row.original.professor
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/\b[A-Z]\.\s?/g, "")
-        .split(",")
-        .map((name) => name.trim().toLowerCase().replace(/\s+/g, "-"));
+      const profName = cell.getValue() as string;
+      if (!row.original.professor || profName === "-") return "-";
 
-      const profLink = `/${firstName}-${lastName}`;
+      const archerEyeUrl = getArcherEyeUrl(row.original.professor);
+
+      if (!archerEyeUrl) {
+        return <span>{profName}</span>;
+      }
 
       return (
         <TooltipWrapper content="View ArcherEye Profile" delayDuration={300}>
           <a
-            href={`https://archer-eye.com/professor${profLink}`}
+            href={archerEyeUrl}
             target="_blank"
             className="inline-flex items-center gap-2"
             rel="noopener"
           >
-            {cell.getValue() as string}{" "}
+            {profName}{" "}
             <SquareArrowOutUpRight
               className="size-3 shrink-0 text-accent-foreground"
               strokeWidth={2.5}
