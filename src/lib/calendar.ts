@@ -4,9 +4,9 @@ import { DaysEnum } from "./enums";
 import {
   addDaysToDate,
   convertToIcalDay,
+  formatProfessorName,
   formatTime,
   inferRoom,
-  toProperCase,
 } from "./utils";
 
 const SEMESTER_WEEKS = 13; // Number of weeks in a semester
@@ -81,7 +81,7 @@ export function createICalendar(classes: Class[]) {
       const eventInfo = {
         summary: `[${classData.section}] ${classData.course}`,
         description: classData.professor
-          ? `Professor: ${toProperCase(classData.professor)}`
+          ? `Professor: ${formatProfessorName(classData.professor) || "TBA"}`
           : "",
         location: inferRoom(classData, firstSchedule),
       };
@@ -103,7 +103,7 @@ export function createICalendar(classes: Class[]) {
       const eventInfo = {
         summary: `[${classData.section}] ${classData.course}`,
         description: classData.professor
-          ? `Professor: ${toProperCase(classData.professor)}`
+          ? `Professor: ${formatProfessorName(classData.professor) || "TBA"}`
           : "",
         location: inferRoom(classData, sched),
       };

@@ -41,3 +41,4 @@ next-env.d.ts
 
 # AI assistant artifacts
 context-snapshot.json
+.env*

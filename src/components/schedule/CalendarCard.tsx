@@ -5,10 +5,10 @@ import { Card } from "@/components/ui/card";
 import { Class, Schedule } from "@/lib/definitions";
 import {
   cn,
+  formatProfessorName,
   formatTime,
   getCardColors,
   inferRoom,
-  toProperCase,
 } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 
@@ -65,7 +65,7 @@ const CalendarCard = ({
       content: `${isMobile ? currClass.section : ""} ${room === "TBA" ? "" : room}`,
     },
     {
-      content: `${toProperCase(currClass.professor)}`,
+      content: `${formatProfessorName(currClass.professor) || "TBA"}`,
       className: cn(isMobile && "line-clamp-2 text-wrap"),
     },
   ];
