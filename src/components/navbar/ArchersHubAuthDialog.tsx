@@ -2,11 +2,10 @@
 
 import {
   AlertTriangle,
-  Check,
   CheckCircle2,
-  Copy,
   ExternalLink,
   KeyRound,
+  Loader2,
   Lock,
   LogOut,
   Network,
@@ -37,8 +36,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { analyzeSessionCookie } from "@/lib/archershub/validation";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import ResponsiveButton from "../wrappers/ResponsiveButton";
-
-const CONSOLE_SNIPPET = `copy(document.cookie);`;
 
 interface ArchersHubAuthDialogProps {
   children?: ReactNode;
@@ -72,7 +69,6 @@ export default function ArchersHubAuthDialog({
     (sessionCookie === "MOCK_SESSION" || sessionCookie === "DEMO");
 
   const [inputVal, setInputVal] = useState(sessionCookie || "");
-  const [hasCopiedSnippet, setHasCopiedSnippet] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
 
   const cookieAnalysis = useMemo(() => {
@@ -84,22 +80,6 @@ export default function ArchersHubAuthDialog({
       setInputVal(sessionCookie || "");
     }
   }, [isSessionModalOpen, sessionCookie]);
-
-  const handleCopySnippet = async () => {
-    try {
-      await navigator.clipboard.writeText(CONSOLE_SNIPPET);
-      setHasCopiedSnippet(true);
-      toast.success("Snippet copied to clipboard!", {
-        description:
-          "Paste into DevTools console. Note: HttpOnly cookies require the Network Tab method below.",
-      });
-      setTimeout(() => setHasCopiedSnippet(false), 2500);
-    } catch {
-      toast.error(
-        "Failed to copy automatically. Please copy the snippet manually."
-      );
-    }
-  };
 
   const handleConnect = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -114,29 +94,33 @@ export default function ArchersHubAuthDialog({
       const validation = await validateArchersHubSession(trimmed);
 
       if (!validation.success) {
-        if (validation.isAffinityOnly) {
+        if (validation.cloudflareBlocked) {
+          toast.error("Blocked by Cloudflare", {
+            description:
+              validation.error ||
+              "ArchersHub's bot protection blocked this check. Please try Demo Mode or add your courses manually.",
+            duration: 7000,
+          });
+        } else if (validation.isAffinityOnly) {
           toast.error("Incomplete Session Cookie", {
             description:
+              validation.error ||
               "Only Azure Gateway cookies were detected. Please copy your full Cookie header from the DevTools Network Tab as instructed below.",
             duration: 6000,
           });
-        } else if (validation.isUnauthenticatedOnly) {
-          toast.error("Pre-Login Cookie Detected", {
-            description:
-              "The pasted cookie appears to be from the login screen. Please log in to ArchersHub first, navigate to Course Finder or Enlistment, and copy the Cookie header.",
-            duration: 7000,
-          });
         } else {
-          toast.error("Invalid Session Token", {
+          toast.error("Couldn't Verify Your Session", {
             description:
-              validation.error || "Please check your session cookie format.",
+              validation.error ||
+              "Please check your session cookie and try again.",
+            duration: 6000,
           });
         }
         return;
       }
 
       await clearCourseCacheAction();
-      setSessionCookie(trimmed);
+      setSessionCookie(trimmed, true);
       setSessionModalOpen(false);
       toast.success("Connected to ArchersHub!", {
         description: "You can now search and import your courses seamlessly.",
@@ -153,7 +137,7 @@ export default function ArchersHubAuthDialog({
   const handleUseDemo = async () => {
     await clearCourseCacheAction();
     setInputVal("MOCK_SESSION");
-    setSessionCookie("MOCK_SESSION");
+    setSessionCookie("MOCK_SESSION", true);
     setSessionModalOpen(false);
     toast.success("Demo Mode Activated!", {
       description:
@@ -299,7 +283,7 @@ export default function ArchersHubAuthDialog({
 
               <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-xs leading-relaxed">
                 <p className="font-semibold text-foreground">
-                  Recommended: Copy via DevTools Network Tab (100% Reliable)
+                  Copy via DevTools Network Tab
                 </p>
                 <ol className="mt-1.5 list-inside list-decimal space-y-1 text-muted-foreground">
                   <li>
@@ -311,8 +295,8 @@ export default function ArchersHubAuthDialog({
                       className="font-medium text-foreground underline"
                     >
                       archershub.dlsu.edu.ph
-                    </a>
-                    .
+                    </a>{" "}
+                    and stay signed in — don&apos;t copy from the login page.
                   </li>
                   <li>
                     Navigate inside the portal (e.g. <strong>Enlistment</strong>{" "}
@@ -338,38 +322,6 @@ export default function ArchersHubAuthDialog({
                     <strong>Copy value</strong>.
                   </li>
                 </ol>
-              </div>
-
-              {/* Console Snippet Accordion / Helper */}
-              <div className="space-y-2 pt-1 text-xs">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span>Quick DevTools Console Snippet:</span>
-                  <Badge variant="outline" className="font-normal text-[10px]">
-                    Non-HttpOnly cookies
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 rounded-md border bg-background p-2 font-mono text-xs">
-                  <code className="flex-1 select-all overflow-x-auto text-primary">
-                    {CONSOLE_SNIPPET}
-                  </code>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    type="button"
-                    onClick={handleCopySnippet}
-                    className="h-7 shrink-0 gap-1 text-xs"
-                  >
-                    {hasCopiedSnippet ? (
-                      <>
-                        <Check className="size-3 text-green-600" /> Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="size-3" /> Copy Snippet
-                      </>
-                    )}
-                  </Button>
-                </div>
               </div>
             </div>
 
@@ -409,25 +361,11 @@ export default function ArchersHubAuthDialog({
                 </div>
               )}
 
-              {/* Pre-Login Cookie Warning Alert */}
-              {cookieAnalysis.isUnauthenticatedOnly && (
-                <div className="flex flex-col gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-                  <div className="flex items-center gap-1.5 font-semibold text-amber-800 text-xs dark:text-amber-300">
-                    <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                    <span>Pre-Login Cookie Detected</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed">
-                    The pasted string only contains anti-forgery tokens (
-                    <code>__RequestVerificationToken</code>) and anonymous
-                    session routing. This happens when copying cookies before
-                    completing student login.
-                  </p>
-                  <p className="font-medium text-[11px]">
-                    👉 Please sign in to <strong>archershub.dlsu.edu.ph</strong>
-                    , open <strong>Enlistment</strong> or{" "}
-                    <strong>Course Finder</strong>, and then copy the{" "}
-                    <code>Cookie:</code> header from the Network Tab.
-                  </p>
+              {/* Live validation in progress */}
+              {isValidating && (
+                <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-2.5 text-muted-foreground text-xs">
+                  <Loader2 className="size-4 shrink-0 animate-spin" />
+                  <span>Checking your session with ArchersHub&hellip;</span>
                 </div>
               )}
 

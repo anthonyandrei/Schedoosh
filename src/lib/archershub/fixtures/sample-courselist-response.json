@@ -1,0 +1,18 @@
+{
+  "CampusDrp": [],
+  "SessionDrp": [],
+  "CourseDrp": [
+    {
+      "COURSE_CREATION_ID": 5125,
+      "COURSE_NAME": "CCPROG1 - LOGIC FORMULATION AND INTRODUCTORY PROGRAMMING"
+    },
+    {
+      "COURSE_CREATION_ID": 5139,
+      "COURSE_NAME": "CCPROG3 - OBJECT-ORIENTED PROGRAMMING"
+    },
+    {
+      "COURSE_CREATION_ID": 5159,
+      "COURSE_NAME": "CCPROG2 - PROGRAMMING WITH STRUCTURED DATA TYPES"
+    }
+  ]
+}

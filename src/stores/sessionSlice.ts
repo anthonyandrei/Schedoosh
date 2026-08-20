@@ -1,4 +1,3 @@
-import { analyzeSessionCookie } from "@/lib/archershub/validation";
 import { Slice } from "./useGlobalStore";
 
 export interface SessionStates {
@@ -10,7 +9,7 @@ export interface SessionStates {
 }
 
 export interface SessionActions {
-  setSessionCookie: (cookie: string) => void;
+  setSessionCookie: (cookie: string, isAuthenticated: boolean) => void;
   setIdNumber: (idNumber: string) => void;
   clearSession: () => void;
   setSessionModalOpen: (open: boolean) => void;
@@ -29,14 +28,15 @@ const initState: SessionStates = {
 
 export const createSessionSlice: Slice<SessionSlice> = (set) => ({
   ...initState,
-  setSessionCookie: (cookie: string) => {
+  // isAuthenticated is decided by the caller (a live ArchersHub probe),
+  // not re-derived here from cookie shape — cookie names alone can't
+  // prove a session is logged in.
+  setSessionCookie: (cookie: string, isAuthenticated: boolean) => {
     const trimmed = cookie.trim();
-    const analysis = analyzeSessionCookie(trimmed);
-    const isValid = analysis.isValid && !analysis.isAffinityOnly;
     set({
       sessionCookie: trimmed,
-      isAuthenticated: isValid,
-      lastAuthenticated: isValid ? new Date() : null,
+      isAuthenticated,
+      lastAuthenticated: isAuthenticated ? new Date() : null,
     });
   },
 

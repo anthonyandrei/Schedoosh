@@ -111,7 +111,7 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
           action: {
             label: "Try Demo Mode",
             onClick: () => {
-              useGlobalStore.getState().setSessionCookie("MOCK_SESSION");
+              useGlobalStore.getState().setSessionCookie("MOCK_SESSION", true);
               toast.success("Demo Mode Activated!");
             },
           },

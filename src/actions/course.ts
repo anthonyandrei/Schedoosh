@@ -10,6 +10,7 @@ import {
   ArchersHubCloudflareError,
   ArchersHubCourseNotFoundError,
   ArchersHubRateLimitError,
+  DEFAULT_HEADERS,
 } from "../lib/archershub/types";
 import { analyzeSessionCookie } from "../lib/archershub/validation";
 import { Course } from "../lib/definitions";
@@ -18,7 +19,7 @@ export interface ValidateSessionResult {
   success: boolean;
   isMock?: boolean;
   isAffinityOnly?: boolean;
-  isUnauthenticatedOnly?: boolean;
+  cloudflareBlocked?: boolean;
   error?: string;
 }
 
@@ -156,36 +157,18 @@ export async function clearCourseCacheAction(): Promise<{ success: boolean }> {
 export async function validateArchersHubSession(
   sessionCookie: string
 ): Promise<ValidateSessionResult> {
-  const analysis = analyzeSessionCookie(sessionCookie);
+  const trimmed = sessionCookie?.trim() ?? "";
 
-  if (analysis.isAffinityOnly) {
-    return {
-      success: false,
-      isAffinityOnly: true,
-      error:
-        analysis.warningMessage ||
-        "Only Azure Gateway routing cookies were detected. The actual student authentication cookie is missing because modern browsers hide HttpOnly cookies from document.cookie. Please copy your full Cookie header from DevTools Network Tab or use Demo Mode.",
-    };
-  }
-
-  if (analysis.isUnauthenticatedOnly) {
-    return {
-      success: false,
-      isUnauthenticatedOnly: true,
-      error:
-        analysis.warningMessage ||
-        "The pasted cookies appear to be from the login page rather than an active logged-in ArchersHub session. Please log in to ArchersHub first, navigate to Course Finder or Enlistment, and copy the Cookie header from the DevTools Network Tab.",
-    };
-  }
-
-  if (analysis.isMock) {
+  if (trimmed === "MOCK_SESSION" || trimmed === "DEMO") {
     return {
       success: true,
       isMock: true,
     };
   }
 
-  if (!analysis.isValid) {
+  const analysis = analyzeSessionCookie(sessionCookie);
+
+  if (!trimmed || (!analysis.isValid && !analysis.isAffinityOnly)) {
     return {
       success: false,
       error:
@@ -194,7 +177,92 @@ export async function validateArchersHubSession(
     };
   }
 
-  return {
-    success: true,
-  };
+  try {
+    const signal =
+      typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
+        ? AbortSignal.timeout(8000)
+        : undefined;
+
+    const response = await fetch(
+      "https://archershub.dlsu.edu.ph/StudentDashboard",
+      {
+        method: "GET",
+        headers: {
+          ...DEFAULT_HEADERS,
+          Cookie: trimmed,
+        },
+        redirect: "follow",
+        signal,
+      }
+    );
+
+    const body = await response.text();
+
+    const isCloudflare =
+      body.includes("challenges.cloudflare.com") ||
+      body.includes("cf-turnstile") ||
+      body.includes("cf-browser-verification") ||
+      body.includes("<title>Just a moment...</title>") ||
+      body.includes("Cloudflare") ||
+      body.includes("Attention Required");
+
+    if (isCloudflare) {
+      return {
+        success: false,
+        cloudflareBlocked: true,
+        error:
+          "ArchersHub request was blocked by Cloudflare Bot Protection or security challenge. Please try Demo Mode or add your courses manually.",
+      };
+    }
+
+    const isLoginPage =
+      (response.redirected &&
+        (response.url.includes("/Login") ||
+          response.url.includes("/StudentLogin") ||
+          response.url.includes("/Account/Login"))) ||
+      body.includes("<title>Login</title>") ||
+      body.includes("student-login") ||
+      body.includes("StudentLogin");
+
+    if (isLoginPage) {
+      if (analysis.isAffinityOnly) {
+        return {
+          success: false,
+          isAffinityOnly: true,
+          error:
+            analysis.warningMessage ||
+            "Only Azure Gateway routing cookies were detected. The actual student authentication cookie is missing because modern browsers hide HttpOnly cookies from document.cookie. Please copy your full Cookie header from DevTools Network Tab or use Demo Mode.",
+        };
+      }
+
+      return {
+        success: false,
+        error:
+          "Your ArchersHub session appears to be expired or you are not logged in. Please log in to archershub.dlsu.edu.ph, navigate to Course Finder or Enlistment, then copy the Cookie header from the DevTools Network Tab.",
+      };
+    }
+
+    const isLoggedIn =
+      body.includes('id="IsLoggedIn"') ||
+      body.includes('id="userID"') ||
+      body.includes('id="hdnStudId"');
+
+    if (isLoggedIn) {
+      return {
+        success: true,
+      };
+    }
+
+    return {
+      success: false,
+      error:
+        "Unexpected response from ArchersHub while validating your session. Please try again.",
+    };
+  } catch (_error) {
+    return {
+      success: false,
+      error:
+        "Could not reach ArchersHub to validate your session. Please check your connection and try again.",
+    };
+  }
 }

@@ -2,7 +2,6 @@ export interface CookieAnalysisResult {
   isValid: boolean;
   isMock: boolean;
   isAffinityOnly: boolean;
-  isUnauthenticatedOnly: boolean;
   hasAuthToken: boolean;
   cookieKeys: string[];
   warningMessage?: string;
@@ -19,12 +18,6 @@ const GATEWAY_ANALYTICS_KEYS = new Set([
   "_cfuvid",
   "_clck",
   "_clsk",
-]);
-
-const PRE_LOGIN_CSRF_KEYS = new Set([
-  "__requestverificationtoken",
-  "requestverificationtoken",
-  "__secure-sid",
 ]);
 
 const AUTH_KEY_PATTERNS = [
@@ -51,7 +44,7 @@ const AUTH_KEY_PATTERNS = [
 
 /**
  * Analyzes a raw session cookie or token string to diagnose whether it contains
- * actual authentication tokens, only Azure Gateway cookies, or unauthenticated pre-login cookies.
+ * actual authentication tokens or only Azure Gateway cookies.
  */
 export function analyzeSessionCookie(
   rawInput?: string | null
@@ -61,7 +54,6 @@ export function analyzeSessionCookie(
       isValid: false,
       isMock: false,
       isAffinityOnly: false,
-      isUnauthenticatedOnly: false,
       hasAuthToken: false,
       cookieKeys: [],
     };
@@ -73,7 +65,6 @@ export function analyzeSessionCookie(
       isValid: false,
       isMock: false,
       isAffinityOnly: false,
-      isUnauthenticatedOnly: false,
       hasAuthToken: false,
       cookieKeys: [],
     };
@@ -85,7 +76,6 @@ export function analyzeSessionCookie(
       isValid: true,
       isMock: true,
       isAffinityOnly: false,
-      isUnauthenticatedOnly: false,
       hasAuthToken: true,
       cookieKeys: ["MOCK_SESSION"],
     };
@@ -98,7 +88,6 @@ export function analyzeSessionCookie(
         isValid: true,
         isMock: false,
         isAffinityOnly: false,
-        isUnauthenticatedOnly: false,
         hasAuthToken: true,
         cookieKeys: ["RAW_TOKEN"],
       };
@@ -107,7 +96,6 @@ export function analyzeSessionCookie(
       isValid: false,
       isMock: false,
       isAffinityOnly: false,
-      isUnauthenticatedOnly: false,
       hasAuthToken: false,
       cookieKeys: [],
       warningMessage:
@@ -137,7 +125,6 @@ export function analyzeSessionCookie(
       isValid: false,
       isMock: false,
       isAffinityOnly: false,
-      isUnauthenticatedOnly: false,
       hasAuthToken: false,
       cookieKeys: [],
       warningMessage:
@@ -146,23 +133,17 @@ export function analyzeSessionCookie(
   }
 
   // Check if any key represents an actual authenticated session token
-  // (Excluding anti-forgery / CSRF tokens which are generated before login)
-  const nonCsrfKeys = keys.filter((k) => !PRE_LOGIN_CSRF_KEYS.has(k));
-  const hasAuthKey = nonCsrfKeys.some((k) =>
+  const hasAuthKey = keys.some((k) =>
     AUTH_KEY_PATTERNS.some((pattern) => k.includes(pattern))
   );
 
   const allKeysAreGateway = keys.every((k) => GATEWAY_ANALYTICS_KEYS.has(k));
-  const allKeysAreGatewayOrCsrf = keys.every(
-    (k) => GATEWAY_ANALYTICS_KEYS.has(k) || PRE_LOGIN_CSRF_KEYS.has(k)
-  );
 
   if (allKeysAreGateway && !hasAuthKey) {
     return {
       isValid: false,
       isMock: false,
       isAffinityOnly: true,
-      isUnauthenticatedOnly: false,
       hasAuthToken: false,
       cookieKeys: keys,
       warningMessage:
@@ -170,24 +151,10 @@ export function analyzeSessionCookie(
     };
   }
 
-  if (allKeysAreGatewayOrCsrf && !hasAuthKey) {
-    return {
-      isValid: false,
-      isMock: false,
-      isAffinityOnly: false,
-      isUnauthenticatedOnly: true,
-      hasAuthToken: false,
-      cookieKeys: keys,
-      warningMessage:
-        "The pasted cookies appear to be from the login page (contains only anti-forgery tokens and gateway routing) rather than an active logged-in ArchersHub session. Please log in to ArchersHub first, navigate to Course Finder or Enlistment, and copy the Cookie header from the DevTools Network Tab.",
-    };
-  }
-
   return {
     isValid: true,
     isMock: false,
     isAffinityOnly: false,
-    isUnauthenticatedOnly: false,
     hasAuthToken: true,
     cookieKeys: keys,
   };

@@ -1,0 +1,18 @@
+{
+  "CampusDrp": [
+    { "CAMPUSNO": 7, "CAMPUSNAME": "Manila", "IS_STUDENT_CAMPUS": 1 },
+    { "CAMPUSNO": 8, "CAMPUSNAME": "Laguna", "IS_STUDENT_CAMPUS": 0 }
+  ],
+  "SessionDrp": [
+    {
+      "ACADEMIC_SESSION_ID": 155,
+      "ACADEMIC_SESSION_NAME": "AY 2026-2027 Term 1",
+      "IS_CURRENT_SESSION": true
+    },
+    {
+      "ACADEMIC_SESSION_ID": 157,
+      "ACADEMIC_SESSION_NAME": "AY 2026-2027 Term 3",
+      "IS_CURRENT_SESSION": false
+    }
+  ]
+}

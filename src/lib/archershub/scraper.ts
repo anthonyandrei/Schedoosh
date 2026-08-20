@@ -1,9 +1,10 @@
-import { Course } from "../definitions";
+import { Class, Course, Schedule } from "../definitions";
 import sampleCourseResponse from "./fixtures/sample-course-response.json";
 import {
   buildCourseObject,
-  parseArchersHubHtml,
   parseArchersHubJson,
+  parseDays,
+  timeStringToMilitary,
 } from "./parsers";
 import {
   ARCHERSHUB_ENDPOINTS,
@@ -15,6 +16,10 @@ import {
   ArchersHubScrapeResult,
   ArchersHubScraperOptions,
   DEFAULT_HEADERS,
+  RawArchersHubAcademicSession,
+  RawArchersHubCampus,
+  RawArchersHubCFData,
+  RawArchersHubCourseListItem,
 } from "./types";
 import { analyzeSessionCookie } from "./validation";
 
@@ -39,8 +44,8 @@ export function formatSessionCookie(sessionCookie: string): string {
     return trimmed;
   }
 
-  // If provided as a raw session token or connect.sid / JSESSIONID / token value
-  return `session=${trimmed}; ArchersHubAuth=${trimmed}; token=${trimmed}; .AspNetCore.Cookies=${trimmed}; ASP.NET_SessionId=${trimmed}`;
+  // Best-effort: return as-is
+  return trimmed;
 }
 
 /**
@@ -205,13 +210,6 @@ export async function scrapeCourseFromArchersHub(
     );
   }
 
-  if (analysis.isUnauthenticatedOnly) {
-    throw new ArchersHubAuthError(
-      analysis.warningMessage ||
-        "The pasted cookies appear to be from the login page rather than an active logged-in ArchersHub session. Please log in to ArchersHub first, navigate to Course Finder or Enlistment, and copy the Cookie header from the DevTools Network Tab."
-    );
-  }
-
   const cookieHeader = formatSessionCookie(sessionCookie);
   const timeoutMs = options.timeoutMs ?? 10000;
   const maxRetries = options.maxRetries ?? 2;
@@ -223,150 +221,210 @@ export async function scrapeCourseFromArchersHub(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      // Search via ArchersHub JSON API or HTML endpoint
-      const searchUrl = `${ARCHERSHUB_ENDPOINTS.COURSE_OFFERINGS}?course=${encodeURIComponent(
-        normalizedCode
-      )}&q=${encodeURIComponent(normalizedCode)}`;
+      const fetchApi = async (url: string, body?: string) => {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            ...DEFAULT_HEADERS,
+            Cookie: cookieHeader,
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body,
+          signal: controller.signal,
+        });
 
-      const response = await fetch(searchUrl, {
-        method: "GET",
-        headers: {
-          ...DEFAULT_HEADERS,
-          Cookie: cookieHeader,
-        },
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timeoutId));
-
-      // Handle Authentication Failures (401)
-      if (response.status === 401) {
-        throw new ArchersHubAuthError(
-          "ArchersHub session token is invalid or expired. Please re-authenticate or try Demo Mode."
-        );
-      }
-
-      // Handle 403 Forbidden (Cloudflare Bot Challenge vs Auth Forbidden)
-      if (response.status === 403) {
-        const text = await response.text().catch(() => "");
+        if (res.status === 401) {
+          throw new ArchersHubAuthError(
+            "ArchersHub session token is invalid or expired. Please re-authenticate or try Demo Mode."
+          );
+        }
+        if (res.status === 403) {
+          const text = await res.text().catch(() => "");
+          if (
+            text.includes("challenges.cloudflare.com") ||
+            text.includes("cf-turnstile") ||
+            text.includes("Cloudflare") ||
+            text.includes("Attention Required")
+          ) {
+            throw new ArchersHubCloudflareError();
+          }
+          throw new ArchersHubAuthError(
+            "ArchersHub access forbidden (403). Your session may be expired or lack permissions."
+          );
+        }
+        if (res.status === 429) {
+          throw new ArchersHubRateLimitError();
+        }
         if (
-          text.includes("challenges.cloudflare.com") ||
-          text.includes("cf-turnstile") ||
-          text.includes("Cloudflare") ||
-          text.includes("Attention Required")
+          res.redirected &&
+          (res.url.includes("/Login") ||
+            res.url.includes("/StudentLogin") ||
+            res.url.includes("/Account/Login"))
         ) {
-          throw new ArchersHubCloudflareError();
-        }
-        throw new ArchersHubAuthError(
-          "ArchersHub access forbidden (403). Your session may be expired or lack permissions."
-        );
-      }
-
-      // Handle Rate Limiting (429)
-      if (response.status === 429) {
-        if (attempt < maxRetries) {
-          const backoff = 2 ** attempt * 1000;
-          await new Promise((resolve) => setTimeout(resolve, backoff));
-          continue;
-        }
-        throw new ArchersHubRateLimitError();
-      }
-
-      // Check for redirects to login
-      if (
-        response.redirected &&
-        (response.url.includes("/Login") ||
-          response.url.includes("/StudentLogin") ||
-          response.url.includes("/Account/Login"))
-      ) {
-        throw new ArchersHubAuthError(
-          "ArchersHub session is invalid or expired. Please re-authenticate or try Demo Mode."
-        );
-      }
-
-      // Check for redirects to general server error
-      if (response.redirected && response.url.includes("/Error")) {
-        throw new ArchersHubError(
-          `ArchersHub server returned an error while querying "${normalizedCode}". Please verify the course code or try Demo Mode.`
-        );
-      }
-
-      if (!response.ok) {
-        throw new ArchersHubError(
-          `ArchersHub returned status ${response.status}: ${response.statusText}`,
-          response.status
-        );
-      }
-
-      const contentType = response.headers.get("content-type") || "";
-      let classes: ReturnType<typeof parseArchersHubJson> = [];
-
-      if (contentType.includes("application/json")) {
-        const json = await response.json();
-        classes = parseArchersHubJson(json, normalizedCode);
-      } else {
-        const html = await response.text();
-
-        // Check if the HTML returned is Cloudflare Turnstile / challenge
-        if (
-          html.includes("challenges.cloudflare.com") ||
-          html.includes("cf-turnstile") ||
-          html.includes("cf-browser-verification") ||
-          html.includes("<title>Just a moment...</title>")
-        ) {
-          throw new ArchersHubCloudflareError();
-        }
-
-        // Check if the HTML returned is a login page
-        const isAuthPage =
-          html.includes("<title>Login</title>") ||
-          html.includes("student-login") ||
-          html.includes("Login.css");
-
-        if (isAuthPage) {
           throw new ArchersHubAuthError(
             "ArchersHub session is invalid or expired. Please re-authenticate or try Demo Mode."
           );
         }
-
-        // Check if the HTML is an ASP.NET error page
-        const isErrorPage =
-          html.includes("/Error/Index") ||
-          html.includes("Object moved to") ||
-          html.includes("Server Error in");
-
-        if (isErrorPage) {
+        if (res.redirected && res.url.includes("/Error")) {
           throw new ArchersHubError(
             `ArchersHub server returned an error while querying "${normalizedCode}". Please verify the course code or try Demo Mode.`
           );
         }
-
-        classes = parseArchersHubHtml(html, normalizedCode);
-      }
-
-      // Filter classes strictly for this course code if multiple returned
-      const matchedClasses = classes.filter(
-        (c) => c.course.toUpperCase() === normalizedCode
-      );
-
-      const finalClasses = matchedClasses.length > 0 ? matchedClasses : classes;
-
-      if (finalClasses.length === 0) {
-        throw new ArchersHubCourseNotFoundError(normalizedCode);
-      }
-
-      const course = buildCourseObject(normalizedCode, finalClasses, false);
-
-      // Cache the result
-      courseCache.set(cacheKey, { course, timestamp: Date.now() });
-
-      return {
-        course,
-        isCached: false,
-        rawCount: finalClasses.length,
+        if (!res.ok) {
+          throw new ArchersHubError(
+            `ArchersHub returned status ${res.status}: ${res.statusText}`,
+            res.status
+          );
+        }
+        return res;
       };
+
+      try {
+        const ddRes = await fetchApi(ARCHERSHUB_ENDPOINTS.GET_ALL_DROPDOWNS);
+        const ddJson = await ddRes.json();
+
+        const campusList: RawArchersHubCampus[] = ddJson.CampusDrp || [];
+        const sessionList: RawArchersHubAcademicSession[] =
+          ddJson.SessionDrp || [];
+
+        const studentCampus =
+          campusList.find((c) => c.IS_STUDENT_CAMPUS === 1) || campusList[0];
+        const currentSession =
+          sessionList.find((s) => s.IS_CURRENT_SESSION === true) ||
+          sessionList[0];
+
+        if (!studentCampus || !currentSession) {
+          throw new ArchersHubError(
+            "Failed to resolve Campus or Academic Session from ArchersHub dropdown data."
+          );
+        }
+
+        const campusNo = studentCampus.CAMPUSNO;
+        const academicSessionId = currentSession.ACADEMIC_SESSION_ID;
+
+        const clRes = await fetchApi(
+          ARCHERSHUB_ENDPOINTS.GET_COURSE_LIST,
+          `Campusno=${campusNo}&AcademicSession=${academicSessionId}`
+        );
+        const clJson = await clRes.json();
+        const courseDrp: RawArchersHubCourseListItem[] = clJson.CourseDrp || [];
+
+        const matchedCourse = courseDrp.find((c) => {
+          const nameParts = c.COURSE_NAME.split(" - ");
+          return nameParts[0].trim().toUpperCase() === normalizedCode;
+        });
+
+        if (!matchedCourse) {
+          throw new ArchersHubCourseNotFoundError(normalizedCode);
+        }
+
+        const courseId = matchedCourse.COURSE_CREATION_ID;
+
+        const cfRes = await fetchApi(
+          ARCHERSHUB_ENDPOINTS.GET_CF_DATA,
+          `Campusno=${campusNo}&AcademicSession=${academicSessionId}&Courseid=${courseId}`
+        );
+        const cfData = await cfRes.json();
+
+        if (!Array.isArray(cfData) || cfData.length === 0) {
+          throw new ArchersHubCourseNotFoundError(normalizedCode);
+        }
+
+        const finalClasses: Class[] = cfData.map((row: RawArchersHubCFData) => {
+          const schedParts = (row.SCHEDULE || "")
+            .split("|")
+            .map((s) => s.trim())
+            .filter(Boolean);
+
+          const schedules: Schedule[] = schedParts.map((part) => {
+            const inner = part.replace(/^\[/, "").replace(/\]$/, "").trim();
+            const colonParts = inner.split(":");
+            const timeInfo = colonParts[0].trim();
+            const roomInfo = colonParts.length > 1 ? colonParts[1].trim() : "";
+
+            const timeParts = timeInfo.split(" - ").map((s) => s.trim());
+            const dayStr = timeParts[0];
+            const startStr = timeParts[1] || "";
+            const endStr = timeParts[2] || "";
+
+            const days = parseDays(dayStr);
+            const day = days[0] || "M";
+            const start = timeStringToMilitary(startStr);
+            const end = timeStringToMilitary(endStr);
+
+            let room = "TBA";
+            let isOnline = false;
+            if (roomInfo) {
+              if (roomInfo.toUpperCase() === "ONLINE") {
+                isOnline = true;
+                room = "Online";
+              } else if (roomInfo.startsWith("Room - ")) {
+                room = roomInfo.substring(7).trim();
+              } else {
+                room = roomInfo;
+              }
+            }
+
+            return {
+              day,
+              start,
+              end,
+              date: "TBA",
+              isOnline,
+              room,
+            };
+          });
+
+          let modality:
+            | "F2F"
+            | "ONLINE"
+            | "HYBRID"
+            | "PREDOMINANTLY ONLINE"
+            | "TENTATIVE" = "HYBRID";
+          if (schedules.length > 0) {
+            const allOnline = schedules.every((s) => s.isOnline);
+            const noneOnline = schedules.every((s) => !s.isOnline);
+            if (allOnline) modality = "ONLINE";
+            else if (noneOnline) modality = "F2F";
+          } else {
+            modality = "F2F";
+          }
+
+          const mainProf = (row.MAIN_TEACHER || "").trim();
+          const addlProf = (row.ADDITIONAL_TEACHER || "").trim();
+          const professor = mainProf || addlProf || "";
+
+          return {
+            code: row.SECTION_CREATION_ID,
+            course: normalizedCode,
+            section: row.SECTION_NAME || "TBA",
+            professor,
+            schedules,
+            enrolled: row.ENLISTED || 0,
+            enrollCap: row.CAPACITY || 0,
+            restriction: "",
+            modality,
+            remarks: row.SECTION_REMARK || "",
+            rooms: schedules.map((s) => s.room),
+          };
+        });
+
+        const course = buildCourseObject(normalizedCode, finalClasses, false);
+
+        courseCache.set(cacheKey, { course, timestamp: Date.now() });
+
+        return {
+          course,
+          isCached: false,
+          rawCount: finalClasses.length,
+        };
+      } finally {
+        clearTimeout(timeoutId);
+      }
     } catch (err) {
       lastError = err as Error;
 
-      // Don't retry on auth error, cloudflare block, or not found
       if (
         err instanceof ArchersHubAuthError ||
         err instanceof ArchersHubCloudflareError ||
@@ -379,7 +437,6 @@ export async function scrapeCourseFromArchersHub(
         break;
       }
 
-      // Exponential backoff before retry
       await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
     }
   }
