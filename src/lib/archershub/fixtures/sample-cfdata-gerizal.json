@@ -1,0 +1,51 @@
+{
+  "524": [
+    {
+      "SESSION": "AY 2026-2027 Term 1",
+      "CAMPUS": "Manila",
+      "COURSE_CREATION_ID": 524,
+      "SECTION_CREATION_ID": 793,
+      "SECTION_NAME": "Y12",
+      "CAPACITY": 45,
+      "UPDATED_CAPACITY": 0,
+      "SUBJECT_NAME": "GERIZAL - ANG BUHAY AT MGA AKDA NI RIZAL",
+      "SUBJECT_TYPE": "Lecture",
+      "CREDITS": 3.0,
+      "MAIN_TEACHER": "Jose Racho",
+      "ADDITIONAL_TEACHER": null,
+      "SCHEDULE": "[ FRIDAY - 02:30 PM - 04:00 PM   : Online ] | [ TUESDAY - 02:30 PM - 04:00 PM   : Online ]",
+      "ENLISTED": 0,
+      "APPROVED_COUNT": 0,
+      "START_DATE": "07/10/2026",
+      "END_DATE": "12/09/2026",
+      "BATCH_CREATION_ID": 0,
+      "SECTION_REMARK": "",
+      "ROOOMNAME": null,
+      "BATCHNAME": null
+    },
+    {
+      "SESSION": "AY 2026-2027 Term 1",
+      "CAMPUS": "Manila",
+      "COURSE_CREATION_ID": 524,
+      "SECTION_CREATION_ID": 2103,
+      "SECTION_NAME": "M14",
+      "CAPACITY": 40,
+      "UPDATED_CAPACITY": 0,
+      "SUBJECT_NAME": "GERIZAL - ANG BUHAY AT MGA AKDA NI RIZAL",
+      "SUBJECT_TYPE": "Lecture",
+      "CREDITS": 3.0,
+      "MAIN_TEACHER": "Jose Victor Zarcal Torres",
+      "ADDITIONAL_TEACHER": null,
+      "SCHEDULE": "[ FRIDAY - 02:30 PM - 04:00 PM   : Online ] | [ TUESDAY - 02:30 PM - 04:00 PM   : Room - L207 ]",
+      "ENLISTED": 0,
+      "APPROVED_COUNT": 0,
+      "START_DATE": "07/10/2026",
+      "END_DATE": "12/09/2026",
+      "BATCH_CREATION_ID": 0,
+      "SECTION_REMARK": "",
+      "ROOOMNAME": null,
+      "BATCHNAME": null
+    }
+  ],
+  "11992": []
+}

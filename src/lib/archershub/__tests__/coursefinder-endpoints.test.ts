@@ -25,7 +25,20 @@ import { ArchersHubCourseNotFoundError } from "../types";
 // Fixtures under src/lib/archershub/fixtures/sample-*.json were captured
 // verbatim from the live, authenticated portal (course: CCPROG1,
 // Courseid 5125, Manila/Campusno 7, AY 2026-2027 Term 1/AcademicSession
-// 155). This file is frozen for offload workers.
+// 155). sample-cfdata-nstp101.json and sample-cfdata-gerizal.json are
+// additional verbatim captures, keyed by COURSE_CREATION_ID, covering
+// course codes that resolve to more than one course id (NSTP101: 4 ids,
+// GERIZAL: 2, one of which legitimately has zero live sections). This
+// file is frozen for offload workers.
+//
+// START_DATE/END_DATE on every row is the academic term range, identical
+// across the whole university — not a per-section date. Schedule.date
+// must stay empty ("") for a regular weekly meeting; it is a sentinel
+// for one-off, non-repeating sessions, which ArchersHub never sends.
+// Section S48B's SCHEDULE string also contains two Friday bookings at
+// the same time in different rooms (G302A, G302B) — one class held in
+// two rooms, not two classes — which the parser must merge into a
+// single Schedule with a joined room string.
 
 const REAL_COOKIE =
   "ApplicationGatewayAffinityCORS=efbd9facb6f6e984a572d91915bfa51a; ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a; __Secure-SID=3huocv4ar3zyymsvzfphqhs2";
@@ -135,36 +148,62 @@ test("scrapeCourseFromArchersHub parses the real GetCFData payload into Course/C
     assert.equal(s20g!.schedules[0].end, 1045);
     assert.equal(s20g!.schedules[0].room, "G302A");
     assert.equal(s20g!.schedules[0].isOnline, false);
-    assert.equal(s20g!.schedules[0].date, "07/10/2026 - 12/09/2026");
+    // date is a one-off-session sentinel, not the academic term range.
+    // START_DATE/END_DATE (07/10/2026 - 12/09/2026) is identical across
+    // every section in the university and must never be written here.
+    assert.equal(s20g!.schedules[0].date, "");
     assert.equal(s20g!.schedules[1].day, "T");
     assert.equal(s20g!.schedules[1].start, 915);
     assert.equal(s20g!.schedules[1].end, 1045);
     assert.equal(s20g!.schedules[1].room, "Online");
     assert.equal(s20g!.schedules[1].isOnline, true);
-    assert.equal(s20g!.schedules[1].date, "07/10/2026 - 12/09/2026");
+    assert.equal(s20g!.schedules[1].date, "");
 
     const s48b = result.course.classes.find((c) => c.section === "S48B");
     assert.ok(s48b, "section S48B must be present");
     assert.equal(s48b!.enrolled, 30);
     assert.equal(s48b!.enrollCap, 40);
-    assert.equal(s48b!.schedules.length, 3);
-    assert.equal(s48b!.schedules[0].start, 730);
-    assert.equal(s48b!.schedules[0].end, 900);
-    assert.equal(s48b!.schedules[0].room, "G302A");
+    // Live SCHEDULE had two Friday 07:30-09:00 bookings in different
+    // rooms (G302A, G302B) plus one Tuesday online meeting: one class
+    // held across two rooms, not two classes. Must merge to 2 schedules,
+    // not 3, with the Friday room joined.
+    assert.equal(s48b!.schedules.length, 2);
+    const s48bFriday = s48b!.schedules.find((s) => s.day === "F");
+    assert.ok(s48bFriday, "Friday schedule must be present");
+    assert.equal(s48bFriday!.start, 730);
+    assert.equal(s48bFriday!.end, 900);
+    assert.equal(s48bFriday!.room, "G302A, G302B");
+    assert.equal(s48bFriday!.isOnline, false);
+    const s48bTuesday = s48b!.schedules.find((s) => s.day === "T");
+    assert.ok(s48bTuesday, "Tuesday schedule must be present");
+    assert.equal(s48bTuesday!.room, "Online");
+    assert.equal(s48bTuesday!.isOnline, true);
     // MAIN_TEACHER was "" in the live payload for this section; the
     // parser must not crash or fabricate a name.
     assert.equal(typeof s48b!.professor, "string");
 
     const s45 = result.course.classes.find((c) => c.section === "S45");
     assert.ok(s45, "section S45 must be present");
-    // Live schedule text included a meeting segment with no room at all:
-    // "[ MONDAY - 07:30 AM - 09:00 AM   ]" — must not throw, must fall
-    // back to a placeholder room rather than crash the parse.
-    assert.equal(s45!.schedules.length, 4);
-    assert.equal(s45!.schedules[0].day, "M");
-    assert.equal(s45!.schedules[0].start, 730);
-    assert.equal(s45!.schedules[0].end, 900);
-    assert.equal(s45!.schedules[0].room, "TBA");
+    // Live SCHEDULE had four entries, two per day at the same time:
+    // Monday paired a roomless entry ("[ MONDAY - 07:30 AM - 09:00 AM ]",
+    // falls back to the TBA placeholder) with a real-room duplicate
+    // (L230) — a garbled duplicate row, not a second physical room.
+    // Thursday paired two real, distinct rooms (G302B, G304A) — a
+    // genuine same-slot multi-room booking, like S48B's Friday.
+    // Merging by (day, start, end): a TBA placeholder is dropped in
+    // favor of a real room in the same group; two or more real rooms
+    // in the same group are joined. Must not throw.
+    assert.equal(s45!.schedules.length, 2);
+    const s45Monday = s45!.schedules.find((s) => s.day === "M");
+    assert.ok(s45Monday, "Monday schedule must be present");
+    assert.equal(s45Monday!.start, 730);
+    assert.equal(s45Monday!.end, 900);
+    assert.equal(s45Monday!.room, "L230");
+    const s45Thursday = s45!.schedules.find((s) => s.day === "H");
+    assert.ok(s45Thursday, "Thursday schedule must be present");
+    assert.equal(s45Thursday!.start, 730);
+    assert.equal(s45Thursday!.end, 900);
+    assert.equal(s45Thursday!.room, "G302B, G304A");
     for (const sched of s45!.schedules) {
       assert.equal(typeof sched.room, "string");
       assert.ok(sched.room.length > 0);
