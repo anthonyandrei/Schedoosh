@@ -38,3 +38,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env
+
+# AI assistant artifacts
+context-snapshot.json

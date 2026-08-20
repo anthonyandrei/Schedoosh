@@ -87,7 +87,7 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
     }
 
     try {
-      const { data, error, authExpired } = await fetchCourse(
+      const { data, error, authExpired, cloudflareBlocked } = await fetchCourse(
         courseCode,
         sessionCookie
       );
@@ -95,9 +95,27 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
       if (authExpired) {
         toast.error("ArchersHub Session Expired", {
           description:
+            error ||
             "Please reconnect your session cookie or activate Demo Mode to fetch courses.",
+          duration: 6000,
         });
         setSessionModalOpen(true);
+        return;
+      }
+
+      if (cloudflareBlocked) {
+        toast.error("ArchersHub Bot Protection Active", {
+          description:
+            "ArchersHub Cloudflare protection blocked direct scraping. You can activate Demo Mode or add courses manually.",
+          duration: 7000,
+          action: {
+            label: "Try Demo Mode",
+            onClick: () => {
+              useGlobalStore.getState().setSessionCookie("MOCK_SESSION");
+              toast.success("Demo Mode Activated!");
+            },
+          },
+        });
         return;
       }
 

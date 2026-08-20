@@ -26,13 +26,12 @@ export class ManualCoursePage extends BasePage {
       courses: [
         {
           courseCode: "CUSTOM101",
-          color: "#3b82f6",
           isCustom: true,
-          isSelected: true,
           lastFetched: new Date(),
           classes: [],
         },
       ],
+
       sessionCookie: "DEMO",
       isAuthenticated: true,
     });

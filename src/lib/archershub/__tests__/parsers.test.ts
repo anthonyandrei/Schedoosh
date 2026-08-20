@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { validateArchersHubSession } from "../../../actions/course";
 import { classSchema, courseSchema } from "../../definitions";
 import sampleCourseResponse from "../fixtures/sample-course-response.json";
 import {
@@ -18,6 +19,8 @@ import {
   getMockCourse,
   scrapeCourseFromArchersHub,
 } from "../scraper";
+import { ArchersHubAuthError } from "../types";
+import { analyzeSessionCookie } from "../validation";
 
 test("parseDays parses single and compound DLSU day codes correctly", () => {
   assert.deepEqual(parseDays("M"), ["M"]);
@@ -164,7 +167,7 @@ test("formatSessionCookie formats raw strings or headers properly", () => {
   );
   assert.equal(
     formatSessionCookie("abc123token"),
-    "session=abc123token; ArchersHubAuth=abc123token; token=abc123token"
+    "session=abc123token; ArchersHubAuth=abc123token; token=abc123token; .AspNetCore.Cookies=abc123token; ASP.NET_SessionId=abc123token"
   );
 });
 
@@ -228,8 +231,10 @@ test("scrapeCourseFromArchersHub isolates mock cache from live requests", async 
   try {
     const liveResult = await scrapeCourseFromArchersHub(
       "GERIZAL",
-      "valid_looking_live_token_xyz"
+      "valid_looking_live_token_xyz",
+      { timeoutMs: 300, maxRetries: 0 }
     );
+
     // If by some chance liveResult succeeded, ensure it was not the mock cache
     if (liveResult.isCached) {
       hitMockCache = true;
@@ -259,4 +264,123 @@ test("clearCourseCache clears all stored cache entries", async () => {
 
   const res3 = await scrapeCourseFromArchersHub("CCPROG1", "MOCK_SESSION");
   assert.equal(res3.isCached, false);
+});
+
+test("analyzeSessionCookie identifies affinity-only cookies and distinguishes authentic credentials", () => {
+  // Affinity only
+  const affinityCookie =
+    "ApplicationGatewayAffinityCORS=efbd9facb6f6e984a572d91915bfa51a; ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a";
+  const analysisAffinity = analyzeSessionCookie(affinityCookie);
+  assert.equal(analysisAffinity.isValid, false);
+  assert.equal(analysisAffinity.isAffinityOnly, true);
+  assert.equal(analysisAffinity.isUnauthenticatedOnly, false);
+  assert.equal(analysisAffinity.hasAuthToken, false);
+  assert.ok(
+    analysisAffinity.warningMessage?.includes("ApplicationGatewayAffinity")
+  );
+
+  // Exact user cookie from prompt with CSRF token and anonymous SID
+  const userPreLoginCookie =
+    "ApplicationGatewayAffinityCORS=efbd9facb6f6e984a572d91915bfa51a; ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a; __RequestVerificationToken=59zjuoS3St_tiSa1qMxEXPgiqkNjxIlmxsslBm_AW488vLyI7q_iHK5hfl-oTBrk7YET0t0uAdnJSt3eH64gh5hYpNrKHr8z7hvZt4KR95E1; cf_clearance=8lmZB3xeJQQ77neLk5_i8AXGEU_D8FYscxnbLARyOFA-1787133911-1.2.1.1; __Secure-SID=3huocv4ar3zyymsvzfphqhs2";
+  const analysisPreLogin = analyzeSessionCookie(userPreLoginCookie);
+  assert.equal(analysisPreLogin.isValid, false);
+  assert.equal(analysisPreLogin.isAffinityOnly, false);
+  assert.equal(analysisPreLogin.isUnauthenticatedOnly, true);
+  assert.equal(analysisPreLogin.hasAuthToken, false);
+  assert.ok(
+    analysisPreLogin.warningMessage?.includes("login page") ||
+      analysisPreLogin.warningMessage?.includes("anti-forgery")
+  );
+
+  // Empty string
+  const analysisEmpty = analyzeSessionCookie("");
+  assert.equal(analysisEmpty.isValid, false);
+  assert.equal(analysisEmpty.isAffinityOnly, false);
+  assert.equal(analysisEmpty.isUnauthenticatedOnly, false);
+
+  // Demo / Mock Mode
+  const analysisMock = analyzeSessionCookie("MOCK_SESSION");
+  assert.equal(analysisMock.isValid, true);
+  assert.equal(analysisMock.isMock, true);
+
+  const analysisDemo = analyzeSessionCookie("DEMO");
+  assert.equal(analysisDemo.isValid, true);
+  assert.equal(analysisDemo.isMock, true);
+
+  // Full cookie string with ASP.NET session + Application Gateway
+  const fullCookie =
+    "ApplicationGatewayAffinityCORS=efbd9facb6f6e984a572d91915bfa51a; ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a; .AspNetCore.Cookies=CfDJ8N5...";
+  const analysisFull = analyzeSessionCookie(fullCookie);
+  assert.equal(analysisFull.isValid, true);
+  assert.equal(analysisFull.isAffinityOnly, false);
+  assert.equal(analysisFull.isUnauthenticatedOnly, false);
+  assert.equal(analysisFull.hasAuthToken, true);
+
+  // Raw token string
+  const analysisRaw = analyzeSessionCookie(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+  );
+  assert.equal(analysisRaw.isValid, true);
+  assert.equal(analysisRaw.hasAuthToken, true);
+});
+
+test("scrapeCourseFromArchersHub throws descriptive ArchersHubAuthError on affinity-only and pre-login cookies", async () => {
+  const userCookie =
+    "ApplicationGatewayAffinityCORS=efbd9facb6f6e984a572d91915bfa51a; ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a";
+
+  await assert.rejects(
+    async () => {
+      await scrapeCourseFromArchersHub("CCPROG1", userCookie);
+    },
+    (err: Error) => {
+      assert.ok(err instanceof ArchersHubAuthError);
+      assert.ok(err.message.includes("Azure Gateway routing cookies"));
+      return true;
+    }
+  );
+
+  const preLoginCookie =
+    "ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a; __RequestVerificationToken=59zjuoS3St_tiSa; __Secure-SID=3huocv4ar3zyymsvzfphqhs2";
+
+  await assert.rejects(
+    async () => {
+      await scrapeCourseFromArchersHub("GERIZAL", preLoginCookie);
+    },
+    (err: Error) => {
+      assert.ok(err instanceof ArchersHubAuthError);
+      assert.ok(
+        err.message.includes("login page") ||
+          err.message.includes("anti-forgery")
+      );
+      return true;
+    }
+  );
+});
+
+test("validateArchersHubSession validates cookies and flags affinity-only and pre-login strings", async () => {
+  const userCookie =
+    "ApplicationGatewayAffinityCORS=efbd9facb6f6e984a572d91915bfa51a; ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a";
+  const validationAffinity = await validateArchersHubSession(userCookie);
+  assert.equal(validationAffinity.success, false);
+  assert.equal(validationAffinity.isAffinityOnly, true);
+  assert.ok(validationAffinity.error?.includes("ApplicationGatewayAffinity"));
+
+  const preLoginCookie =
+    "ApplicationGatewayAffinity=efbd9facb6f6e984a572d91915bfa51a; __RequestVerificationToken=59zjuoS3St; __Secure-SID=3huocv4ar3zyymsvzfphqhs2";
+  const validationPreLogin = await validateArchersHubSession(preLoginCookie);
+  assert.equal(validationPreLogin.success, false);
+  assert.equal(validationPreLogin.isUnauthenticatedOnly, true);
+  assert.ok(
+    validationPreLogin.error?.includes("login page") ||
+      validationPreLogin.error?.includes("anti-forgery")
+  );
+
+  const validationMock = await validateArchersHubSession("MOCK_SESSION");
+  assert.equal(validationMock.success, true);
+  assert.equal(validationMock.isMock, true);
+
+  const validationFull = await validateArchersHubSession(
+    "ASP.NET_SessionId=xyz123; ApplicationGatewayAffinity=abc"
+  );
+  assert.equal(validationFull.success, true);
 });

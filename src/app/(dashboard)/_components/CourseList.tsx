@@ -154,17 +154,28 @@ export default function CourseList({
 
     setIsFetching(true);
     try {
-      const { data, error, authExpired } = await fetchMultipleCourses(
-        courses.filter((course) => !course.isCustom),
-        sessionCookie
-      );
+      const { data, error, authExpired, cloudflareBlocked } =
+        await fetchMultipleCourses(
+          courses.filter((course) => !course.isCustom),
+          sessionCookie
+        );
 
       if (authExpired) {
         toast.error("ArchersHub Session Expired", {
           description:
-            "Please reconnect your session cookie to update courses.",
+            error || "Please reconnect your session cookie to update courses.",
+          duration: 6000,
         });
         setSessionModalOpen(true);
+        return;
+      }
+
+      if (cloudflareBlocked) {
+        toast.error("ArchersHub Bot Protection Active", {
+          description:
+            "ArchersHub Cloudflare protection blocked direct scraping. You can activate Demo Mode or edit courses manually.",
+          duration: 7000,
+        });
         return;
       }
 

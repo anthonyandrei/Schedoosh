@@ -1,3 +1,4 @@
+import { analyzeSessionCookie } from "@/lib/archershub/validation";
 import { Slice } from "./useGlobalStore";
 
 export interface SessionStates {
@@ -30,12 +31,15 @@ export const createSessionSlice: Slice<SessionSlice> = (set) => ({
   ...initState,
   setSessionCookie: (cookie: string) => {
     const trimmed = cookie.trim();
+    const analysis = analyzeSessionCookie(trimmed);
+    const isValid = analysis.isValid && !analysis.isAffinityOnly;
     set({
       sessionCookie: trimmed,
-      isAuthenticated: trimmed.length > 0,
-      lastAuthenticated: trimmed.length > 0 ? new Date() : null,
+      isAuthenticated: isValid,
+      lastAuthenticated: isValid ? new Date() : null,
     });
   },
+
   setIdNumber: (idNumber: string) => {
     set({
       idNumber: idNumber.trim(),

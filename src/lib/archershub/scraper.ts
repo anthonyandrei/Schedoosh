@@ -8,6 +8,7 @@ import {
 import {
   ARCHERSHUB_ENDPOINTS,
   ArchersHubAuthError,
+  ArchersHubCloudflareError,
   ArchersHubCourseNotFoundError,
   ArchersHubError,
   ArchersHubRateLimitError,
@@ -15,6 +16,7 @@ import {
   ArchersHubScraperOptions,
   DEFAULT_HEADERS,
 } from "./types";
+import { analyzeSessionCookie } from "./validation";
 
 // In-memory cache for course queries (5 minute TTL)
 interface CacheEntry {
@@ -38,7 +40,7 @@ export function formatSessionCookie(sessionCookie: string): string {
   }
 
   // If provided as a raw session token or connect.sid / JSESSIONID / token value
-  return `session=${trimmed}; ArchersHubAuth=${trimmed}; token=${trimmed}`;
+  return `session=${trimmed}; ArchersHubAuth=${trimmed}; token=${trimmed}; .AspNetCore.Cookies=${trimmed}; ASP.NET_SessionId=${trimmed}`;
 }
 
 /**
@@ -195,6 +197,21 @@ export async function scrapeCourseFromArchersHub(
     );
   }
 
+  const analysis = analyzeSessionCookie(sessionCookie);
+  if (analysis.isAffinityOnly) {
+    throw new ArchersHubAuthError(
+      analysis.warningMessage ||
+        "Only Azure Gateway routing cookies were detected. The HttpOnly authentication cookie is missing. Please copy your Cookie header from DevTools Network Tab."
+    );
+  }
+
+  if (analysis.isUnauthenticatedOnly) {
+    throw new ArchersHubAuthError(
+      analysis.warningMessage ||
+        "The pasted cookies appear to be from the login page rather than an active logged-in ArchersHub session. Please log in to ArchersHub first, navigate to Course Finder or Enlistment, and copy the Cookie header from the DevTools Network Tab."
+    );
+  }
+
   const cookieHeader = formatSessionCookie(sessionCookie);
   const timeoutMs = options.timeoutMs ?? 10000;
   const maxRetries = options.maxRetries ?? 2;
@@ -220,9 +237,27 @@ export async function scrapeCourseFromArchersHub(
         signal: controller.signal,
       }).finally(() => clearTimeout(timeoutId));
 
-      // Handle Authentication Failures (401 / 403)
-      if (response.status === 401 || response.status === 403) {
-        throw new ArchersHubAuthError();
+      // Handle Authentication Failures (401)
+      if (response.status === 401) {
+        throw new ArchersHubAuthError(
+          "ArchersHub session token is invalid or expired. Please re-authenticate or try Demo Mode."
+        );
+      }
+
+      // Handle 403 Forbidden (Cloudflare Bot Challenge vs Auth Forbidden)
+      if (response.status === 403) {
+        const text = await response.text().catch(() => "");
+        if (
+          text.includes("challenges.cloudflare.com") ||
+          text.includes("cf-turnstile") ||
+          text.includes("Cloudflare") ||
+          text.includes("Attention Required")
+        ) {
+          throw new ArchersHubCloudflareError();
+        }
+        throw new ArchersHubAuthError(
+          "ArchersHub access forbidden (403). Your session may be expired or lack permissions."
+        );
       }
 
       // Handle Rate Limiting (429)
@@ -235,22 +270,29 @@ export async function scrapeCourseFromArchersHub(
         throw new ArchersHubRateLimitError();
       }
 
+      // Check for redirects to login
+      if (
+        response.redirected &&
+        (response.url.includes("/Login") ||
+          response.url.includes("/StudentLogin") ||
+          response.url.includes("/Account/Login"))
+      ) {
+        throw new ArchersHubAuthError(
+          "ArchersHub session is invalid or expired. Please re-authenticate or try Demo Mode."
+        );
+      }
+
+      // Check for redirects to general server error
+      if (response.redirected && response.url.includes("/Error")) {
+        throw new ArchersHubError(
+          `ArchersHub server returned an error while querying "${normalizedCode}". Please verify the course code or try Demo Mode.`
+        );
+      }
+
       if (!response.ok) {
         throw new ArchersHubError(
           `ArchersHub returned status ${response.status}: ${response.statusText}`,
           response.status
-        );
-      }
-
-      // Check for redirects to login or error pages
-      if (
-        response.redirected &&
-        (response.url.includes("/Login") ||
-          response.url.includes("/Error") ||
-          response.url.includes("/Account"))
-      ) {
-        throw new ArchersHubAuthError(
-          "ArchersHub session is invalid or expired. Please re-authenticate or try Demo Mode."
         );
       }
 
@@ -263,18 +305,37 @@ export async function scrapeCourseFromArchersHub(
       } else {
         const html = await response.text();
 
-        // Check if the HTML returned is actually a login or error page
-        const isAuthOrErrorPage =
+        // Check if the HTML returned is Cloudflare Turnstile / challenge
+        if (
+          html.includes("challenges.cloudflare.com") ||
+          html.includes("cf-turnstile") ||
+          html.includes("cf-browser-verification") ||
+          html.includes("<title>Just a moment...</title>")
+        ) {
+          throw new ArchersHubCloudflareError();
+        }
+
+        // Check if the HTML returned is a login page
+        const isAuthPage =
           html.includes("<title>Login</title>") ||
           html.includes("student-login") ||
-          html.includes("Login.css") ||
-          html.includes("/Error/Index") ||
-          html.includes("Object moved to") ||
-          html.includes("challenges.cloudflare.com");
+          html.includes("Login.css");
 
-        if (isAuthOrErrorPage) {
+        if (isAuthPage) {
           throw new ArchersHubAuthError(
             "ArchersHub session is invalid or expired. Please re-authenticate or try Demo Mode."
+          );
+        }
+
+        // Check if the HTML is an ASP.NET error page
+        const isErrorPage =
+          html.includes("/Error/Index") ||
+          html.includes("Object moved to") ||
+          html.includes("Server Error in");
+
+        if (isErrorPage) {
+          throw new ArchersHubError(
+            `ArchersHub server returned an error while querying "${normalizedCode}". Please verify the course code or try Demo Mode.`
           );
         }
 
@@ -305,9 +366,10 @@ export async function scrapeCourseFromArchersHub(
     } catch (err) {
       lastError = err as Error;
 
-      // Don't retry on auth error or not found
+      // Don't retry on auth error, cloudflare block, or not found
       if (
         err instanceof ArchersHubAuthError ||
+        err instanceof ArchersHubCloudflareError ||
         err instanceof ArchersHubCourseNotFoundError
       ) {
         throw err;
@@ -354,7 +416,10 @@ export async function scrapeMultipleCoursesFromArchersHub(
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
     } catch (error) {
-      if (error instanceof ArchersHubAuthError) {
+      if (
+        error instanceof ArchersHubAuthError ||
+        error instanceof ArchersHubCloudflareError
+      ) {
         throw error;
       }
       // On individual course error, keep empty or skip so others still load

@@ -1,5 +1,7 @@
 import { Course } from "../definitions";
 
+export * from "./validation";
+
 // Custom Error Classes
 export class ArchersHubError extends Error {
   constructor(
@@ -27,6 +29,15 @@ export class ArchersHubRateLimitError extends ArchersHubError {
   ) {
     super(message, 429, "RATE_LIMITED");
     this.name = "ArchersHubRateLimitError";
+  }
+}
+
+export class ArchersHubCloudflareError extends ArchersHubError {
+  constructor(
+    message = "ArchersHub request was blocked by Cloudflare Bot Protection or security challenge. Please try Demo Mode or add your courses manually."
+  ) {
+    super(message, 403, "CLOUDFLARE_BLOCKED");
+    this.name = "ArchersHubCloudflareError";
   }
 }
 
