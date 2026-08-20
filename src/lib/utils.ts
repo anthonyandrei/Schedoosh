@@ -293,9 +293,104 @@ export function calculateHeight(params: {
   return (totalMinutes / 60) * cellSizePx;
 }
 
+const COMPOUND_SURNAME_PREFIXES_2 = new Set([
+  "de la",
+  "de los",
+  "de las",
+  "del los",
+  "del las",
+]);
+
+const COMPOUND_SURNAME_PREFIXES_1 = new Set([
+  "de",
+  "del",
+  "dela",
+  "san",
+  "santa",
+  "santo",
+  "van",
+  "von",
+  "da",
+  "di",
+  "dos",
+  "das",
+  "st.",
+  "st",
+]);
+
+const SENTINEL_PROFESSOR_NAMES = /^(tba|tbd|staff|faculty|n\/a|-)$/i;
+
+/**
+ * Splits a raw professor string into firstName and lastName components.
+ * Handles both comma-separated ("DELA CRUZ, JUAN") and natural order ("Louis Lu", "Maria Clara De Castro").
+ */
+function splitProfessorName(
+  raw: string
+): { firstName: string; lastName: string } | null {
+  const trimmed = raw.trim();
+  if (!trimmed || SENTINEL_PROFESSOR_NAMES.test(trimmed)) {
+    return null;
+  }
+
+  if (trimmed.includes(",")) {
+    const parts = trimmed.split(",").map((p) => p.trim());
+    const lastName = parts[0] || "";
+    const firstName = parts.slice(1).join(" ").trim();
+    return { firstName, lastName };
+  }
+
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return null;
+  if (words.length === 1) return { firstName: "", lastName: words[0] };
+
+  if (words.length >= 4) {
+    const twoWordPrefix = `${words[words.length - 3]} ${
+      words[words.length - 2]
+    }`.toLowerCase();
+    if (COMPOUND_SURNAME_PREFIXES_2.has(twoWordPrefix)) {
+      const lastName = words.slice(words.length - 3).join(" ");
+      const firstName = words.slice(0, words.length - 3).join(" ");
+      return { firstName, lastName };
+    }
+  }
+
+  if (words.length >= 3) {
+    const oneWordPrefix = words[words.length - 2].toLowerCase();
+    if (COMPOUND_SURNAME_PREFIXES_1.has(oneWordPrefix)) {
+      const lastName = words.slice(words.length - 2).join(" ");
+      const firstName = words.slice(0, words.length - 2).join(" ");
+      return { firstName, lastName };
+    }
+  }
+
+  const lastName = words[words.length - 1];
+  const firstName = words.slice(0, -1).join(" ");
+  return { firstName, lastName };
+}
+
+/**
+ * Formats a raw professor name into standard "Lastname, Firstname" proper-cased format.
+ * Returns an empty string if professor is null, undefined, empty, or a sentinel placeholder (TBA, STAFF, etc.).
+ */
+export function formatProfessorName(
+  professor: string | null | undefined
+): string {
+  if (!professor) return "";
+
+  const split = splitProfessorName(professor);
+  if (!split) return "";
+
+  const { firstName, lastName } = split;
+  if (!firstName && !lastName) return "";
+  if (!firstName) return toProperCase(lastName);
+  if (!lastName) return toProperCase(firstName);
+
+  return `${toProperCase(lastName)}, ${toProperCase(firstName)}`;
+}
+
 /**
  * Generates an ArcherEye professor profile URL from raw instructor strings.
- * ArcherEye uses a last-name-first slug format (e.g. `/professor/lastname-firstname`).
+ * ArcherEye uses a first-name-first slug format (e.g. `/professor/firstname-lastname`).
  *
  * Returns null if the instructor is empty, unassigned, or a sentinel placeholder (TBA, STAFF, etc.).
  */
@@ -305,33 +400,21 @@ export function getArcherEyeUrl(
   if (!professor) return null;
 
   const trimmed = professor.trim();
-  if (!trimmed || /^(tba|tbd|staff|faculty|n\/a|-)$/i.test(trimmed)) {
+  if (!trimmed || SENTINEL_PROFESSOR_NAMES.test(trimmed)) {
     return null;
   }
 
   const normalized = trimmed.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  let lastName = "";
-  let firstName = "";
-
-  if (normalized.includes(",")) {
-    const parts = normalized.split(",").map((p) => p.trim());
-    lastName = parts[0] || "";
-    firstName = (parts[1] || "")
-      .replace(/(?:^|\s+)[a-zA-Z]\.?(?=\s+|$)/g, " ")
-      .trim();
-  } else {
-    const words = normalized.split(/\s+/).filter(Boolean);
-    if (words.length < 2) {
-      return null;
-    }
-    lastName = words[words.length - 1];
-    firstName = words
-      .slice(0, -1)
-      .join(" ")
-      .replace(/(?:^|\s+)[a-zA-Z]\.?(?=\s+|$)/g, " ")
-      .trim();
+  const split = splitProfessorName(normalized);
+  if (!split?.lastName || !split.firstName) {
+    return null;
   }
+
+  const { lastName } = split;
+  const firstName = split.firstName
+    .replace(/(?:^|\s+)[a-zA-Z]\.?(?=\s+|$)/g, " ")
+    .trim();
 
   const cleanLast = lastName
     .toLowerCase()
@@ -353,5 +436,5 @@ export function getArcherEyeUrl(
     return null;
   }
 
-  return `https://archer-eye.com/professor/${cleanLast}-${cleanFirst}`;
+  return `https://archer-eye.com/professor/${cleanFirst}-${cleanLast}`;
 }

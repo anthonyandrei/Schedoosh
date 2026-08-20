@@ -5,7 +5,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Class, Schedule } from "@/lib/definitions";
-import { formatTime, getArcherEyeUrl, toProperCase } from "@/lib/utils";
+import { formatProfessorName, formatTime, getArcherEyeUrl } from "@/lib/utils";
 import TooltipWrapper from "../wrappers/TooltipWrapper";
 import RowSettings from "./RowSettings";
 import { SortableHeader } from "./SortableHeader";
@@ -62,7 +62,7 @@ export const columns: ColumnDef<Class>[] = [
   {
     id: "Professor",
     accessorFn: (row) => {
-      return row.professor.length !== 0 ? toProperCase(row.professor) : "-";
+      return formatProfessorName(row.professor) || "-";
     },
     meta: {
       headerClassName: "w-[300px] nowrap",
@@ -87,7 +87,7 @@ export const columns: ColumnDef<Class>[] = [
             href={archerEyeUrl}
             target="_blank"
             className="inline-flex items-center gap-2"
-            rel="noopener"
+            rel="noopener noreferrer"
           >
             {profName}{" "}
             <SquareArrowOutUpRight

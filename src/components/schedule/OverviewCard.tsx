@@ -12,7 +12,12 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Class, Schedule } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
-import { cn, formatTime, getCardColors, toProperCase } from "@/lib/utils";
+import {
+  cn,
+  formatProfessorName,
+  formatTime,
+  getCardColors,
+} from "@/lib/utils";
 import TooltipWrapper from "../wrappers/TooltipWrapper";
 
 interface cardItem {
@@ -77,8 +82,7 @@ export default function OverviewCard({
   const classDetails: cardItem[] = [
     {
       icon: User,
-      content:
-        classData.professor !== "" ? toProperCase(classData.professor) : "TBA",
+      content: formatProfessorName(classData.professor) || "TBA",
       shouldRender: classData.professor !== "",
     },
     {

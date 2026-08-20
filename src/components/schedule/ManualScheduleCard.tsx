@@ -19,9 +19,9 @@ import { doClassesOverlap, getRandomColors } from "@/lib/schedules";
 import {
   calculateHeight,
   cn,
+  formatProfessorName,
   formatTime,
   minutesToMilitaryTime,
-  toProperCase,
 } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
 import {
@@ -367,7 +367,7 @@ function AvailableClassButton({
       >
         <Badge variant="secondary">{classData.section}</Badge>
         <span className="max-w-[20ch] truncate">
-          {classData.professor ? toProperCase(classData.professor) : "TBA"}
+          {formatProfessorName(classData.professor) || "TBA"}
         </span>
         <Badge className="ml-auto" variant="secondary">
           {formatTime(schedule.start)} - {formatTime(schedule.end)}

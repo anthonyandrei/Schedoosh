@@ -5,9 +5,9 @@ import { DaysEnum } from "./enums";
 import {
   addDaysToDate,
   convertToIcalDay,
+  formatProfessorName,
   formatTime,
   inferRoom,
-  toProperCase,
 } from "./utils";
 
 export const SEMESTER_WEEKS = 13;
@@ -230,7 +230,7 @@ export function convertClassToEvent(
 
   const commonEventInfo = {
     summary: `[${classData.section}] ${classData.course}`,
-    description: `Professor: ${toProperCase(classData.professor) || "TBA"}`,
+    description: `Professor: ${formatProfessorName(classData.professor) || "TBA"}`,
   };
 
   if (hasDate) {
