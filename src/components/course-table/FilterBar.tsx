@@ -7,10 +7,12 @@ import {
   Clock,
   FilePen,
   FilterX,
+  GraduationCap,
   Lock,
   LucideIcon,
   Monitor,
   TableOfContents,
+  Tag,
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,8 @@ export function FilterBar<TData>({ table }: FilterBarProps<TData>) {
       title: "Section",
       icon: TableOfContents,
     },
+    { type: "facet", column: "type", title: "Type", icon: Tag },
+    { type: "facet", column: "units", title: "Units", icon: GraduationCap },
     { type: "facet", column: "Professor", title: "Professor", icon: User },
     { type: "facet", column: "schedules", title: "Schedules", icon: Clock },
     { type: "facet", column: "Days", title: "Days", icon: Calendar },
@@ -50,7 +54,8 @@ export function FilterBar<TData>({ table }: FilterBarProps<TData>) {
     <div className="flex flex-1 flex-wrap items-center gap-2">
       {filterEntries.map(
         (filter) =>
-          table.getColumn(filter.column) && (
+          (table.getColumn(filter.column)?.getFacetedUniqueValues()?.size ??
+            0) > 0 && (
             <FacetedFilter
               key={filter.column}
               column={table.getColumn(filter.column)}
