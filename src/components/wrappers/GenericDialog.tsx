@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,8 +25,8 @@ import { cn } from "@/lib/utils";
 interface DialogWrapperProps {
   open?: boolean;
   setOpen?: (open: boolean) => void;
-  title?: string;
-  description?: string;
+  title?: ReactNode;
+  description?: ReactNode;
   children?: ReactNode;
   trigger?: ReactNode;
   footer?: ReactNode;
@@ -74,16 +74,12 @@ export default function DialogWrapper({
     setOpenState(false);
   };
 
-  useEffect(() => {
-    console.log("isMobile", isMobile);
-  }, [isMobile]);
-
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={setOpenState}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent
-          className={className}
+          className={cn("max-h-[85vh]", className)}
           onPointerDownOutside={(e) => {
             if (preventClickOutside) {
               e.preventDefault();
