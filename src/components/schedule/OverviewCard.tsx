@@ -1,14 +1,12 @@
 import {
   CalendarClock,
   Clock,
-  Copy,
   DoorOpen,
   FilePen,
   LucideIcon,
   User,
 } from "lucide-react";
 import React from "react";
-import { toast } from "sonner";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Class, Schedule } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
@@ -18,7 +16,6 @@ import {
   formatTime,
   getCardColors,
 } from "@/lib/utils";
-import TooltipWrapper from "../wrappers/TooltipWrapper";
 
 interface cardItem {
   icon: LucideIcon;
@@ -92,9 +89,9 @@ export default function OverviewCard({
     },
     ...uniqueSchedules.map((sched) => ({
       icon: Clock,
-      content: `${formatTime(sched.start)} - ${formatTime(sched.end)} ${`(${
-        sched.combinedDays === "U" ? sched.date : sched.combinedDays
-      })`}`,
+      content: `${formatTime(sched.start)} - ${formatTime(sched.end)} (${
+        sched.combinedDays === "U" ? sched.date || "TBA" : sched.combinedDays
+      })`,
       shouldRender: sched.start !== sched.end,
     })),
     {
@@ -132,17 +129,12 @@ export default function OverviewCard({
             {classData.section}
           </div>
           {classData.course}
-          <TooltipWrapper content="Copy" delayDuration={0}>
-            <span
-              onClick={() => {
-                toast.success("Successfully copied class code to clipboard!");
-                navigator.clipboard.writeText(`${classData.code}`);
-              }}
-              className="group ml-auto inline-flex cursor-pointer items-center font-medium text-sm opacity-50 transition-opacity duration-200 hover:opacity-100"
-            >
-              #{classData.code} <Copy className="ml-2 size-4" strokeWidth={3} />
-            </span>
-          </TooltipWrapper>
+          <span className="ml-auto font-medium text-sm opacity-50">
+            {classData.type || "—"} ·{" "}
+            {classData.units !== undefined && classData.units !== null
+              ? String(Number(classData.units))
+              : "—"}
+          </span>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 pb-4 text-sm">
