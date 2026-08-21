@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, CheckCheck, Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { FormComboboxField } from "@/components/form/form-combobox-field";
 import { FormSelectField } from "@/components/form/form-select-field";
 import { FormTextField } from "@/components/form/form-text-field";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,20 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toggle } from "@/components/ui/toggle";
 import { Class } from "@/lib/definitions";
-import { ModalityEnumSchema } from "@/lib/enums";
+import { buildClassFromForm } from "@/lib/utils";
 import { useGlobalStore } from "@/stores/useGlobalStore";
+
+// SUBJECT_TYPE values ArchersHub has been observed to emit. It's a free
+// string on their end (no enum), so the combobox accepts anything else too.
+const TYPE_OPTIONS = [
+  { label: "Lecture", value: "Lecture" },
+  { label: "Lecture and Laboratory", value: "Lecture and Laboratory" },
+  {
+    label: "Administrative / Residency",
+    value: "Administrative / Residency",
+  },
+];
+const KNOWN_TYPES = new Set(TYPE_OPTIONS.map((option) => option.value));
 
 interface ClassFormProps {
   onSubmit: (data: Class) => void;
@@ -26,22 +39,6 @@ export default function ClassForm({
   const courses = useGlobalStore((state) => state.courses);
 
   const classFormSchema = z.object({
-    code: z.coerce
-      .number()
-      .default(0)
-      .refine(
-        (val) => {
-          return (
-            !courses
-              .find((c) => c.courseCode === courseCode)
-              ?.classes.some((classData) => classData.code === val) ||
-            defaultValues?.code === val
-          );
-        },
-        {
-          message: "Class code already exists.",
-        }
-      ),
     course: z.string(),
     section: z.string().min(1, "Section is required."),
     professor: z.string(),
@@ -69,36 +66,53 @@ export default function ClassForm({
           })
       )
       .min(1),
-    enrolled: z.number().default(0),
-    enrollCap: z.number().default(0),
+    enrolled: z.coerce.number().default(0),
+    enrollCap: z.coerce.number().default(0),
     restriction: z.string(),
-    modality: ModalityEnumSchema,
     remarks: z.string(),
+    type: z.preprocess(
+      (val) => (val === "" ? undefined : val),
+      z.string().optional()
+    ),
+    isCustomType: z.boolean(),
+    units: z.preprocess(
+      (val) => (val === "" ? undefined : val),
+      z.coerce.number().optional()
+    ),
+    variant: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof classFormSchema>>({
     resolver: zodResolver(classFormSchema),
-    defaultValues: defaultValues ?? {
-      code: 123,
-      course: courseCode,
-      section: "",
-      professor: "",
-      schedules: [
-        {
-          day: "M",
-          start: undefined,
-          end: undefined,
-          date: "",
-          isOnline: false,
-          room: "",
+    defaultValues: defaultValues
+      ? {
+          ...defaultValues,
+          isCustomType:
+            !!defaultValues.type && !KNOWN_TYPES.has(defaultValues.type),
+        }
+      : {
+          course: courseCode,
+          section: "",
+          professor: "",
+          schedules: [
+            {
+              day: "M",
+              start: undefined,
+              end: undefined,
+              date: "",
+              isOnline: false,
+              room: "",
+            },
+          ],
+          enrolled: 0,
+          enrollCap: 0,
+          restriction: "",
+          remarks: "",
+          type: undefined,
+          isCustomType: false,
+          units: undefined,
+          variant: undefined,
         },
-      ],
-      enrolled: 0,
-      enrollCap: 0,
-      restriction: "",
-      modality: "HYBRID",
-      remarks: "",
-    },
   });
 
   const schedules = useFieldArray({
@@ -126,20 +140,16 @@ export default function ClassForm({
     name: "schedules",
   }).length;
 
+  const handleFormSubmit = form.handleSubmit((values) => {
+    const existingClasses =
+      courses.find((c) => c.courseCode === courseCode)?.classes ?? [];
+    onSubmit(buildClassFromForm(values, existingClasses, defaultValues));
+  });
+
   return (
     <Form {...form}>
-      <form
-        className="flex min-h-0 flex-col gap-4"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
+      <form className="flex min-h-0 flex-col gap-4" onSubmit={handleFormSubmit}>
         <div className="grid grid-cols-2 gap-4">
-          <FormTextField
-            form={form}
-            label="Code"
-            formKey="code"
-            placeholder="1234"
-            divClassName="w-full"
-          />
           <FormTextField
             form={form}
             label="Section"
@@ -147,28 +157,48 @@ export default function ClassForm({
             placeholder="Z32"
             divClassName="w-full"
           />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
           <FormTextField
             form={form}
             label="Professor"
             formKey="professor"
             placeholder="Dela Cruz, Juan"
+            divClassName="w-full"
           />
-          <FormSelectField
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <FormComboboxField
             form={form}
-            label="Modality"
-            formKey="modality"
-            options={[
-              { label: "Hybrid", value: "HYBRID" },
-              { label: "Face-to-Face", value: "F2F" },
-              { label: "Online", value: "ONLINE" },
-              {
-                label: "Predominantly Online",
-                value: "PREDOMINANTLY ONLINE",
-              },
-              { label: "Tentative", value: "TENTATIVE" },
-            ]}
+            label="Type"
+            formKey="type"
+            isCustomFormKey="isCustomType"
+            options={TYPE_OPTIONS}
+            selectMessage="Select type..."
+            searchMessage="Search or add a type..."
+            emptyMessage="No matching type."
+            className="col-span-2"
+          />
+          <FormTextField
+            form={form}
+            label="Units"
+            formKey="units"
+            placeholder="3"
+            divClassName="col-span-1"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <FormTextField
+            form={form}
+            label="Enrolled"
+            formKey="enrolled"
+            placeholder="0"
+            divClassName="w-full"
+          />
+          <FormTextField
+            form={form}
+            label="Capacity"
+            formKey="enrollCap"
+            placeholder="40"
+            divClassName="w-full"
           />
         </div>
         <FormTextField
