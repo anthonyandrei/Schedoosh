@@ -90,3 +90,50 @@ test("a column with header or label 'Units' exists", () => {
     "Expected a column with header or label 'Units' to exist"
   );
 });
+
+function makeClass(overrides: Partial<Class> = {}): Class {
+  return {
+    code: 1,
+    course: "CSARCH1",
+    section: "S11",
+    professor: "",
+    schedules: [],
+    enrolled: 0,
+    enrollCap: 0,
+    restriction: "",
+    modality: "F2F",
+    remarks: "",
+    ...overrides,
+  };
+}
+
+function statusAccessor(row: Class): string {
+  const statusColumn = columns.find(
+    (col) => (col as { id?: string }).id === "status"
+  ) as { accessorFn?: (row: Class) => string } | undefined;
+  if (!statusColumn?.accessorFn) {
+    throw new Error("status column or its accessorFn was not found");
+  }
+  return statusColumn.accessorFn(row);
+}
+
+test("status is Open, not Closed, for a fresh class with no capacity set (0/0)", () => {
+  assert.equal(
+    statusAccessor(makeClass({ enrolled: 0, enrollCap: 0 })),
+    "Open"
+  );
+});
+
+test("status is Closed once a real capacity is reached", () => {
+  assert.equal(
+    statusAccessor(makeClass({ enrolled: 40, enrollCap: 40 })),
+    "Closed"
+  );
+});
+
+test("status is Open when under a real capacity", () => {
+  assert.equal(
+    statusAccessor(makeClass({ enrolled: 10, enrollCap: 40 })),
+    "Open"
+  );
+});

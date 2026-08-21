@@ -226,7 +226,9 @@ export const columns: ColumnDef<Class>[] = [
   {
     id: "status",
     accessorFn: (row) => {
-      const isClosed = row.enrolled >= row.enrollCap;
+      // A capacity of 0 means it's unset (e.g. an unedited custom class),
+      // not that the class is full — only a real capacity can close it.
+      const isClosed = row.enrollCap > 0 && row.enrolled >= row.enrollCap;
 
       return isClosed ? "Closed" : "Open";
     },
