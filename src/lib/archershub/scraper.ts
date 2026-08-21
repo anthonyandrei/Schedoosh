@@ -311,125 +311,145 @@ export async function scrapeCourseFromArchersHub(
         const clJson = await clRes.json();
         const courseDrp: RawArchersHubCourseListItem[] = clJson.CourseDrp || [];
 
-        const matchedCourse = courseDrp.find((c) => {
+        const matchedCourses = courseDrp.filter((c) => {
           const nameParts = c.COURSE_NAME.split(" - ");
           return nameParts[0].trim().toUpperCase() === normalizedCode;
         });
 
-        if (!matchedCourse) {
+        if (matchedCourses.length === 0) {
           throw new ArchersHubCourseNotFoundError(normalizedCode);
         }
 
-        const courseId = matchedCourse.COURSE_CREATION_ID;
+        const cfDataResults = await Promise.all(
+          matchedCourses.map(async (matchedCourse) => {
+            const courseId = matchedCourse.COURSE_CREATION_ID;
+            const firstDashIdx = matchedCourse.COURSE_NAME.indexOf(" - ");
+            const variant =
+              firstDashIdx !== -1
+                ? matchedCourse.COURSE_NAME.substring(firstDashIdx + 3).trim()
+                : "";
 
-        const cfRes = await fetchApi(
-          ARCHERSHUB_ENDPOINTS.GET_CF_DATA,
-          `Campusno=${campusNo}&AcademicSession=${academicSessionId}&Courseid=${courseId}`
+            const cfRes = await fetchApi(
+              ARCHERSHUB_ENDPOINTS.GET_CF_DATA,
+              `Campusno=${campusNo}&AcademicSession=${academicSessionId}&Courseid=${courseId}`
+            );
+            const cfData = await cfRes.json();
+            const rows: RawArchersHubCFData[] = Array.isArray(cfData)
+              ? cfData
+              : [];
+            return rows.map((row) => ({ row, variant }));
+          })
         );
-        const cfData = await cfRes.json();
 
-        if (!Array.isArray(cfData) || cfData.length === 0) {
+        const allRowsWithVariant = cfDataResults.flat();
+
+        if (allRowsWithVariant.length === 0) {
           throw new ArchersHubCourseNotFoundError(normalizedCode);
         }
 
-        const finalClasses: Class[] = cfData.map((row: RawArchersHubCFData) => {
-          const schedParts = (row.SCHEDULE || "")
-            .split("|")
-            .map((s) => s.trim())
-            .filter(Boolean);
+        const finalClasses: Class[] = allRowsWithVariant.map(
+          ({ row, variant }) => {
+            const schedParts = (row.SCHEDULE || "")
+              .split("|")
+              .map((s) => s.trim())
+              .filter(Boolean);
 
-          const rawSchedules: Schedule[] = schedParts.map((part) => {
-            const inner = part.replace(/^\[/, "").replace(/\]$/, "").trim();
-            // The separator between time info and room info is "  :" (padded colon),
-            // NOT bare ":" which appears inside times like "07:30 AM".
-            // Use lastIndexOf to find the room separator, not split.
-            const lastSepIdx = inner.lastIndexOf("  :");
-            let timeInfo: string;
-            let roomInfo: string;
-            if (lastSepIdx !== -1) {
-              timeInfo = inner.substring(0, lastSepIdx).trim();
-              roomInfo = inner.substring(lastSepIdx + 3).trim();
+            const rawSchedules: Schedule[] = schedParts.map((part) => {
+              const inner = part.replace(/^\[/, "").replace(/\]$/, "").trim();
+              // The separator between time info and room info is "  :" (padded colon),
+              // NOT bare ":" which appears inside times like "07:30 AM".
+              // Use lastIndexOf to find the room separator, not split.
+              const lastSepIdx = inner.lastIndexOf("  :");
+              let timeInfo: string;
+              let roomInfo: string;
+              if (lastSepIdx !== -1) {
+                timeInfo = inner.substring(0, lastSepIdx).trim();
+                roomInfo = inner.substring(lastSepIdx + 3).trim();
+              } else {
+                // Fallback: try single-space-padded " : "
+                const fallbackIdx = inner.lastIndexOf(" : ");
+                if (fallbackIdx !== -1) {
+                  timeInfo = inner.substring(0, fallbackIdx).trim();
+                  roomInfo = inner.substring(fallbackIdx + 3).trim();
+                } else {
+                  // No room separator at all — entire string is time info
+                  timeInfo = inner;
+                  roomInfo = "";
+                }
+              }
+
+              const timeParts = timeInfo.split(" - ").map((s) => s.trim());
+              const dayStr = timeParts[0];
+              const startStr = timeParts[1] || "";
+              const endStr = timeParts[2] || "";
+
+              const days = parseDays(dayStr);
+              const day = days[0] || "M";
+              const start = timeStringToMilitary(startStr);
+              const end = timeStringToMilitary(endStr);
+
+              let room = "TBA";
+              let isOnline = false;
+              if (roomInfo) {
+                if (roomInfo.toUpperCase() === "ONLINE") {
+                  isOnline = true;
+                  room = "Online";
+                } else if (roomInfo.startsWith("Room - ")) {
+                  room = roomInfo.substring(7).trim() || "TBA";
+                } else {
+                  room = roomInfo;
+                }
+              }
+
+              return {
+                day,
+                start,
+                end,
+                date: "",
+                isOnline,
+                room,
+              };
+            });
+
+            const schedules = mergeSchedules(rawSchedules);
+
+            let modality:
+              | "F2F"
+              | "ONLINE"
+              | "HYBRID"
+              | "PREDOMINANTLY ONLINE"
+              | "TENTATIVE" = "HYBRID";
+            if (schedules.length > 0) {
+              const allOnline = schedules.every((s) => s.isOnline);
+              const noneOnline = schedules.every((s) => !s.isOnline);
+              if (allOnline) modality = "ONLINE";
+              else if (noneOnline) modality = "F2F";
             } else {
-              // Fallback: try single-space-padded " : "
-              const fallbackIdx = inner.lastIndexOf(" : ");
-              if (fallbackIdx !== -1) {
-                timeInfo = inner.substring(0, fallbackIdx).trim();
-                roomInfo = inner.substring(fallbackIdx + 3).trim();
-              } else {
-                // No room separator at all — entire string is time info
-                timeInfo = inner;
-                roomInfo = "";
-              }
+              modality = "F2F";
             }
 
-            const timeParts = timeInfo.split(" - ").map((s) => s.trim());
-            const dayStr = timeParts[0];
-            const startStr = timeParts[1] || "";
-            const endStr = timeParts[2] || "";
-
-            const days = parseDays(dayStr);
-            const day = days[0] || "M";
-            const start = timeStringToMilitary(startStr);
-            const end = timeStringToMilitary(endStr);
-
-            let room = "TBA";
-            let isOnline = false;
-            if (roomInfo) {
-              if (roomInfo.toUpperCase() === "ONLINE") {
-                isOnline = true;
-                room = "Online";
-              } else if (roomInfo.startsWith("Room - ")) {
-                room = roomInfo.substring(7).trim() || "TBA";
-              } else {
-                room = roomInfo;
-              }
-            }
+            const mainProf = (row.MAIN_TEACHER || "").trim();
+            const addlProf = (row.ADDITIONAL_TEACHER || "").trim();
+            const professor = mainProf || addlProf || "";
 
             return {
-              day,
-              start,
-              end,
-              date: "",
-              isOnline,
-              room,
+              code: row.SECTION_CREATION_ID,
+              course: normalizedCode,
+              section: row.SECTION_NAME || "TBA",
+              professor,
+              schedules,
+              enrolled: row.ENLISTED || 0,
+              enrollCap: row.CAPACITY || 0,
+              restriction: "",
+              modality,
+              remarks: row.SECTION_REMARK || "",
+              rooms: schedules.map((s) => s.room),
+              type: row.SUBJECT_TYPE,
+              units: row.CREDITS,
+              variant,
             };
-          });
-
-          const schedules = mergeSchedules(rawSchedules);
-
-          let modality:
-            | "F2F"
-            | "ONLINE"
-            | "HYBRID"
-            | "PREDOMINANTLY ONLINE"
-            | "TENTATIVE" = "HYBRID";
-          if (schedules.length > 0) {
-            const allOnline = schedules.every((s) => s.isOnline);
-            const noneOnline = schedules.every((s) => !s.isOnline);
-            if (allOnline) modality = "ONLINE";
-            else if (noneOnline) modality = "F2F";
-          } else {
-            modality = "F2F";
           }
-
-          const mainProf = (row.MAIN_TEACHER || "").trim();
-          const addlProf = (row.ADDITIONAL_TEACHER || "").trim();
-          const professor = mainProf || addlProf || "";
-
-          return {
-            code: row.SECTION_CREATION_ID,
-            course: normalizedCode,
-            section: row.SECTION_NAME || "TBA",
-            professor,
-            schedules,
-            enrolled: row.ENLISTED || 0,
-            enrollCap: row.CAPACITY || 0,
-            restriction: "",
-            modality,
-            remarks: row.SECTION_REMARK || "",
-            rooms: schedules.map((s) => s.room),
-          };
-        });
+        );
 
         const course = buildCourseObject(normalizedCode, finalClasses, false);
 
