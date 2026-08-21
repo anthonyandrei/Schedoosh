@@ -208,6 +208,61 @@ export function isOnlineSchedule(
 }
 
 /**
+ * Merges same-slot multi-room schedule entries grouped by (day, start, end).
+ * Preserves the original group order emitted by the data source.
+ */
+export function mergeSchedules(schedules: Schedule[]): Schedule[] {
+  if (schedules.length <= 1) {
+    return schedules;
+  }
+
+  const groups = new Map<string, Schedule[]>();
+
+  for (const s of schedules) {
+    const key = `${s.day}:${s.start}:${s.end}`;
+    const group = groups.get(key);
+    if (group) {
+      group.push(s);
+    } else {
+      groups.set(key, [s]);
+    }
+  }
+
+  const merged: Schedule[] = [];
+
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      merged.push(group[0]);
+      continue;
+    }
+
+    const realMembers = group.filter((s) => s.room && s.room !== "TBA");
+    const activeMembers = realMembers.length > 0 ? realMembers : group;
+
+    let room: string;
+    if (realMembers.length > 0) {
+      room = realMembers.map((s) => s.room).join(", ");
+    } else {
+      room = "TBA";
+    }
+
+    const isOnline = activeMembers.every((s) => s.isOnline);
+    const first = group[0];
+
+    merged.push({
+      day: first.day,
+      start: first.start,
+      end: first.end,
+      date: first.date || "",
+      isOnline,
+      room,
+    });
+  }
+
+  return merged;
+}
+
+/**
  * Parses raw meeting / schedule items into Schedoosh Schedule objects
  */
 export function parseRawMeetings(
@@ -236,7 +291,7 @@ export function parseRawMeetings(
         day: "M",
         start: 0,
         end: 0,
-        date: "TBA",
+        date: "",
         isOnline: modality === "ONLINE",
         room: "TBA",
       },
@@ -252,12 +307,7 @@ export function parseRawMeetings(
       item.end_time ?? item.endTime
     );
     const room = normalizeRoom(item.room || item.facility || fallback?.room);
-    const date = (
-      item.date_range ||
-      item.dateRange ||
-      item.dates ||
-      "TBA"
-    ).trim();
+    const date = (item.date_range || item.dateRange || item.dates || "").trim();
     const isOnline = isOnlineSchedule(
       room,
       modality,
@@ -269,21 +319,23 @@ export function parseRawMeetings(
         day,
         start,
         end,
-        date: date || "TBA",
+        date: date || "",
         isOnline,
         room,
       });
     }
   }
 
-  return schedules.length > 0
-    ? schedules
+  const merged = mergeSchedules(schedules);
+
+  return merged.length > 0
+    ? merged
     : [
         {
           day: "M",
           start: 0,
           end: 0,
-          date: "TBA",
+          date: "",
           isOnline: modality === "ONLINE",
           room: "TBA",
         },

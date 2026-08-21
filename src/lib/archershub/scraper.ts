@@ -2,6 +2,7 @@ import { Class, Course, Schedule } from "../definitions";
 import sampleCourseResponse from "./fixtures/sample-course-response.json";
 import {
   buildCourseObject,
+  mergeSchedules,
   parseArchersHubJson,
   parseDays,
   timeStringToMilitary,
@@ -337,7 +338,7 @@ export async function scrapeCourseFromArchersHub(
             .map((s) => s.trim())
             .filter(Boolean);
 
-          const schedules: Schedule[] = schedParts.map((part) => {
+          const rawSchedules: Schedule[] = schedParts.map((part) => {
             const inner = part.replace(/^\[/, "").replace(/\]$/, "").trim();
             // The separator between time info and room info is "  :" (padded colon),
             // NOT bare ":" which appears inside times like "07:30 AM".
@@ -378,7 +379,7 @@ export async function scrapeCourseFromArchersHub(
                 isOnline = true;
                 room = "Online";
               } else if (roomInfo.startsWith("Room - ")) {
-                room = roomInfo.substring(7).trim();
+                room = roomInfo.substring(7).trim() || "TBA";
               } else {
                 room = roomInfo;
               }
@@ -388,14 +389,13 @@ export async function scrapeCourseFromArchersHub(
               day,
               start,
               end,
-              date:
-                row.START_DATE && row.END_DATE
-                  ? `${row.START_DATE} - ${row.END_DATE}`
-                  : "TBA",
+              date: "",
               isOnline,
               room,
             };
           });
+
+          const schedules = mergeSchedules(rawSchedules);
 
           let modality:
             | "F2F"
