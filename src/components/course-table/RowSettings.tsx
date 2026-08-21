@@ -34,7 +34,12 @@ export default function RowSettings({ data }: Props) {
   return (
     <div>
       <Dropdown items={items}>
-        <Button size="icon" variant="ghost" className="size-8">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-8"
+          aria-label="Row settings"
+        >
           <Ellipsis className="size-4" />
         </Button>
       </Dropdown>

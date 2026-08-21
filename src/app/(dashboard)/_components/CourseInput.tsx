@@ -244,9 +244,9 @@ const CourseInput = ({ setActiveCourse }: CourseInputProps) => {
                 {isDemoMode && (
                   <Badge
                     variant="secondary"
-                    className="gap-1 border-amber-500/30 bg-amber-100 px-1.5 py-0 font-medium text-[10px] text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                    className="gap-1 border-warning/30 bg-warning/10 px-1.5 py-0 font-medium text-[10px] text-warning"
                   >
-                    <Sparkles className="size-2.5 text-amber-500" /> Demo Mode
+                    <Sparkles className="size-2.5 text-warning" /> Demo Mode
                   </Badge>
                 )}
               </div>
