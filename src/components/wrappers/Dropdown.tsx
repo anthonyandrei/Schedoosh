@@ -33,7 +33,12 @@ export default function Dropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {children ?? (
-          <Button size="icon" variant="ghost" className="size-8">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label={title || "More options"}
+          >
             <Ellipsis className="size-4" />
           </Button>
         )}

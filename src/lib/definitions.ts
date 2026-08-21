@@ -24,6 +24,9 @@ export const classSchema = z.object({
   restriction: z.string(),
   modality: ModalityEnumSchema,
   remarks: z.string(),
+  type: z.string().optional(),
+  units: z.number().optional(),
+  variant: z.string().optional(),
 });
 
 export const courseGroupSchema = z.object({

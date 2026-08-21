@@ -74,7 +74,7 @@ export default function NavigationBar() {
   );
 
   return (
-    <div className="flex w-full items-center justify-between gap-2 border-b bg-background px-8 py-4 xl:px-16">
+    <div className="flex w-full items-center justify-between gap-2 border-b bg-background px-8 py-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-16">
       <Link
         href="/"
         className="flex items-center gap-2 font-extrabold text-lg tracking-tight"
@@ -88,7 +88,7 @@ export default function NavigationBar() {
         </div>
         Schedoosh
       </Link>
-      <div className="absolute left-1/2 hidden -translate-x-1/2 gap-2 xl:flex">
+      <div className="hidden gap-2 lg:flex lg:justify-self-center">
         {navigationItems.map((item) => (
           <Link
             key={item.href}
@@ -103,14 +103,14 @@ export default function NavigationBar() {
           </Link>
         ))}
       </div>
-      <div className="xl:hidden">
+      <div className="lg:hidden">
         <NavigationBarMobile>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" aria-label="Open menu">
             <Menu className="size-4" />
           </Button>
         </NavigationBarMobile>
       </div>
-      <div className="hidden flex-row gap-2 xl:flex">
+      <div className="hidden flex-row items-center gap-2 lg:flex lg:justify-self-end">
         <Announcement />
         <SocialsDialog />
         <ArchersHubAuthDialog />

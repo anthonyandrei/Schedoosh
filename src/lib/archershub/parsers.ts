@@ -208,6 +208,61 @@ export function isOnlineSchedule(
 }
 
 /**
+ * Merges same-slot multi-room schedule entries grouped by (day, start, end).
+ * Preserves the original group order emitted by the data source.
+ */
+export function mergeSchedules(schedules: Schedule[]): Schedule[] {
+  if (schedules.length <= 1) {
+    return schedules;
+  }
+
+  const groups = new Map<string, Schedule[]>();
+
+  for (const s of schedules) {
+    const key = `${s.day}:${s.start}:${s.end}`;
+    const group = groups.get(key);
+    if (group) {
+      group.push(s);
+    } else {
+      groups.set(key, [s]);
+    }
+  }
+
+  const merged: Schedule[] = [];
+
+  for (const group of groups.values()) {
+    if (group.length === 1) {
+      merged.push(group[0]);
+      continue;
+    }
+
+    const realMembers = group.filter((s) => s.room && s.room !== "TBA");
+    const activeMembers = realMembers.length > 0 ? realMembers : group;
+
+    let room: string;
+    if (realMembers.length > 0) {
+      room = realMembers.map((s) => s.room).join(", ");
+    } else {
+      room = "TBA";
+    }
+
+    const isOnline = activeMembers.every((s) => s.isOnline);
+    const first = group[0];
+
+    merged.push({
+      day: first.day,
+      start: first.start,
+      end: first.end,
+      date: first.date || "",
+      isOnline,
+      room,
+    });
+  }
+
+  return merged;
+}
+
+/**
  * Parses raw meeting / schedule items into Schedoosh Schedule objects
  */
 export function parseRawMeetings(
@@ -236,7 +291,7 @@ export function parseRawMeetings(
         day: "M",
         start: 0,
         end: 0,
-        date: "TBA",
+        date: "",
         isOnline: modality === "ONLINE",
         room: "TBA",
       },
@@ -252,12 +307,7 @@ export function parseRawMeetings(
       item.end_time ?? item.endTime
     );
     const room = normalizeRoom(item.room || item.facility || fallback?.room);
-    const date = (
-      item.date_range ||
-      item.dateRange ||
-      item.dates ||
-      "TBA"
-    ).trim();
+    const date = (item.date_range || item.dateRange || item.dates || "").trim();
     const isOnline = isOnlineSchedule(
       room,
       modality,
@@ -269,21 +319,23 @@ export function parseRawMeetings(
         day,
         start,
         end,
-        date: date || "TBA",
+        date: date || "",
         isOnline,
         room,
       });
     }
   }
 
-  return schedules.length > 0
-    ? schedules
+  const merged = mergeSchedules(schedules);
+
+  return merged.length > 0
+    ? merged
     : [
         {
           day: "M",
           start: 0,
           end: 0,
-          date: "TBA",
+          date: "",
           isOnline: modality === "ONLINE",
           room: "TBA",
         },
@@ -460,144 +512,6 @@ export function parseArchersHubJson(
   }
 
   return parsedClasses;
-}
-
-/**
- * Strips HTML tags and decodes common HTML entities
- */
-function cleanHtmlText(htmlSnippet?: string): string {
-  if (!htmlSnippet) return "";
-  return htmlSnippet
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&#39;/gi, "'")
-    .replace(/&quot;/gi, '"')
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/**
- * Parses ArchersHub HTML course offerings table into Class[]
- */
-export function parseArchersHubHtml(
-  html: string,
-  defaultCourseCode = ""
-): Class[] {
-  if (!html || typeof html !== "string") {
-    throw new ArchersHubParseError(
-      "Invalid HTML string provided to parseArchersHubHtml"
-    );
-  }
-
-  const classes: Class[] = [];
-
-  // Extract table rows (tr elements)
-  const rowMatches = html.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
-  if (!rowMatches || rowMatches.length === 0) {
-    return [];
-  }
-
-  // Look for header row to map column indices
-  let colMap: Record<string, number> = {};
-  let headerFound = false;
-
-  for (const rowHtml of rowMatches) {
-    const isHeader = /<th/i.test(rowHtml);
-    const cellMatches = rowHtml.match(
-      /<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>/gi
-    );
-    if (!cellMatches) continue;
-
-    const cells = cellMatches.map((cell) => cleanHtmlText(cell));
-
-    if (
-      isHeader ||
-      (!headerFound &&
-        cells.some((c) => /course|class|section|subject/i.test(c)))
-    ) {
-      headerFound = true;
-      colMap = {};
-      cells.forEach((headerText, idx) => {
-        const text = headerText.toUpperCase();
-        if (/COURSE|SUBJECT/.test(text)) colMap.course = idx;
-        else if (/SECTION/.test(text)) colMap.section = idx;
-        else if (/CLASS\s*(?:NBR|NO|CODE|NUMBER)|CODE/.test(text))
-          colMap.code = idx;
-        else if (/DAY/.test(text)) colMap.day = idx;
-        else if (/TIME/.test(text)) colMap.time = idx;
-        else if (/ROOM|FACILITY|VENUE/.test(text)) colMap.room = idx;
-        else if (/PROFESSOR|FACULTY|INSTRUCTOR/.test(text))
-          colMap.professor = idx;
-        else if (/ENROLLED|ENRL/.test(text)) colMap.enrolled = idx;
-        else if (/CAP|CAPACITY|LIMIT|MAX/.test(text)) colMap.cap = idx;
-        else if (/MODALITY|MODE|DELIVERY/.test(text)) colMap.modality = idx;
-        else if (/REMARK|NOTE/.test(text)) colMap.remarks = idx;
-        else if (/RESTRICTION|RESERVED/.test(text)) colMap.restriction = idx;
-      });
-      continue;
-    }
-
-    if (cells.length < 3) continue;
-
-    // Extract values based on mapped column indices or positional fallback
-    const courseVal =
-      (colMap.course !== undefined ? cells[colMap.course] : cells[0]) ||
-      defaultCourseCode;
-    const sectionVal =
-      colMap.section !== undefined ? cells[colMap.section] : cells[1] || "";
-    const codeVal =
-      colMap.code !== undefined ? cells[colMap.code] : cells[2] || "";
-    const dayVal =
-      colMap.day !== undefined ? cells[colMap.day] : cells[3] || "";
-    const timeVal =
-      colMap.time !== undefined ? cells[colMap.time] : cells[4] || "";
-    const roomVal =
-      colMap.room !== undefined ? cells[colMap.room] : cells[5] || "";
-    const profVal =
-      colMap.professor !== undefined ? cells[colMap.professor] : cells[6] || "";
-    const enrolledVal =
-      colMap.enrolled !== undefined ? cells[colMap.enrolled] : cells[7] || "0";
-    const capVal =
-      colMap.cap !== undefined ? cells[colMap.cap] : cells[8] || "0";
-    const modalityVal =
-      colMap.modality !== undefined
-        ? cells[colMap.modality]
-        : cells[9] || "F2F";
-    const remarksVal =
-      colMap.remarks !== undefined ? cells[colMap.remarks] : cells[10] || "";
-    const restrictionVal =
-      colMap.restriction !== undefined
-        ? cells[colMap.restriction]
-        : cells[11] || "";
-
-    const rawSection: RawArchersHubSection = {
-      course: courseVal || defaultCourseCode,
-      section: sectionVal,
-      class_number: codeVal,
-      day: dayVal,
-      time: timeVal,
-      room: roomVal,
-      professor: profVal,
-      enrolled: enrolledVal,
-      capacity: capVal,
-      modality: modalityVal,
-      remarks: remarksVal,
-      restriction: restrictionVal,
-    };
-
-    try {
-      const parsed = normalizeArchersHubSection(rawSection, defaultCourseCode);
-      classes.push(parsed);
-    } catch {
-      // Ignore unparseable non-data rows
-    }
-  }
-
-  return classes;
 }
 
 /**

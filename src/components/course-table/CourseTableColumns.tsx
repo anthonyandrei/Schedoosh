@@ -2,13 +2,33 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { SquareArrowOutUpRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Class, Schedule } from "@/lib/definitions";
+import { DaysEnumSchema } from "@/lib/enums";
 import { formatProfessorName, formatTime, getArcherEyeUrl } from "@/lib/utils";
 import TooltipWrapper from "../wrappers/TooltipWrapper";
 import RowSettings from "./RowSettings";
 import { SortableHeader } from "./SortableHeader";
+
+const DAY_ORDER: readonly string[] = [...DaysEnumSchema.options, "U"];
+
+function getDayOrderIndex(day: string): number {
+  const index = DAY_ORDER.indexOf(day);
+  return index !== -1 ? index : DAY_ORDER.length;
+}
+
+function formatRoom(sched: Schedule): string {
+  if (sched.isOnline) return "Online";
+  let room = (sched.room || "").trim();
+  if (room.startsWith("[") && room.endsWith("]")) {
+    room = room.slice(1, -1).trim();
+  }
+  room = room.replace(/^Room\s*-\s*/i, "").trim();
+  if (!room) {
+    return sched.isOnline ? "Online" : "TBA";
+  }
+  return room;
+}
 
 export const columns: ColumnDef<Class>[] = [
   {
@@ -39,25 +59,10 @@ export const columns: ColumnDef<Class>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "code",
-    header: "Code",
-    filterFn: "includesString",
-    meta: {
-      headerClassName: "w-12",
-    },
-  },
-  {
-    accessorKey: "section",
-    header: ({ column }) => (
-      <SortableHeader
-        className="min-w-12 max-w-16"
-        column={column}
-        title={"Section"}
-      />
-    ),
-    meta: {
-      headerClassName: "w-20",
-    },
+    accessorKey: "type",
+    header: "Type",
+    filterFn: "arrIncludesSome",
+    cell: ({ row }) => row.original.type || "—",
   },
   {
     id: "Professor",
@@ -100,33 +105,47 @@ export const columns: ColumnDef<Class>[] = [
     },
   },
   {
+    accessorKey: "units",
+    header: "Units",
+    cell: ({ row }) => {
+      const units = row.original.units;
+      if (units === undefined || units === null) return "—";
+      return String(Number(units));
+    },
+  },
+  {
+    accessorKey: "section",
+    header: ({ column }) => (
+      <SortableHeader
+        className="min-w-12 max-w-16"
+        column={column}
+        title={"Section"}
+      />
+    ),
+    filterFn: "includesString",
+    meta: {
+      headerClassName: "w-20",
+    },
+  },
+  {
     header: "Schedules",
     cell: ({ row }) => {
-      const schedules = row.original.schedules.reduce<Schedule[]>(
-        (acc, curr) => {
-          if (
-            !acc.some((acc) => acc.start === curr.start && acc.end === curr.end)
-          )
-            acc.push(curr);
-          return acc;
-        },
-        []
-      );
-      return (
-        <div className="flex flex-col gap-1">
-          {schedules.map((sched, i) => {
-            if (i !== 0 && sched.start === sched.end) return null;
+      const sortedSchedules = [...row.original.schedules].sort((a, b) => {
+        const dayDiff = getDayOrderIndex(a.day) - getDayOrderIndex(b.day);
+        if (dayDiff !== 0) return dayDiff;
+        const startDiff = a.start - b.start;
+        if (startDiff !== 0) return startDiff;
+        return a.end - b.end;
+      });
 
+      return (
+        <div className="flex flex-col gap-1 whitespace-nowrap">
+          {sortedSchedules.map((sched, i) => {
+            const room = formatRoom(sched);
             return (
-              <Badge
-                key={i}
-                variant="outline"
-                className={`flex w-[160px] select-none items-center justify-center gap-2 rounded-lg bg-background/50 p-2 px-4 font-medium`}
-              >
-                {sched.start === sched.end
-                  ? "N/A"
-                  : `${formatTime(sched.start)} - ${formatTime(sched.end)}`}
-              </Badge>
+              <div key={i}>
+                {`${sched.day}  ${formatTime(sched.start)} \u2013 ${formatTime(sched.end)}  ${room}`}
+              </div>
             );
           })}
         </div>
@@ -134,6 +153,27 @@ export const columns: ColumnDef<Class>[] = [
     },
   },
   {
+    id: "enrolled",
+    header: ({ column }) => (
+      <SortableHeader column={column} title={"Enrolled"} />
+    ),
+    accessorKey: "enrolled",
+    cell: ({ row }) => `${row.original.enrolled}/${row.original.enrollCap}`,
+  },
+  {
+    header: "Remarks",
+    accessorKey: "remarks",
+    filterFn: "arrIncludesSome",
+  },
+  {
+    id: "action",
+    cell: ({ row }) => {
+      return <RowSettings data={row.original} />;
+    },
+    enableHiding: false,
+  },
+  {
+    id: "Room",
     header: "Room",
     accessorFn: (row) => {
       const filtered = [
@@ -149,6 +189,7 @@ export const columns: ColumnDef<Class>[] = [
     },
   },
   {
+    id: "Days",
     header: "Days",
     accessorFn: (row) => {
       const days = [...new Set(row.schedules.map((sched) => sched.day))];
@@ -168,15 +209,6 @@ export const columns: ColumnDef<Class>[] = [
     filterFn: "arrIncludesSome",
   },
   {
-    id: "enrolled",
-    header: ({ column }) => (
-      <SortableHeader column={column} title={"Enrolled"} />
-    ),
-    accessorKey: "enrolled",
-    cell: ({ row }) => `${row.original.enrolled}/${row.original.enrollCap}`,
-  },
-
-  {
     id: "modality",
     accessorKey: "modality",
     meta: {
@@ -190,12 +222,6 @@ export const columns: ColumnDef<Class>[] = [
     accessorKey: "restriction",
     filterFn: "arrIncludesSome",
     enableHiding: false,
-  },
-
-  {
-    header: "Remarks",
-    accessorKey: "remarks",
-    filterFn: "arrIncludesSome",
   },
   {
     id: "status",
@@ -218,13 +244,6 @@ export const columns: ColumnDef<Class>[] = [
       const sectionType = row.getValue(columnId) as string;
 
       return filterValue.some((val: string) => sectionType === val);
-    },
-    enableHiding: false,
-  },
-  {
-    id: "action",
-    cell: ({ row }) => {
-      return <RowSettings data={row.original} />;
     },
     enableHiding: false,
   },

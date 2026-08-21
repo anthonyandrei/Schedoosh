@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import path from "node:path";
 import test from "node:test";
 import { classSchema, courseSchema } from "../../definitions";
 import sampleCourseResponse from "../fixtures/sample-course-response.json";
 import {
   normalizeModality,
-  parseArchersHubHtml,
   parseArchersHubJson,
   parseDays,
   parseTimeRange,
@@ -120,41 +117,6 @@ test("parseArchersHubJson parses sample-course-response.json into valid Class ob
   assert.equal(geethic.schedules[0].isOnline, true);
   assert.equal(geethic.schedules[0].start, 1100);
   assert.equal(geethic.schedules[0].end, 1230);
-});
-
-test("parseArchersHubHtml parses sample-course-table.html into valid Class objects", () => {
-  const htmlPath = path.join(__dirname, "../fixtures/sample-course-table.html");
-  const htmlContent = fs.readFileSync(htmlPath, "utf-8");
-
-  const classes = parseArchersHubHtml(htmlContent, "CCPROG1");
-
-  // Validate entire array against Zod schema
-  const parsed = classSchema.array().parse(classes);
-  assert.equal(parsed.length, 3);
-
-  const s11 = parsed[0];
-  assert.equal(s11.section, "S11");
-  assert.equal(s11.code, 1024);
-  assert.equal(s11.professor, "DELA CRUZ, JUAN");
-  assert.equal(s11.schedules[0].day, "M");
-  assert.equal(s11.schedules[0].start, 900);
-  assert.equal(s11.schedules[0].end, 1030);
-  assert.equal(s11.schedules[0].room, "LS210");
-
-  const s12 = parsed[1];
-  assert.equal(s12.section, "S12");
-  // TF expanded to T and F
-  assert.equal(s12.schedules.length, 2);
-  assert.equal(s12.schedules[0].day, "T");
-  assert.equal(s12.schedules[1].day, "F");
-
-  const s13 = parsed[2];
-  assert.equal(s13.section, "S13");
-  // THS expanded to H and S
-  assert.equal(s13.schedules.length, 2);
-  assert.equal(s13.schedules[0].day, "H");
-  assert.equal(s13.schedules[1].day, "S");
-  assert.equal(s13.schedules[0].isOnline, true);
 });
 
 test("formatSessionCookie formats raw strings or headers properly", () => {

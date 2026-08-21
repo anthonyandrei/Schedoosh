@@ -17,7 +17,12 @@ export function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <ResponsiveButton icon={SunMoon} variant="outline" size="icon">
+        <ResponsiveButton
+          icon={SunMoon}
+          variant="outline"
+          size="icon"
+          aria-label="Toggle theme"
+        >
           Toggle theme
         </ResponsiveButton>
       </DropdownMenuTrigger>

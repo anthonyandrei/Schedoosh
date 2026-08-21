@@ -79,6 +79,11 @@ export function CourseDataTable<TData, TValue>({
 
   const rowSelection = selectedRows[activeCourse] || {};
 
+  const defaultHiddenColumns = {
+    Room: false,
+    Days: false,
+  };
+
   const hiddenColumns = {
     courseCode: false,
     modality: false,
@@ -116,7 +121,11 @@ export function CourseDataTable<TData, TValue>({
       columnFilters: columnFilters ?? [],
       rowSelection,
       sorting,
-      columnVisibility: { ...columnVisibility, ...hiddenColumns },
+      columnVisibility: {
+        ...defaultHiddenColumns,
+        ...columnVisibility,
+        ...hiddenColumns,
+      },
     },
   });
 
@@ -126,10 +135,10 @@ export function CourseDataTable<TData, TValue>({
     <div className="flex max-h-[600px] min-h-0 min-w-0 shrink-0 grow flex-col gap-2 lg:max-h-max">
       <div className="flex flex-col items-stretch justify-between gap-2 lg:flex-row lg:items-center">
         <Input
-          placeholder="Search by code..."
-          value={(table.getColumn("code")?.getFilterValue() as string) ?? ""}
+          placeholder="Search by section..."
+          value={(table.getColumn("section")?.getFilterValue() as string) ?? ""}
           onChange={(event) => {
-            table.getColumn("code")?.setFilterValue(event.target.value);
+            table.getColumn("section")?.setFilterValue(event.target.value);
           }}
           className="h-8 w-full lg:w-[150px]"
         />
