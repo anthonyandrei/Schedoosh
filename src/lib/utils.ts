@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { ICalWeekday } from "ical-generator";
 import { twMerge } from "tailwind-merge";
 import { Class, Schedule } from "./definitions";
-import { ColorsEnum, DaysEnum } from "./enums";
+import { ColorsEnum, DaysEnum, ModalityEnum } from "./enums";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -217,6 +217,70 @@ export function inferRoom(classData: Class, sched: Schedule): string {
   }
 
   return "TBA";
+}
+
+/**
+ * Derives a class's modality from its schedules: all-online meetings mean
+ * ONLINE, none-online means F2F, a mix means HYBRID, and no schedules
+ * defaults to F2F. Mirrors how ArchersHub's scraper infers modality, since
+ * ArchersHub has no modality field of its own to scrape.
+ */
+export function deriveModality(schedules: Schedule[]): ModalityEnum {
+  if (schedules.length === 0) return "F2F";
+
+  const allOnline = schedules.every((s) => s.isOnline);
+  const noneOnline = schedules.every((s) => !s.isOnline);
+
+  if (allOnline) return "ONLINE";
+  if (noneOnline) return "F2F";
+  return "HYBRID";
+}
+
+interface ClassFormValues {
+  course: string;
+  section: string;
+  professor: string;
+  schedules: Schedule[];
+  enrolled: number;
+  enrollCap: number;
+  restriction: string;
+  remarks: string;
+  type?: string;
+  units?: number;
+  variant?: string;
+}
+
+/**
+ * Builds a full Class from ClassForm's submitted values. Mints a new `code`
+ * for a fresh class (or preserves the previous one when editing), derives
+ * `modality` and `rooms` from the schedules instead of asking the user for
+ * them directly, and preserves `variant`, which the form never renders an
+ * input for.
+ */
+export function buildClassFromForm(
+  values: ClassFormValues,
+  existingClasses: Class[],
+  previous?: Class
+): Class {
+  const code =
+    previous?.code ?? Math.max(0, ...existingClasses.map((c) => c.code)) + 1;
+
+  return {
+    code,
+    course: values.course,
+    section: values.section,
+    professor: values.professor,
+    schedules: values.schedules,
+    enrolled: values.enrolled,
+    enrollCap: values.enrollCap,
+    rooms: values.schedules.map((s) => s.room),
+    restriction: values.restriction,
+    modality: deriveModality(values.schedules),
+    remarks: values.remarks,
+    type: values.type,
+    units: values.units,
+    variant: values.variant,
+  };
 }
 
 export function convertToIcalDay(day: DaysEnum): ICalWeekday {

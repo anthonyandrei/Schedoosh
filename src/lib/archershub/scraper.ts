@@ -1,4 +1,5 @@
 import { Class, Course, Schedule } from "../definitions";
+import { deriveModality } from "../utils";
 import sampleCourseResponse from "./fixtures/sample-course-response.json";
 import {
   buildCourseObject,
@@ -413,20 +414,7 @@ export async function scrapeCourseFromArchersHub(
 
             const schedules = mergeSchedules(rawSchedules);
 
-            let modality:
-              | "F2F"
-              | "ONLINE"
-              | "HYBRID"
-              | "PREDOMINANTLY ONLINE"
-              | "TENTATIVE" = "HYBRID";
-            if (schedules.length > 0) {
-              const allOnline = schedules.every((s) => s.isOnline);
-              const noneOnline = schedules.every((s) => !s.isOnline);
-              if (allOnline) modality = "ONLINE";
-              else if (noneOnline) modality = "F2F";
-            } else {
-              modality = "F2F";
-            }
+            const modality = deriveModality(schedules);
 
             const mainProf = (row.MAIN_TEACHER || "").trim();
             const addlProf = (row.ADDITIONAL_TEACHER || "").trim();

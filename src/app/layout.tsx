@@ -14,6 +14,11 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata: Metadata = {
   title: "Schedoosh",
   description: "Schedoosh: Build your ideal schedule, in a snap. Schedoosh!",
+  icons: {
+    icon: "/schedoosh-new-logo.png",
+    shortcut: "/schedoosh-new-logo.png",
+    apple: "/schedoosh-new-logo.png",
+  },
 };
 
 export default function RootLayout({

@@ -31,7 +31,11 @@ export function FacetedFilter<TData, TValue>({
   Icon,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
-  const options = facets ? [...facets.keys()] : [];
+  // Optional fields (e.g. a class with no Type) surface as an `undefined`
+  // facet value; drop it rather than crash on `.length`/`.icon` below.
+  const options = facets
+    ? [...facets.keys()].filter((option) => option != null)
+    : [];
   const selectedValues = new Set(column?.getFilterValue() as string[]);
 
   const hasLongText = options.some((option) => option.length > 10);

@@ -33,12 +33,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import TooltipWrapper from "@/components/wrappers/TooltipWrapper";
 import useToImage from "@/hooks/useToImage";
 import { Class } from "@/lib/definitions";
 import { ColorsEnum } from "@/lib/enums";
 import { cn } from "@/lib/utils";
 import SchedooshLogo from "../SchedooshLogo";
 import Calendar from "./Calendar";
+import {
+  getWallpaperComposition,
+  getWallpaperPreset,
+  WALLPAPER_PRESETS,
+  WallpaperPreset,
+  WallpaperPresetId,
+} from "./downloadSchedule";
 import ScheduleOverview from "./ScheduleOverview";
 
 interface DownloadScheduleButtonProps extends ButtonProps {
@@ -98,15 +106,14 @@ function DownloadDialog({
   colors,
   classes,
 }: DownloadDialogProps) {
-  const [aspectRatio, setAspectRatio] = useState<[number, number]>([
-    2560, 1440,
-  ]);
+  const [presetId, setPresetId] = useState<WallpaperPresetId>("desktop");
   const [isTransparent, setIsTransparent] = useState(false);
   const [hasClockOffset, setHasClockOffset] = useState(false);
   const [imgName, setImgName] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const isMobile = aspectRatio[0] <= aspectRatio[1];
+  const preset = getWallpaperPreset(presetId);
+  const { isMobile } = getWallpaperComposition(presetId);
 
   const {
     isLoading,
@@ -117,50 +124,29 @@ function DownloadDialog({
     convertPreview,
     isPreviewLoading,
   } = useToImage({
-    options: { quality: 1, pixelRatio: isMobile ? 2.5 : 2, skipFonts: true },
-    onLoading: () => {
-      toast.loading("Generating image...");
+    options: { quality: 1, skipFonts: true },
+    onLoading: (loading) => {
+      if (loading) {
+        toast.loading("Generating image...", { id: "schedule-image" });
+      } else {
+        toast.dismiss("schedule-image");
+      }
     },
     onError: (error) => {
       toast.error("Failed to generate image");
       console.error(error);
     },
-    onSuccess: async () => {
-      toast.dismiss();
-    },
   });
 
-  const dropdownItems = {
-    landscape: [
-      {
-        name: "Desktop (16:9)",
-        Icon: Monitor,
-        value: [2560, 1440],
-      },
-      {
-        name: "Tablet (4:3)",
-        Icon: Tablet,
-        value: [2048, 1536],
-      },
-    ],
-    portrait: [
-      {
-        name: "Phone (16:9)",
-        Icon: Smartphone,
-        value: [1080, 1920],
-      },
-      {
-        name: "Tall Phone (21:9)",
-        Icon: Smartphone,
-        value: [1080, 2520],
-      },
-      {
-        name: "Tablet (3:4)",
-        Icon: Tablet,
-        value: [1536, 2048],
-      },
-    ],
-  };
+  const dropdownItems = WALLPAPER_PRESETS.map((item) => ({
+    ...item,
+    Icon:
+      item.id === "desktop"
+        ? Monitor
+        : item.id.includes("tablet")
+          ? Tablet
+          : Smartphone,
+  }));
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -179,15 +165,16 @@ function DownloadDialog({
   };
 
   useEffect(() => {
-    if (showPreview) {
-      convertPreview();
-    }
-    // Disabled because the function changes everytime it's run
-    // useCallback did not work here, so this is the next best thing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!showPreview) return;
+
+    const timeoutId = window.setTimeout(() => {
+      void convertPreview();
+    }, 150);
+
+    return () => window.clearTimeout(timeoutId);
   }, [
     showPreview,
-    aspectRatio,
+    presetId,
     imageUrl,
     isTransparent,
     hasClockOffset,
@@ -209,19 +196,21 @@ function DownloadDialog({
       setOpen(false);
       setImgName(null);
       setShowPreview(false);
-      setAspectRatio([2560, 1440]);
+      setPresetId("desktop");
       setHasClockOffset(false);
     }
   };
 
   const handleDownload = async () => {
-    await download();
-    toast.success("Image downloaded successfully!");
+    if (await download()) {
+      toast.success("Image downloaded successfully!");
+    }
   };
 
   const handleCopy = async () => {
-    await copy();
-    toast.success("Image copied to clipboard!");
+    if (await copy()) {
+      toast.success("Image copied to clipboard!");
+    }
   };
 
   return (
@@ -240,15 +229,14 @@ function DownloadDialog({
           </Label>
           <Select
             onValueChange={(value) => {
-              const selectedItem = [
-                ...dropdownItems.landscape,
-                ...dropdownItems.portrait,
-              ].find((item) => item.name === value);
+              const selectedItem = WALLPAPER_PRESETS.find(
+                (item) => item.id === value
+              );
               if (selectedItem) {
-                setAspectRatio([selectedItem.value[0], selectedItem.value[1]]);
+                setPresetId(selectedItem.id);
               }
             }}
-            defaultValue="Desktop (16:9)"
+            value={presetId}
           >
             <SelectTrigger className="w-full" id="aspectRatio">
               <div className="ml-2">
@@ -258,57 +246,62 @@ function DownloadDialog({
             <SelectContent className="w-full">
               <SelectGroup>
                 <SelectLabel>Landscape</SelectLabel>
-                {dropdownItems.landscape.map((item, index) => (
-                  <SelectItem key={`landscape-${index}`} value={item.name}>
-                    <div className="flex items-center gap-2">
-                      {item.Icon && (
+                {dropdownItems
+                  .filter((item) => item.orientation === "landscape")
+                  .map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      <div className="flex items-center gap-2">
                         <item.Icon
                           className="size-4 shrink-0"
                           strokeWidth={2.5}
                         />
-                      )}
-                      {item.name}
-                    </div>
-                  </SelectItem>
-                ))}
+                        {item.label}
+                      </div>
+                    </SelectItem>
+                  ))}
               </SelectGroup>
               <SelectGroup>
                 <SelectLabel>Portrait</SelectLabel>
-                {dropdownItems.portrait.map((item, index) => (
-                  <SelectItem key={`portrait-${index}`} value={item.name}>
-                    <div className="flex items-center gap-2">
-                      {item.Icon && (
+                {dropdownItems
+                  .filter((item) => item.orientation === "portrait")
+                  .map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      <div className="flex items-center gap-2">
                         <item.Icon
                           className="size-4 shrink-0"
                           strokeWidth={2.5}
                         />
-                      )}
-                      {item.name}
-                    </div>
-                  </SelectItem>
-                ))}
+                        {item.label}
+                      </div>
+                    </SelectItem>
+                  ))}
               </SelectGroup>
             </SelectContent>
           </Select>
           <Label htmlFor="fileUpload" className="text-nowrap">
             Custom BG
           </Label>
-          <Button
-            onClick={() => document.getElementById("fileUpload")?.click()}
-            variant="outline"
-            className="w-full min-w-0 justify-start"
-            disabled={isTransparent}
+          <TooltipWrapper
+            content={imgName ?? "Select a background image"}
+            side="top"
           >
-            <Upload className="mr-2 size-4" />
-            <span
-              className={cn(
-                "w-[35ch] truncate text-ellipsis text-left",
-                !imgName && "text-muted-foreground"
-              )}
+            <Button
+              onClick={() => document.getElementById("fileUpload")?.click()}
+              variant="outline"
+              className="w-full min-w-0 justify-start overflow-hidden"
+              disabled={isTransparent}
             >
-              {imgName ?? "Select file..."}
-            </span>
-          </Button>
+              <Upload className="mr-2 size-4 shrink-0" />
+              <span
+                className={cn(
+                  "min-w-0 flex-1 truncate text-left",
+                  !imgName && "text-muted-foreground"
+                )}
+              >
+                {imgName ?? "Select file..."}
+              </span>
+            </Button>
+          </TooltipWrapper>
           <input
             id="fileUpload"
             type="file"
@@ -339,16 +332,28 @@ function DownloadDialog({
             </>
           )}
         </div>
-        <div className="flex max-h-[300px] items-center justify-center">
-          {showPreview &&
-            (isPreviewLoading ? (
-              <Loader2 className="my-20 size-20 animate-spin text-muted-foreground" />
+        {showPreview && (
+          <div className="relative flex max-h-[300px] min-h-40 items-center justify-center overflow-hidden rounded-md border bg-muted/20">
+            {preview ? (
+              // biome-ignore lint/performance/noImgElement: The preview is a generated data URL.
+              <img
+                src={preview}
+                alt="Schedule preview"
+                className="max-h-[300px] max-w-full object-contain"
+              />
             ) : (
-              preview && (
-                <img src={preview} alt="Schedule Preview" className="h-full" />
-              )
-            ))}
-        </div>
+              <Loader2 className="size-12 animate-spin text-muted-foreground" />
+            )}
+            {preview && isPreviewLoading && (
+              <div
+                className="absolute inset-0 flex items-center justify-center bg-background/60"
+                aria-label="Updating schedule preview"
+              >
+                <Loader2 className="size-10 animate-spin text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        )}
         <DialogFooter>
           <Button
             onClick={() => setShowPreview(!showPreview)}
@@ -367,11 +372,14 @@ function DownloadDialog({
             onClick={handleCopy}
             className="inline-flex gap-2"
             variant="outline"
-            disabled={isLoading}
+            disabled={isLoading || isPreviewLoading}
           >
             <Copy className="mr-2 size-4" /> Copy
           </Button>
-          <Button onClick={handleDownload} disabled={isLoading}>
+          <Button
+            onClick={handleDownload}
+            disabled={isLoading || isPreviewLoading}
+          >
             <Download className="mr-2 size-4" /> Download
           </Button>
         </DialogFooter>
@@ -382,7 +390,7 @@ function DownloadDialog({
           imageUrl={imageUrl}
           classes={classes}
           colors={colors}
-          aspectRatio={aspectRatio}
+          preset={preset}
           isTransparent={isTransparent}
           hasClockOffset={hasClockOffset}
         />
@@ -395,7 +403,7 @@ interface WallpaperProps {
   imageUrl: string | null;
   classes: Class[];
   colors: Record<string, ColorsEnum>;
-  aspectRatio: [width: number, height: number];
+  preset: WallpaperPreset;
   ref: React.RefObject<HTMLDivElement | null>;
   isTransparent: boolean;
   hasClockOffset?: boolean;
@@ -405,13 +413,13 @@ function Wallpaper({
   imageUrl,
   classes,
   colors,
-  aspectRatio,
+  preset,
   ref,
   isTransparent,
   hasClockOffset = false,
 }: WallpaperProps) {
-  const isMobile = aspectRatio[0] <= aspectRatio[1];
-  const [width, height] = aspectRatio;
+  const { isMobile, showOverview } = getWallpaperComposition(preset.id);
+  const { width, height } = preset;
 
   // Calculate the cell size based on the aspect ratio
   // So either height / 17.5 (approx. the amount of rows in the calendar) + 6 for mobile since it's longer
@@ -437,6 +445,7 @@ function Wallpaper({
         key={`${cellSize}-${width}-${height}`}
       >
         {!isTransparent && (
+          // biome-ignore lint/performance/noImgElement: The export renderer needs the original local file or blob URL.
           <img
             alt=""
             src={bgImageUrl}
@@ -455,7 +464,7 @@ function Wallpaper({
           isMobile={isMobile}
           noAnimations
         />
-        {!isMobile && (
+        {showOverview && (
           <ScheduleOverview
             activeSchedule={classes}
             colors={colors}
@@ -464,20 +473,14 @@ function Wallpaper({
             noAnimations
           />
         )}
-        {!isMobile && (
-          <div
-            className={cn(
-              "absolute flex w-max justify-center rounded-lg bg-accent p-2 pl-3",
-              "right-12 bottom-12"
-            )}
-          >
-            <SchedooshLogo
-              width={32}
-              height={32}
-              className="text-accent-foreground"
-            />
-          </div>
-        )}
+        <div
+          className={cn(
+            "absolute flex w-max justify-center rounded-lg bg-accent p-2",
+            isMobile ? "right-20 bottom-20" : "right-12 bottom-12"
+          )}
+        >
+          <SchedooshLogo width={32} height={32} />
+        </div>
       </div>
     </div>
   );
