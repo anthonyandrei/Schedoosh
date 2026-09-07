@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Schedoosh - Agent Guidelines
 
 ## Repository & Git Configuration
@@ -15,3 +16,6 @@
 ## Code Conventions
 - **Professor Names**: Always use `formatProfessorName` from `@/lib/utils` to format instructor names as `Last, First` (proper-cased).
 - **ArcherEye URLs**: Always use `getArcherEyeUrl` from `@/lib/utils` which generates slugs in the format `https://archer-eye.com/professor/firstname-lastname`.
+=======
+@AGENTS.md
+>>>>>>> Stashed changes
