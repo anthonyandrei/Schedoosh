@@ -1,5 +1,10 @@
 import { toPng } from "html-to-image";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import {
+  createSerialRenderQueue,
+  getExportRenderOptions,
+  getPreviewRenderOptions,
+} from "./imageRender";
 
 type ToImageOptions = Parameters<typeof toPng>[1];
 
@@ -21,58 +26,70 @@ export default function useToImage({
 
   const ref = useRef<HTMLDivElement>(null);
   const [preview, setPreview] = useState<string | undefined>(undefined);
+  const optionsRef = useRef(options);
+  const callbacksRef = useRef({ onError, onLoading, onSuccess });
+  const renderQueueRef = useRef(createSerialRenderQueue());
+  const previewRequestIdRef = useRef(0);
 
-  const convertPreview = async () => {
+  optionsRef.current = options;
+  callbacksRef.current = { onError, onLoading, onSuccess };
+
+  const convertPreview = useCallback(async () => {
+    const requestId = ++previewRequestIdRef.current;
+    setIsPreviewLoading(true);
+
     try {
-      if (!ref.current) throw new Error("Ref is not set");
-      setIsPreviewLoading(true);
+      const dataUrl = await renderQueueRef.current(async () => {
+        if (!ref.current) throw new Error("Ref is not set");
 
-      const element = ref.current;
-
-      const dataUrl = await toPng(element, {
-        cacheBust: true,
-        quality: 0.3,
-        pixelRatio: 0.5,
-        ...(options ?? {}),
+        return toPng(
+          ref.current,
+          getPreviewRenderOptions(optionsRef.current ?? {})
+        );
       });
 
-      setPreview(dataUrl);
+      if (requestId === previewRequestIdRef.current) {
+        setPreview(dataUrl);
+      }
 
       return dataUrl;
     } catch (error) {
-      onError?.(error as Error);
+      callbacksRef.current.onError?.(error as Error);
     } finally {
-      setIsPreviewLoading(false);
+      if (requestId === previewRequestIdRef.current) {
+        setIsPreviewLoading(false);
+      }
     }
-  };
+  }, []);
 
-  const convertToPng = async () => {
+  const convertToPng = useCallback(async () => {
     try {
-      if (!ref.current) throw new Error("Ref is not set");
       setIsLoading(true);
-      onLoading?.(true);
+      callbacksRef.current.onLoading?.(true);
 
-      const element = ref.current;
+      const dataUrl = await renderQueueRef.current(async () => {
+        if (!ref.current) throw new Error("Ref is not set");
 
-      const dataUrl = await toPng(element, {
-        cacheBust: true,
-        pixelRatio: 2,
-        ...(options ?? {}),
+        return toPng(
+          ref.current,
+          getExportRenderOptions(optionsRef.current ?? {})
+        );
       });
 
-      onSuccess?.(dataUrl);
+      callbacksRef.current.onSuccess?.(dataUrl);
       return dataUrl;
     } catch (error) {
-      onError?.(error as Error);
+      callbacksRef.current.onError?.(error as Error);
     } finally {
       setIsLoading(false);
+      callbacksRef.current.onLoading?.(false);
     }
-  };
+  }, []);
 
-  const download = async () => {
+  const download = useCallback(async () => {
     const dataUrl = await convertToPng();
 
-    if (!dataUrl) return;
+    if (!dataUrl) return false;
 
     const link = document.createElement("a");
 
@@ -80,23 +97,25 @@ export default function useToImage({
     link.href = dataUrl;
     link.click();
     link.remove();
-  };
+    return true;
+  }, [convertToPng]);
 
-  const copy = async () => {
+  const copy = useCallback(async () => {
     const dataUrl = await convertToPng();
 
-    if (!dataUrl) return;
+    if (!dataUrl) return false;
 
     const blobData = await fetch(dataUrl).then((res) => res.blob());
 
-    if (!blobData) return;
+    if (!blobData) return false;
 
     await navigator.clipboard.write([
       new ClipboardItem({
         "image/png": blobData,
       }),
     ]);
-  };
+    return true;
+  }, [convertToPng]);
 
   return {
     ref,
