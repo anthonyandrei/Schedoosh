@@ -79,12 +79,8 @@ export default function NavigationBar() {
         href="/"
         className="flex items-center gap-2 font-extrabold text-lg tracking-tight"
       >
-        <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-2 pl-3">
-          <SchedooshLogo
-            className="text-accent-foreground"
-            width={24}
-            height={24}
-          />
+        <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-1.5">
+          <SchedooshLogo width={28} height={28} />
         </div>
         Schedoosh
       </Link>
@@ -152,12 +148,8 @@ function NavigationBarMobile({ children }: NavigationBarMobile) {
               href="/"
               className="flex items-center gap-2 font-extrabold text-lg tracking-tight"
             >
-              <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-2 pl-3">
-                <SchedooshLogo
-                  className="text-accent-foreground"
-                  width={24}
-                  height={24}
-                />
+              <div className="flex max-w-[40px] justify-center rounded-lg bg-accent p-1.5">
+                <SchedooshLogo width={28} height={28} />
               </div>
               Schedoosh
             </Link>
